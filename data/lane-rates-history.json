@@ -61,5 +61,15 @@
       "west": 3.03
     },
     "sourceSummary": "Scale Funding Current Freight Rates"
+  },
+  {
+    "updatedAt": "2026-06-02T20:39:25.761Z",
+    "defaultCostPerMile": 3.6,
+    "regionalAnchors": {
+      "midwest": 2.86,
+      "west": 3.03
+    },
+    "sourceSummary": "Previous lane-rate data retained; no public source parsed successfully",
+    "failures": 2
   }
 ]

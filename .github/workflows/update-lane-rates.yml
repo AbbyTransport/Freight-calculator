@@ -1,4 +1,4 @@
-name: Update Freight Lane Rates
+name: Update Freight Calculator Lane Rates
 
 on:
   schedule:
@@ -23,11 +23,9 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Update freight lane rates
+      - name: Update weekly semi-dynamic lane rates
         env:
-          # Optional. Only use these if you later connect a paid DAT/API endpoint.
-          DAT_API_URL: ${{ secrets.DAT_API_URL }}
-          DAT_API_KEY: ${{ secrets.DAT_API_KEY }}
+          # Optional: comma-separated public pages you want the parser to try in addition to the defaults.
           EXTRA_RATE_SOURCE_URLS: ${{ vars.EXTRA_RATE_SOURCE_URLS }}
         run: node scripts/update-lane-rates.mjs
 

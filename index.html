@@ -3,13 +3,13 @@
   Freight Quote Calculator — Abby Transport
   Self-contained single-file build for GitHub Pages.
   Logo embedded as base64. All CSS/JS inline.
-  Calibrated: March 2026
+  Portal-styled build with weekly semi-dynamic lane rates
 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <meta name="theme-color" content="#0F172A">
+  <meta name="theme-color" content="#07182F">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Abby Transport">
@@ -576,6 +576,367 @@ button:focus-visible {
   .results { padding: 1.25rem .85rem; }
   .history { padding: 1.25rem .85rem; }
 }
+
+/* ────────────────────────────────────────────────────────────────
+   Abby PortalAdmin visual skin + weekly lane-rate panel
+   Added for Abby Transport Freight Calculator.
+   ──────────────────────────────────────────────────────────────── */
+:root {
+  --bg: #eef3f8;
+  --surface: #ffffff;
+  --surface-alt: #f7fafc;
+  --border: #cfd9e5;
+  --border-focus: #1f6fb2;
+  --ink-900: #07182f;
+  --ink-700: #25364d;
+  --ink-500: #5b6b80;
+  --ink-300: #b8c5d4;
+  --accent: #145da0;
+  --accent-hover: #0f477c;
+  --success: #1f7a4d;
+  --success-hover: #17603d;
+  --danger: #b42318;
+  --danger-hover: #8f1d14;
+  --neutral: #34495e;
+  --neutral-hover: #223447;
+  --shadow-sm: 0 1px 2px rgba(7,24,47,.08), 0 4px 14px rgba(7,24,47,.06);
+  --shadow-md: 0 2px 6px rgba(7,24,47,.12), 0 10px 22px rgba(7,24,47,.08);
+  --shadow-lg: 0 8px 28px rgba(7,24,47,.14);
+  --radius-xl: 12px;
+  --radius-lg: 10px;
+  --radius-md: 7px;
+  --radius-sm: 5px;
+  --font-body: 'Segoe UI', Arial, system-ui, sans-serif;
+  --font-heading: 'Segoe UI', Arial, system-ui, sans-serif;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(20,93,160,.10), transparent 28rem),
+    linear-gradient(180deg, #f8fbff 0%, var(--bg) 46%, #e8eef6 100%);
+  color: var(--ink-700);
+}
+
+.app-header {
+  background: linear-gradient(135deg, #06172d 0%, #0d2b4f 58%, #113d69 100%);
+  border-bottom: 3px solid #1f7a4d;
+  position: static;
+  box-shadow: 0 8px 22px rgba(7,24,47,.22);
+}
+
+.header-content {
+  max-width: 1180px;
+  padding: .75rem 1.25rem;
+  min-height: 86px;
+}
+
+.logo {
+  height: 66px;
+  background: rgba(255,255,255,.98);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 10px;
+  padding: 6px 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.18);
+}
+
+.app-title {
+  font-size: 1.28rem;
+  font-weight: 800;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+}
+
+.app-title::after {
+  content: 'Internal Quote Tool';
+  display: block;
+  margin-top: .18rem;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: #c7d6e8;
+  text-transform: uppercase;
+}
+
+.app-main {
+  max-width: 1180px;
+  padding-top: 1.15rem;
+  gap: 1rem;
+}
+
+.form-section,
+.results,
+.history {
+  border: 1px solid #cbd7e4;
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.form-section {
+  padding: 0;
+}
+
+.form-section h2,
+.results h2,
+.history-header {
+  margin: 0;
+  padding: .58rem .82rem;
+  border-bottom: 1px solid #cbd7e4;
+  background: linear-gradient(180deg, #f7fbff 0%, #eaf1f8 100%);
+  color: #102a43;
+  font-size: .94rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.form-section h2::before {
+  width: 4px;
+  height: 1rem;
+  background: #1f7a4d;
+}
+
+.form-section > .form-row,
+.form-section > #moreOptions,
+.form-section > .button-row {
+  padding: .85rem;
+}
+
+#moreOptions > .form-row {
+  margin-top: 0 !important;
+}
+
+.form-row {
+  gap: .72rem;
+}
+
+.input-group {
+  min-width: 180px;
+}
+
+.input-group label {
+  color: #30455d;
+  font-size: .74rem;
+  margin-bottom: .28rem;
+}
+
+input, select {
+  min-height: 36px;
+  border: 1px solid #b9c7d8;
+  border-radius: 6px;
+  padding: .5rem .65rem;
+  font-size: .9rem;
+  background: #ffffff;
+}
+
+input:focus, select:focus {
+  border-color: #1f6fb2;
+  box-shadow: 0 0 0 3px rgba(31,111,178,.16);
+}
+
+button {
+  border-radius: 6px;
+  min-height: 36px;
+  font-weight: 800;
+  letter-spacing: .015em;
+  box-shadow: 0 1px 2px rgba(0,0,0,.10);
+}
+
+.calculate-button,
+.pdf-button,
+.clear-button,
+.add-stop-button,
+.remove-stop-button,
+.clear-history-button,
+.market-rate-button {
+  border: 1px solid transparent;
+}
+
+.calculate-button,
+.market-rate-button.primary {
+  background: linear-gradient(180deg, #1b6fb2 0%, #124f83 100%);
+}
+
+.calculate-button:hover,
+.market-rate-button.primary:hover {
+  background: linear-gradient(180deg, #155f9b 0%, #0f416d 100%);
+}
+
+.pdf-button {
+  background: linear-gradient(180deg, #238756 0%, #17603d 100%);
+}
+
+.clear-button,
+.add-stop-button,
+.remove-stop-button,
+.clear-history-button,
+.market-rate-button.secondary {
+  background: linear-gradient(180deg, #eef4fa 0%, #dce7f3 100%);
+  color: #17324d;
+  border-color: #b9c7d8;
+}
+
+.clear-button:hover,
+.add-stop-button:hover,
+.remove-stop-button:hover,
+.clear-history-button:hover,
+.market-rate-button.secondary:hover {
+  background: linear-gradient(180deg, #e2edf8 0%, #cfdeee 100%);
+  color: #07182f;
+}
+
+.results {
+  background: #ffffff;
+  padding: 0;
+}
+
+.results h2 {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.results p {
+  padding: .72rem .86rem;
+}
+
+.results::before { display: none; }
+
+.history {
+  padding: 0;
+  background: #ffffff;
+}
+
+.history-list {
+  padding: .35rem .65rem .65rem;
+  max-height: 230px;
+}
+
+.history-list li {
+  padding: .5rem .45rem;
+  font-size: .86rem;
+}
+
+.app-footer {
+  color: #607086;
+  padding: 1rem;
+}
+
+.lane-hint {
+  color: #145da0;
+  font-weight: 700;
+}
+
+.market-rate-panel {
+  flex: 1 1 100%;
+  border: 1px solid #b9c7d8;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f1f6fb 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+  padding: .72rem;
+  margin-top: .25rem;
+}
+
+.market-rate-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .75rem;
+  padding-bottom: .6rem;
+  margin-bottom: .65rem;
+  border-bottom: 1px solid #cbd7e4;
+}
+
+.market-rate-title {
+  font-weight: 900;
+  color: #102a43;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  font-size: .82rem;
+}
+
+.market-rate-subtitle {
+  color: #63748a;
+  font-size: .78rem;
+  margin-top: .16rem;
+}
+
+.market-rate-value {
+  text-align: right;
+  color: #145da0;
+  font-weight: 900;
+  font-size: 1.28rem;
+  white-space: nowrap;
+}
+
+.market-rate-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  gap: .48rem;
+}
+
+.market-rate-stat {
+  background: #fff;
+  border: 1px solid #d6e0ec;
+  border-radius: 8px;
+  padding: .48rem .55rem;
+}
+
+.market-rate-stat span {
+  display: block;
+  color: #63748a;
+  font-size: .66rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: .05em;
+}
+
+.market-rate-stat strong {
+  display: block;
+  color: #102a43;
+  font-size: .82rem;
+  margin-top: .12rem;
+  line-height: 1.25;
+}
+
+.market-rate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: .65rem;
+}
+
+.market-rate-button {
+  padding: .48rem .8rem;
+  font-size: .78rem;
+}
+
+.confidence-high { color: #17603d !important; }
+.confidence-medium { color: #9a5b00 !important; }
+.confidence-low { color: #9f2b1d !important; }
+
+@media (max-width: 760px) {
+  .header-content {
+    align-items: center;
+  }
+  .app-title {
+    white-space: normal;
+    font-size: 1.05rem;
+  }
+  .logo {
+    height: 56px;
+  }
+  .market-rate-header {
+    flex-direction: column;
+  }
+  .market-rate-value {
+    text-align: left;
+  }
+  .market-rate-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -743,6 +1104,19 @@ button:focus-visible {
             </div>
 
             <div class="input-group">
+              <label for="equipmentClass">Market Rate Class</label>
+              <select id="equipmentClass" name="equipmentClass">
+                <option value="flatbed">Flatbed</option>
+                <option value="stepdeck">Step deck</option>
+                <option value="dryvan">Dry van</option>
+                <option value="reefer">Reefer</option>
+                <option value="hotshot">Hotshot</option>
+                <option value="rgn">RGN / Specialized</option>
+              </select>
+              <p class="field-hint">Used for the weekly lane estimate. Manual override still wins.</p>
+            </div>
+
+            <div class="input-group">
               <label for="profit">Desired Profit ($)</label>
               <input type="number" id="profit" name="profit"
                      step="0.01" min="0"
@@ -757,6 +1131,38 @@ button:focus-visible {
               <p class="field-hint">
                 When enabled, the PDF shows only the final Quote Rate — Carrier Rate and Profit are hidden.
               </p>
+            </div>
+
+            <div class="market-rate-panel" id="marketRatePanel" aria-live="polite">
+              <div class="market-rate-header">
+                <div>
+                  <div class="market-rate-title">Weekly Lane Market Estimate</div>
+                  <div class="market-rate-subtitle" id="marketRateStatus">Waiting for origin and destination.</div>
+                </div>
+                <div class="market-rate-value" id="marketRateValue">—</div>
+              </div>
+              <div class="market-rate-grid">
+                <div class="market-rate-stat">
+                  <span>Lane</span>
+                  <strong id="marketRateLane">—</strong>
+                </div>
+                <div class="market-rate-stat">
+                  <span>Source</span>
+                  <strong id="marketRateSource">Weekly public update + Abby matrix</strong>
+                </div>
+                <div class="market-rate-stat">
+                  <span>Confidence</span>
+                  <strong id="marketRateConfidence">—</strong>
+                </div>
+                <div class="market-rate-stat">
+                  <span>Last Updated</span>
+                  <strong id="marketRateUpdated">—</strong>
+                </div>
+              </div>
+              <div class="market-rate-actions">
+                <button type="button" class="market-rate-button primary" id="useMarketRateButton">Use Weekly Lane Rate</button>
+                <button type="button" class="market-rate-button secondary" id="refreshMarketRateButton">Refresh Market Data</button>
+              </div>
             </div>
           </div>
         </div>
@@ -799,7 +1205,7 @@ button:focus-visible {
  * FreightCalculator — Abby Transport
  *
  * Calibration: Auto-updated weekly via GitHub Actions
- * Source: Scale Funding Current Freight Rates
+ * Source: Weekly public freight-rate update + Abby regional lane matrix
  *   Flatbed national avg : $2.70 – $2.95/mi (all-in incl. FSC)
  *   Midwest flatbed      : $2.97/mi (highest region)
  *   West flatbed         : $2.31/mi linehaul / ~$2.45–2.55 all-in
@@ -807,7 +1213,7 @@ button:focus-visible {
  * Key rules:
  *  – Quote Results updated ONLY on "Calculate" click.
  *  – refreshVisibleQuote() removed; no auto-recalculation.
- *  – costPerMile auto-populated from region-pair lane table after distance
+ *  – costPerMile auto-populated from weekly JSON + region-pair lane table after distance
  *    is resolved. User can override at any time.
  *  – PDF "Send to Customer" shows ONLY Quote Rate (no Carrier Rate / Profit).
  *  – Floor raised $500 → $600. Default rate 2.00 → 2.70.
@@ -892,6 +1298,48 @@ const FreightCalculator = {
     NWE: { NOR:4.21, SOU:4.01, MID:3.68, SPL:3.70, TEX:3.75, MTN:3.33, SWE:3.34, NWE:3.15 },
   },
 
+  REGION_LABELS: {
+    NOR:'Northeast', SOU:'Southeast', MID:'Midwest', SPL:'South Plains',
+    TEX:'Texas', MTN:'Mountain', SWE:'Southwest', NWE:'Northwest',
+  },
+
+  EQUIPMENT_PROFILES: {
+    flatbed: {
+        "label": "Flatbed",
+        "multiplier": 1,
+        "confidenceBoost": 0
+    },
+    stepdeck: {
+        "label": "Step deck",
+        "multiplier": 1.05,
+        "confidenceBoost": -1
+    },
+    dryvan: {
+        "label": "Dry van",
+        "multiplier": 0.78,
+        "confidenceBoost": -1
+    },
+    reefer: {
+        "label": "Reefer",
+        "multiplier": 0.92,
+        "confidenceBoost": -1
+    },
+    hotshot: {
+        "label": "Hotshot",
+        "multiplier": 0.88,
+        "confidenceBoost": -1
+    },
+    rgn: {
+        "label": "RGN / Specialized",
+        "multiplier": 1.42,
+        "confidenceBoost": -2
+    }
+},
+
+  laneRateData: null,
+  laneRateLoadedAt: null,
+  lastLaneRateContext: null,
+
   /* ─── Cached DOM references ───────────────────────────────────── */
   elements: {
     customerName:          document.getElementById('customerName'),
@@ -903,6 +1351,7 @@ const FreightCalculator = {
     width:                 document.getElementById('width'),
     distance:              document.getElementById('distance'),
     costPerMile:           document.getElementById('costPerMile'),
+    equipmentClass:        document.getElementById('equipmentClass'),
     profit:                document.getElementById('profit'),
     isTruck:               document.getElementById('isTruck'),
     cargoType:             document.getElementById('cargoType'),
@@ -913,6 +1362,12 @@ const FreightCalculator = {
     destSpinner:           document.getElementById('destSpinner'),
     historyList:           document.getElementById('historyList'),
     routeDetails:          document.getElementById('routeDetails'),
+    marketRateValue:       document.getElementById('marketRateValue'),
+    marketRateStatus:      document.getElementById('marketRateStatus'),
+    marketRateLane:        document.getElementById('marketRateLane'),
+    marketRateSource:      document.getElementById('marketRateSource'),
+    marketRateConfidence:  document.getElementById('marketRateConfidence'),
+    marketRateUpdated:     document.getElementById('marketRateUpdated'),
     errorElements: {
       origin:      document.getElementById('originError'),
       destination: document.getElementById('destError'),
@@ -961,7 +1416,37 @@ const FreightCalculator = {
     return `$${Number(value || 0).toFixed(2)}`;
   },
 
-  /* ─── Lane-rate auto-population ──────────────────────────────── */
+  /* ─── Weekly lane-rate data + auto-population ─────────────────── */
+
+  async loadLaneRates(force = false) {
+    if (this.laneRateData && !force) return this.laneRateData;
+
+    this.updateMarketRatePanel(null, force ? 'Refreshing weekly market data…' : 'Loading weekly market data…');
+
+    try {
+      const cacheKey = force ? Date.now() : 'weekly';
+      const res = await fetch(`data/lane-rates.json?v=${cacheKey}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      if (data.defaultCostPerMile && Number.isFinite(Number(data.defaultCostPerMile))) {
+        this.DEFAULT_COST_PER_MILE = Number(data.defaultCostPerMile);
+      }
+      if (data.regionRates) this.REGION_RATES = data.regionRates;
+      if (data.regionCodes) this.REGION_LABELS = data.regionCodes;
+      if (data.equipmentProfiles) this.EQUIPMENT_PROFILES = data.equipmentProfiles;
+
+      this.laneRateData = data;
+      this.laneRateLoadedAt = new Date();
+      this.updateMarketRatePanel(null, 'Weekly market data loaded. Enter origin and destination.');
+      this.applyLaneRate(false);
+      return data;
+    } catch (err) {
+      console.warn('loadLaneRates:', err);
+      this.updateMarketRatePanel(null, 'Using embedded fallback rates. Weekly JSON could not be loaded.');
+      return null;
+    }
+  },
 
   /**
    * Extract a U.S. state abbreviation from a geocoded location string
@@ -971,14 +1456,12 @@ const FreightCalculator = {
     if (!locationStr) return null;
     const str = locationStr.trim();
 
-    // Match ", ST" or ", ST 12345" (two-letter abbreviation)
     const abbrMatch = str.match(/,\s*([A-Za-z]{2})(?:[\s,\d]|$)/);
     if (abbrMatch) {
       const abbr = abbrMatch[1].toUpperCase();
       if (this.STATE_TO_REGION[abbr]) return abbr;
     }
 
-    // Fallback: match full state name anywhere in the string
     const lower = str.toLowerCase();
     for (const [abbr, fullName] of Object.entries(this.FULL_STATE_NAMES)) {
       if (lower.includes(fullName.toLowerCase())) return abbr;
@@ -986,40 +1469,128 @@ const FreightCalculator = {
     return null;
   },
 
-  /**
-   * Look up the region-pair rate for the current origin→destination
-   * and populate the Cost Per Mile field. Shows an inline hint so the
-   * user knows the value was auto-set. The user may override at any time.
-   */
-  applyLaneRate() {
-    const originVal = this.elements.origin.value.trim();
-    const destVal   = this.elements.destination.value.trim();
-    if (!originVal || !destVal) return;
+  getSelectedEquipmentProfile() {
+    const key = this.elements.equipmentClass?.value || 'flatbed';
+    return {
+      key,
+      ...(this.EQUIPMENT_PROFILES[key] || this.EQUIPMENT_PROFILES.flatbed || { label:'Flatbed', multiplier:1 }),
+    };
+  },
 
+  confidenceFromContext(oRegion, dRegion, profile) {
+    let score = 2;
+    if (oRegion && dRegion) score += 1;
+    if (this.laneRateData?.sources?.length) score += 1;
+    score += Number(profile.confidenceBoost || 0);
+    if (score >= 4) return 'High';
+    if (score >= 2) return 'Medium';
+    return 'Low';
+  },
+
+  formatUpdatedAt(value) {
+    if (!value) return 'Embedded fallback';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Embedded fallback';
+    return date.toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' });
+  },
+
+  summarizeRateSource() {
+    const sources = this.laneRateData?.sources || [];
+    if (!sources.length) return 'Embedded Abby matrix';
+    const names = sources.map(s => s.source).filter(Boolean);
+    return names.length ? `${names.slice(0, 2).join(' + ')}${names.length > 2 ? ' +' : ''}` : 'Weekly public update';
+  },
+
+  computeMarketLaneRate() {
+    const originVal = this.elements.origin.value.trim();
+    const destVal = this.elements.destination.value.trim();
     const oState = this.extractState(originVal);
     const dState = this.extractState(destVal);
-    if (!oState || !dState) return;
+    if (!originVal || !destVal || !oState || !dState) return null;
 
     const oRegion = this.STATE_TO_REGION[oState];
     const dRegion = this.STATE_TO_REGION[dState];
-    if (!oRegion || !dRegion) return;
+    const profile = this.getSelectedEquipmentProfile();
+    const baseRate = Number(this.REGION_RATES?.[oRegion]?.[dRegion]);
+    if (!Number.isFinite(baseRate) || baseRate <= 0) return null;
 
-    const rate = this.REGION_RATES[oRegion]?.[dRegion];
-    if (!rate) return;
+    const multiplier = Number(profile.multiplier || 1);
+    const rate = Number((baseRate * multiplier).toFixed(2));
+    const confidence = this.confidenceFromContext(oRegion, dRegion, profile);
 
-    this.elements.costPerMile.value = rate.toFixed(2);
+    return {
+      rate,
+      baseRate,
+      multiplier,
+      confidence,
+      equipmentKey: profile.key,
+      equipmentLabel: profile.label || profile.key,
+      oState,
+      dState,
+      oRegion,
+      dRegion,
+      originRegionLabel: this.REGION_LABELS[oRegion] || oRegion,
+      destinationRegionLabel: this.REGION_LABELS[dRegion] || dRegion,
+      source: this.summarizeRateSource(),
+      updatedAt: this.laneRateData?.updatedAt || null,
+      basis: this.laneRateData?.rateType || 'estimated all-in spot rate per mile',
+    };
+  },
+
+  updateMarketRatePanel(context, statusText) {
+    const els = this.elements;
+    if (statusText && els.marketRateStatus) els.marketRateStatus.textContent = statusText;
+
+    if (!context) {
+      if (els.marketRateValue) els.marketRateValue.textContent = '—';
+      if (els.marketRateLane) els.marketRateLane.textContent = '—';
+      if (els.marketRateConfidence) {
+        els.marketRateConfidence.textContent = '—';
+        els.marketRateConfidence.className = '';
+      }
+      if (els.marketRateUpdated) els.marketRateUpdated.textContent = this.formatUpdatedAt(this.laneRateData?.updatedAt);
+      if (els.marketRateSource) els.marketRateSource.textContent = this.summarizeRateSource();
+      return;
+    }
+
+    if (els.marketRateValue) els.marketRateValue.textContent = `${this.formatCurrency(context.rate)} / mile`;
+    if (els.marketRateStatus) els.marketRateStatus.textContent = `${context.equipmentLabel} estimate applied from weekly data.`;
+    if (els.marketRateLane) els.marketRateLane.textContent = `${context.oState} → ${context.dState} (${context.originRegionLabel} → ${context.destinationRegionLabel})`;
+    if (els.marketRateSource) els.marketRateSource.textContent = context.source;
+    if (els.marketRateUpdated) els.marketRateUpdated.textContent = this.formatUpdatedAt(context.updatedAt);
+    if (els.marketRateConfidence) {
+      els.marketRateConfidence.textContent = context.confidence;
+      els.marketRateConfidence.className = `confidence-${String(context.confidence).toLowerCase()}`;
+    }
+  },
+
+  /**
+   * Look up the region-pair rate for the current origin→destination
+   * and populate the Cost Per Mile field. This is intentionally a
+   * semi-real estimate: weekly public market update + Abby matrix +
+   * equipment multiplier. User can override at any time.
+   */
+  applyLaneRate(forceUpdatePanel = true) {
+    const context = this.computeMarketLaneRate();
+    if (!context) {
+      if (forceUpdatePanel) this.updateMarketRatePanel(null, 'Enter a valid origin and destination to estimate the lane.');
+      return;
+    }
+
+    this.elements.costPerMile.value = context.rate.toFixed(2);
+    this.lastLaneRateContext = context;
 
     const hint = document.getElementById('laneRateHint');
     if (hint) {
-      const regionLabels = {
-        NOR:'Northeast', SOU:'Southeast', MID:'Midwest', SPL:'South Plains',
-        TEX:'Texas', MTN:'Mountain', SWE:'Southwest', NWE:'Northwest',
-      };
-      hint.textContent =
-        `Lane avg auto-set: ${oState} → ${dState}`
-        + ` (${regionLabels[oRegion]} → ${regionLabels[dRegion]}, DAT Mar 2026)`;
+      hint.textContent = `Weekly lane avg auto-set: ${context.oState} → ${context.dState} | ${context.equipmentLabel} | ${context.confidence} confidence`;
       hint.style.display = 'block';
     }
+
+    this.updateMarketRatePanel(context);
+  },
+
+  getLaneRateSnapshot() {
+    return this.computeMarketLaneRate() || this.lastLaneRateContext;
   },
 
   /* ─── Calculation context ─────────────────────────────────────── */
@@ -1031,6 +1602,7 @@ const FreightCalculator = {
     return {
       distanceValue:  parseFloat(elements.distance.value)  || 0,
       costPerMile,
+      laneRateContext: this.getLaneRateSnapshot(),
       profit:         parseFloat(elements.profit.value)    || 0,
       length:         parseFloat(elements.length.value)    || 0,
       weight:         parseFloat(elements.weight.value)    || 0,
@@ -1084,10 +1656,15 @@ const FreightCalculator = {
       this.elements.freightEstimate.textContent =
         `Quote Rate: ${this.formatCurrency(pricing.quoteCost)}`;
     } else {
+      const lane = this.getLaneRateSnapshot();
+      const laneText = lane
+        ? ` | Market Basis: ${this.formatCurrency(lane.rate)}/mi (${lane.oState} → ${lane.dState}, ${lane.confidence})`
+        : '';
       this.elements.freightEstimate.textContent =
         `Carrier Rate: ${this.formatCurrency(pricing.baseCost)}`
         + ` | Profit: ${this.formatCurrency(pricing.profit)}`
-        + ` | Quote Rate: ${this.formatCurrency(pricing.quoteCost)}`;
+        + ` | Quote Rate: ${this.formatCurrency(pricing.quoteCost)}`
+        + laneText;
     }
   },
 
@@ -1324,6 +1901,12 @@ const FreightCalculator = {
       profit:         pricing.profit.toFixed(2),
       quoteCost:      pricing.quoteCost.toFixed(2),
       sendToCustomer: context.sendToCustomer,
+      laneRate: context.laneRateContext ? {
+        rate: context.laneRateContext.rate,
+        confidence: context.laneRateContext.confidence,
+        lane: `${context.laneRateContext.oState} → ${context.laneRateContext.dState}`,
+        equipment: context.laneRateContext.equipmentLabel,
+      } : null,
       trailer,
       date: new Date().toLocaleString(),
     });
@@ -1377,9 +1960,11 @@ const FreightCalculator = {
     this.stopCounter = 0;
     this.elements.freightEstimate.textContent      = '';
     this.elements.trailerRecommendation.textContent = '';
-    // Clear lane-rate hint
+    // Clear lane-rate hint and visible market panel
     const hint = document.getElementById('laneRateHint');
     if (hint) { hint.textContent = ''; hint.style.display = 'none'; }
+    this.lastLaneRateContext = null;
+    this.updateMarketRatePanel(null, 'Waiting for origin and destination.');
   },
 
   /* ─── PDF export (modern design — unchanged from prev iteration) ─ */
@@ -1393,9 +1978,9 @@ const FreightCalculator = {
     const now = new Date();
 
     const C = {
-      navy:   [15,  23,  42],
-      blue:   [37,  99, 235],
-      green:  [ 5, 150, 105],
+      navy:   [ 7,  24,  47],
+      blue:   [20,  93, 160],
+      green:  [31, 122,  77],
       white:  [255, 255, 255],
       ink700: [ 51,  65,  85],
       ink500: [100, 116, 139],
@@ -1573,6 +2158,22 @@ const FreightCalculator = {
       [90, CW - 90]
     );
 
+    const lane = this.getLaneRateSnapshot();
+    if (!sendToCustomer && lane) {
+      sectionTitle('Market Lane Estimate');
+      drawTable(
+        ['Field', 'Value'],
+        [
+          { cells:['Estimated lane rate', `${this.formatCurrency(lane.rate)} / mile`] },
+          { cells:['Lane', `${lane.oState} → ${lane.dState} (${lane.originRegionLabel} → ${lane.destinationRegionLabel})`] },
+          { cells:['Equipment class', lane.equipmentLabel] },
+          { cells:['Confidence', lane.confidence] },
+          { cells:['Pricing basis', `${lane.source} | Updated: ${this.formatUpdatedAt(lane.updatedAt)}`] },
+        ],
+        [58, CW - 58]
+      );
+    }
+
     // Trailer
     const trailer = this.getTrailerRecommendation(
       this.elements.cargoType.value === 'load-is-a-truck',
@@ -1641,9 +2242,12 @@ const FreightCalculator = {
     const li       = document.createElement('li');
     const stopsStr = calculation.stops.length ? ` via ${calculation.stops.join(', ')}` : '';
     const modeStr  = calculation.sendToCustomer ? 'Customer View' : 'Internal View';
+    const laneStr = calculation.laneRate
+      ? ` | Lane: $${Number(calculation.laneRate.rate || 0).toFixed(2)}/mi ${calculation.laneRate.lane || ''}`
+      : '';
     li.textContent = `${calculation.date}: ${calculation.customer} — `
       + `${calculation.origin} to ${calculation.destination}${stopsStr} — `
-      + `${this.formatCurrency(calculation.quoteCost)} (${modeStr})`;
+      + `${this.formatCurrency(calculation.quoteCost)} (${modeStr})${laneStr}`;
     this.elements.historyList.prepend(li);
     if (this.elements.historyList.children.length > 10) {
       this.elements.historyList.removeChild(this.elements.historyList.lastChild);
@@ -1720,6 +2324,13 @@ const FreightCalculator = {
       this.validateInput(elements.distance, 10000, 'Distance must be between 0 and 10,000 miles'));
     elements.costPerMile.addEventListener('input', () =>
       this.validateInput(elements.costPerMile, 100, 'Cost per mile must be between $0 and $100'));
+    elements.equipmentClass?.addEventListener('change', () => this.applyLaneRate(true));
+
+    document.getElementById('useMarketRateButton')?.addEventListener('click', () => this.applyLaneRate(true));
+    document.getElementById('refreshMarketRateButton')?.addEventListener('click', async () => {
+      await this.loadLaneRates(true);
+      this.applyLaneRate(true);
+    });
 
     // Action buttons
     document.querySelector('.calculate-button').addEventListener('click',
@@ -1756,6 +2367,7 @@ const FreightCalculator = {
       this.loadCustomers();
       this.addEventListeners();
       this.loadHistory();
+      this.loadLaneRates(false);
     };
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', start, { once: true });

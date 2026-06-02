@@ -1,6 +1,8 @@
 {
-  "updatedAt": "2026-06-01T18:59:57.527Z",
-  "equipment": "flatbed",
+  "schemaVersion": 2,
+  "updatedAt": "2026-06-02T20:39:25.761Z",
+  "model": "weekly-public-update-plus-abby-regional-matrix",
+  "equipment": "flatbed-base-with-equipment-multipliers",
   "rateType": "estimated all-in spot rate per mile",
   "defaultCostPerMile": 3.6,
   "regionalAnchors": {
@@ -14,8 +16,8 @@
     "SPL": "South Plains",
     "TEX": "Texas",
     "MTN": "Mountain",
-    "SWE": "Southwest / West",
-    "NWE": "Northwest / West"
+    "SWE": "Southwest",
+    "NWE": "Northwest"
   },
   "regionRates": {
     "NOR": {
@@ -99,27 +101,56 @@
       "NWE": 3.15
     }
   },
+  "equipmentProfiles": {
+    "flatbed": {
+      "label": "Flatbed",
+      "multiplier": 1,
+      "confidenceBoost": 0
+    },
+    "stepdeck": {
+      "label": "Step deck",
+      "multiplier": 1.05,
+      "confidenceBoost": -1
+    },
+    "dryvan": {
+      "label": "Dry van",
+      "multiplier": 0.78,
+      "confidenceBoost": -1
+    },
+    "reefer": {
+      "label": "Reefer",
+      "multiplier": 0.92,
+      "confidenceBoost": -1
+    },
+    "hotshot": {
+      "label": "Hotshot",
+      "multiplier": 0.88,
+      "confidenceBoost": -1
+    },
+    "rgn": {
+      "label": "RGN / Specialized",
+      "multiplier": 1.42,
+      "confidenceBoost": -2
+    }
+  },
+  "display": {
+    "showConfidence": true,
+    "showLastUpdated": true,
+    "customerPdfHidesMarketBasis": true
+  },
   "methodology": {
     "baseNationalAverage": 2.7,
-    "note": "The updater scales the existing Abby Transport regional matrix using the newest parseable national flatbed rate. Midwest and West anchors are blended gently when available. This is an estimating model, not a substitute for DAT RateView or another paid lane-level API."
+    "note": "Weekly public freight-rate data is parsed when available, then blended into Abby Transport regional lane matrix. The app applies an equipment multiplier on top of the flatbed matrix. This is a semi-real estimating model, not a replacement for paid lane-level rate products."
   },
-  "sources": [
-    {
-      "source": "Scale Funding Current Freight Rates",
-      "url": "https://getscalefunding.com/resources/current-freight-rates/",
-      "weight": 2.5,
-      "foundAt": "2026-06-01T18:59:57.811Z",
-      "rates": {
-        "national": 3.6,
-        "midwest": 2.86,
-        "west": 3.03
-      }
-    }
-  ],
+  "sources": [],
   "failures": [
     {
       "source": "DAT Trendlines",
-      "error": "No parseable flatbed rates found"
+      "error": "fetch failed"
+    },
+    {
+      "source": "Scale Funding Current Freight Rates",
+      "error": "fetch failed"
     }
   ]
 }

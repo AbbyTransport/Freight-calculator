@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
- * Abby Transport Freight Calculator — weekly lane-rate updater
+ * Abby Transport Freight Calculator — weekly semi-dynamic lane-rate updater
  *
- * What this does:
- * 1. Tries to read current public market-rate pages and/or an optional paid/API endpoint.
- * 2. Computes a revised all-in flatbed $/mile matrix using your existing regional model.
- * 3. Rewrites the constants inside index.html:
- *    - DEFAULT_COST_PER_MILE
- *    - REGION_RATES
- *    - the visible Cost Per Mile input default value
- * 4. Writes data/lane-rates.json and data/lane-rates-history.json for auditability.
+ * No paid API required.
  *
- * Important: public websites can change their HTML at any moment, because apparently
- * civilization was built on brittle markup and wishful thinking. If parsing fails, this
- * script keeps the current rates instead of corrupting the calculator.
+ * What this does every Monday through GitHub Actions:
+ *  1. Reads parseable public freight-rate pages when possible.
+ *  2. Uses previous good values if public pages fail.
+ *  3. Rebuilds the Abby regional lane matrix.
+ *  4. Writes data/lane-rates.json and data/lane-rates-history.json.
+ *  5. Patches index.html fallback constants, so the calculator still works
+ *     even if the JSON file cannot be loaded by the browser.
+ *
+ * This is an estimating model. It is not DAT RateView, Truckstop, SONAR,
+ * or any other paid lane-level product. Sad, but at least honest.
  */
 
 import fs from "node:fs/promises";
@@ -27,6 +27,26 @@ const HISTORY_JSON_PATH = path.join(DATA_DIR, "lane-rates-history.json");
 
 const REGION_CODES = ["NOR", "SOU", "MID", "SPL", "TEX", "MTN", "SWE", "NWE"];
 const BASE_NATIONAL_AVERAGE = 2.70;
+
+const REGION_LABELS = {
+  NOR: "Northeast",
+  SOU: "Southeast",
+  MID: "Midwest",
+  SPL: "South Plains",
+  TEX: "Texas",
+  MTN: "Mountain",
+  SWE: "Southwest",
+  NWE: "Northwest",
+};
+
+const EQUIPMENT_PROFILES = {
+  flatbed:  { label: "Flatbed", multiplier: 1.00, confidenceBoost: 0 },
+  stepdeck: { label: "Step deck", multiplier: 1.05, confidenceBoost: -1 },
+  dryvan:   { label: "Dry van", multiplier: 0.78, confidenceBoost: -1 },
+  reefer:   { label: "Reefer", multiplier: 0.92, confidenceBoost: -1 },
+  hotshot:  { label: "Hotshot", multiplier: 0.88, confidenceBoost: -1 },
+  rgn:      { label: "RGN / Specialized", multiplier: 1.42, confidenceBoost: -2 },
+};
 
 const BASE_REGION_RATES = {
   NOR: { NOR: 2.75, SOU: 2.90, MID: 2.95, SPL: 3.05, TEX: 3.10, MTN: 3.15, SWE: 3.20, NWE: 3.25 },
@@ -57,7 +77,7 @@ function round2(value) {
 }
 
 function isUsableRate(value) {
-  return Number.isFinite(value) && value >= 1.5 && value <= 8;
+  return Number.isFinite(Number(value)) && Number(value) >= 1.5 && Number(value) <= 8;
 }
 
 function htmlToText(html) {
@@ -87,112 +107,43 @@ function parsePublicFreightRates(html, sourceName, url, weight = 1) {
 
   const national = firstRate(text, [
     /national\s+average\s+flatbed\s+rates?\s+(?:are|is|at|averaged?)\s+\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-    /flatbed\s+freight\s+rates?[^$]{0,180}national\s+average[^$]{0,80}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /flatbed\s+freight\s+rates?[^$]{0,200}national\s+average[^$]{0,100}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
     /flatbed\s*[:\-]\s*\$\s*([0-9]+(?:\.[0-9]+)?)\s*(?:per\s+mile|\/mi|a\s+mile)/i,
-    /national\s+flatbed\s+(?:spot\s+)?(?:rate|rates|average)[^$]{0,100}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-    /flatbed\s+spot\s+rates?[^.]{0,160}(?:national\s+averages?\s+)?(?:exceeding|above|around|at)\s+\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /national\s+flatbed\s+(?:spot\s+)?(?:rate|rates|average)[^$]{0,120}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /flatbed\s+spot\s+rates?[^.]{0,180}(?:national\s+averages?\s+)?(?:exceeding|above|around|at)\s+\$\s*([0-9]+(?:\.[0-9]+)?)/i,
   ]);
 
   const midwest = firstRate(text, [
-    /Midwest[^$]{0,120}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /Midwest[^$]{0,140}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
   ]);
 
   const west = firstRate(text, [
-    /lowest\s+rates?\s+are\s+in\s+the\s+West[^$]{0,120}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-    /West\s+flatbed[^$]{0,120}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-    /West[^$]{0,80}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /lowest\s+rates?\s+are\s+in\s+the\s+West[^$]{0,140}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /West\s+flatbed[^$]{0,140}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /West[^$]{0,100}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
   ]);
 
   const found = { national, midwest, west };
   const hasAny = Object.values(found).some(v => isUsableRate(v));
   if (!hasAny) return null;
 
-  return {
-    source: sourceName,
-    url,
-    weight,
-    foundAt: new Date().toISOString(),
-    rates: found,
-  };
+  return { source: sourceName, url, weight, foundAt: new Date().toISOString(), rates: found };
 }
 
-async function fetchText(url, headers = {}) {
+async function fetchText(url) {
   const response = await fetch(url, {
     headers: {
-      "user-agent": "AbbyTransportRateUpdater/1.0 (+https://www.abbytransport.com)",
+      "user-agent": "AbbyTransportRateUpdater/2.0 (+https://www.abbytransport.com)",
       "accept": "text/html,application/json;q=0.9,*/*;q=0.8",
-      ...headers,
     },
   });
   if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
   return response.text();
 }
 
-function normalizeApiResponse(json, sourceName = "DAT/API") {
-  const body = json?.flatbed ?? json?.rates?.flatbed ?? json?.rates ?? json;
-  const directMatrix = json?.regionRates ?? body?.regionRates;
-  const national = Number.parseFloat(
-    body?.nationalAverage ?? body?.national ?? body?.spotRate ?? body?.allInRate ?? body?.rate ?? body?.flatbed ?? body?.defaultCostPerMile
-  );
-
-  const midwest = Number.parseFloat(body?.midwest ?? body?.MID ?? body?.regions?.midwest ?? body?.regions?.MID);
-  const west = Number.parseFloat(body?.west ?? body?.WEST ?? body?.regions?.west ?? body?.regions?.WEST);
-
-  if (directMatrix && isUsableRate(national)) {
-    return {
-      source: sourceName,
-      url: process.env.DAT_API_URL || "configured API",
-      weight: 10,
-      foundAt: new Date().toISOString(),
-      rates: { national, midwest: isUsableRate(midwest) ? midwest : null, west: isUsableRate(west) ? west : null },
-      directMatrix,
-    };
-  }
-
-  if (!isUsableRate(national) && !isUsableRate(midwest) && !isUsableRate(west)) return null;
-
-  return {
-    source: sourceName,
-    url: process.env.DAT_API_URL || "configured API",
-    weight: 10,
-    foundAt: new Date().toISOString(),
-    rates: {
-      national: isUsableRate(national) ? national : null,
-      midwest: isUsableRate(midwest) ? midwest : null,
-      west: isUsableRate(west) ? west : null,
-    },
-  };
-}
-
-async function tryPaidApiSource() {
-  const apiUrl = process.env.DAT_API_URL;
-  const apiKey = process.env.DAT_API_KEY;
-  if (!apiUrl || !apiKey) return null;
-
-  const response = await fetch(apiUrl, {
-    headers: {
-      "accept": "application/json",
-      "authorization": `Bearer ${apiKey}`,
-      "x-api-key": apiKey,
-    },
-  });
-
-  if (!response.ok) throw new Error(`DAT/API failed: ${response.status} ${response.statusText}`);
-  const json = await response.json();
-  return normalizeApiResponse(json, "DAT/API");
-}
-
 async function collectSources() {
   const sources = [];
   const failures = [];
-
-  try {
-    const api = await tryPaidApiSource();
-    if (api) sources.push(api);
-  } catch (error) {
-    failures.push({ source: "DAT/API", error: error.message });
-  }
-
   const extraUrls = (process.env.EXTRA_RATE_SOURCE_URLS || "")
     .split(",")
     .map(s => s.trim())
@@ -209,29 +160,25 @@ async function collectSources() {
       failures.push({ source: source.name, error: error.message });
     }
   }
-
   return { sources, failures };
 }
 
 function weightedAverage(items, key) {
   let numerator = 0;
   let denominator = 0;
-
   for (const item of items) {
     const value = item.rates?.[key];
     const weight = item.weight || 1;
     if (!isUsableRate(value)) continue;
-    numerator += value * weight;
+    numerator += Number(value) * weight;
     denominator += weight;
   }
-
   return denominator ? round2(numerator / denominator) : null;
 }
 
 async function readExistingData() {
   try {
-    const raw = await fs.readFile(RATE_JSON_PATH, "utf8");
-    return JSON.parse(raw);
+    return JSON.parse(await fs.readFile(RATE_JSON_PATH, "utf8"));
   } catch {
     return null;
   }
@@ -262,8 +209,6 @@ function clamp(value, min, max) {
 }
 
 function generateRegionRates(rates) {
-  if (rates.directMatrix) return rates.directMatrix;
-
   const national = rates.national;
   const nationalScale = national / BASE_NATIONAL_AVERAGE;
   const regionFactors = buildRegionFactors(rates);
@@ -277,13 +222,15 @@ function generateRegionRates(rates) {
       const rawRegionFactor = Math.sqrt(regionFactors[origin] * regionFactors[destination]);
       const blendedFactor = 1 + (rawRegionFactor - 1) * anchorStrength;
       const adjusted = baseRate * nationalScale * blendedFactor;
-
-      // Broad sanity bounds so one bad public-source parse does not create cartoon economics.
       output[origin][destination] = round2(clamp(adjusted, national * 0.72, national * 1.42));
     }
   }
-
   return output;
+}
+
+function formatObjectForIndex(obj, indent = 2) {
+  return JSON.stringify(obj, null, indent)
+    .replace(/"([A-Z]{3}|flatbed|stepdeck|dryvan|reefer|hotshot|rgn)":/g, "$1:");
 }
 
 function formatRegionRatesForIndex(regionRates) {
@@ -309,75 +256,38 @@ function findMatchingBrace(source, openIndex) {
     const char = source[i];
     const next = source[i + 1];
 
-    if (lineComment) {
-      if (char === "\n") lineComment = false;
-      continue;
-    }
-    if (blockComment) {
-      if (char === "*" && next === "/") {
-        blockComment = false;
-        i++;
-      }
-      continue;
-    }
+    if (lineComment) { if (char === "\n") lineComment = false; continue; }
+    if (blockComment) { if (char === "*" && next === "/") { blockComment = false; i++; } continue; }
     if (quote) {
-      if (escaped) {
-        escaped = false;
-      } else if (char === "\\") {
-        escaped = true;
-      } else if (char === quote) {
-        quote = null;
-      }
+      if (escaped) escaped = false;
+      else if (char === "\\") escaped = true;
+      else if (char === quote) quote = null;
       continue;
     }
 
-    if (char === "/" && next === "/") {
-      lineComment = true;
-      i++;
-      continue;
-    }
-    if (char === "/" && next === "*") {
-      blockComment = true;
-      i++;
-      continue;
-    }
-    if (char === "'" || char === '"' || char === "`") {
-      quote = char;
-      continue;
-    }
+    if (char === "/" && next === "/") { lineComment = true; i++; continue; }
+    if (char === "/" && next === "*") { blockComment = true; i++; continue; }
+    if (char === "'" || char === '"' || char === "`") { quote = char; continue; }
     if (char === "{") depth++;
     if (char === "}") {
       depth--;
       if (depth === 0) return i;
     }
   }
-
-  throw new Error("Could not find matching brace for REGION_RATES object.");
+  throw new Error("Could not find matching brace.");
 }
 
 function replaceObjectLiteral(source, propertyName, replacementObjectLiteral) {
   const propertyIndex = source.indexOf(`${propertyName}:`);
   if (propertyIndex < 0) throw new Error(`Could not find ${propertyName}: in index.html`);
-
   const openIndex = source.indexOf("{", propertyIndex);
   if (openIndex < 0) throw new Error(`Could not find opening brace for ${propertyName}.`);
-
   const closeIndex = findMatchingBrace(source, openIndex);
   return source.slice(0, propertyIndex) + `${propertyName}: ${replacementObjectLiteral}` + source.slice(closeIndex + 1);
 }
 
-function patchIndexHtml(original, defaultCostPerMile, regionRates, metadata) {
+function patchIndexHtml(original, defaultCostPerMile, regionRates) {
   let html = original;
-
-  html = html.replace(
-    /(\*\s*Calibration:\s*)[^\n\r]*/,
-    `$1Auto-updated weekly via GitHub Actions`
-  );
-
-  html = html.replace(
-    /(\*\s*Source:\s*)[^\n\r]*/,
-    `$1${metadata.sourceSummary}`
-  );
 
   html = html.replace(
     /DEFAULT_COST_PER_MILE:\s*[0-9]+(?:\.[0-9]+)?\s*,[^\n\r]*/,
@@ -390,12 +300,13 @@ function patchIndexHtml(original, defaultCostPerMile, regionRates, metadata) {
   );
 
   html = replaceObjectLiteral(html, "REGION_RATES", formatRegionRatesForIndex(regionRates));
+  html = replaceObjectLiteral(html, "EQUIPMENT_PROFILES", formatObjectForIndex(EQUIPMENT_PROFILES, 4));
 
   return html;
 }
 
 function summarizeSources(sources) {
-  if (!sources.length) return "Previous lane-rate data retained; no public/API source parsed successfully";
+  if (!sources.length) return "Previous lane-rate data retained; no public source parsed successfully";
   return sources.map(s => s.source).join(" + ");
 }
 
@@ -413,92 +324,64 @@ async function main() {
   let midwest = weightedAverage(sources, "midwest");
   let west = weightedAverage(sources, "west");
 
-  // If public pages are not parseable this week, keep the previous known values.
-  if (!isUsableRate(national) && existing?.defaultCostPerMile) {
-    national = Number(existing.defaultCostPerMile);
-  }
-  if (!isUsableRate(midwest) && existing?.regionalAnchors?.midwest) {
-    midwest = Number(existing.regionalAnchors.midwest);
-  }
-  if (!isUsableRate(west) && existing?.regionalAnchors?.west) {
-    west = Number(existing.regionalAnchors.west);
-  }
+  if (!isUsableRate(national) && existing?.defaultCostPerMile) national = Number(existing.defaultCostPerMile);
+  if (!isUsableRate(midwest) && existing?.regionalAnchors?.midwest) midwest = Number(existing.regionalAnchors.midwest);
+  if (!isUsableRate(west) && existing?.regionalAnchors?.west) west = Number(existing.regionalAnchors.west);
+  if (!isUsableRate(national)) national = BASE_NATIONAL_AVERAGE;
 
-  if (!isUsableRate(national)) {
-    national = BASE_NATIONAL_AVERAGE;
-  }
-
-  const directMatrixSource = sources.find(s => s.directMatrix);
   const rates = {
     national: round2(national),
     midwest: isUsableRate(midwest) ? round2(midwest) : null,
     west: isUsableRate(west) ? round2(west) : null,
-    directMatrix: directMatrixSource?.directMatrix || null,
   };
 
   const regionRates = generateRegionRates(rates);
   const indexOriginal = await fs.readFile(INDEX_PATH, "utf8");
-  const metadata = { sourceSummary: summarizeSources(sources) };
-  const indexUpdated = patchIndexHtml(indexOriginal, rates.national, regionRates, metadata);
-
-  await fs.writeFile(INDEX_PATH, indexUpdated, "utf8");
+  await fs.writeFile(INDEX_PATH, patchIndexHtml(indexOriginal, rates.national, regionRates), "utf8");
 
   const data = {
+    schemaVersion: 2,
     updatedAt: now,
-    equipment: "flatbed",
+    model: "weekly-public-update-plus-abby-regional-matrix",
+    equipment: "flatbed-base-with-equipment-multipliers",
     rateType: "estimated all-in spot rate per mile",
     defaultCostPerMile: rates.national,
-    regionalAnchors: {
-      midwest: rates.midwest,
-      west: rates.west,
-    },
-    regionCodes: {
-      NOR: "Northeast",
-      SOU: "Southeast",
-      MID: "Midwest",
-      SPL: "South Plains",
-      TEX: "Texas",
-      MTN: "Mountain",
-      SWE: "Southwest / West",
-      NWE: "Northwest / West",
-    },
+    regionalAnchors: { midwest: rates.midwest, west: rates.west },
+    regionCodes: REGION_LABELS,
     regionRates,
+    equipmentProfiles: EQUIPMENT_PROFILES,
+    display: {
+      showConfidence: true,
+      showLastUpdated: true,
+      customerPdfHidesMarketBasis: true,
+    },
     methodology: {
       baseNationalAverage: BASE_NATIONAL_AVERAGE,
-      note: "The updater scales the existing Abby Transport regional matrix using the newest parseable national flatbed rate. Midwest and West anchors are blended gently when available. This is an estimating model, not a substitute for DAT RateView or another paid lane-level API.",
+      note: "Weekly public freight-rate data is parsed when available, then blended into Abby Transport regional lane matrix. The app applies an equipment multiplier on top of the flatbed matrix. This is a semi-real estimating model, not a replacement for paid lane-level rate products.",
     },
-    sources: sources.map(s => ({
-      source: s.source,
-      url: s.url,
-      weight: s.weight,
-      foundAt: s.foundAt,
-      rates: s.rates,
-    })),
+    sources: sources.map(s => ({ source: s.source, url: s.url, weight: s.weight, foundAt: s.foundAt, rates: s.rates })),
     failures,
   };
-
   await writeJson(RATE_JSON_PATH, data);
 
   let history = [];
   try {
     history = JSON.parse(await fs.readFile(HISTORY_JSON_PATH, "utf8"));
     if (!Array.isArray(history)) history = [];
-  } catch {
-    history = [];
-  }
+  } catch {}
 
   history.push({
     updatedAt: now,
     defaultCostPerMile: rates.national,
     regionalAnchors: data.regionalAnchors,
-    sourceSummary: metadata.sourceSummary,
+    sourceSummary: summarizeSources(sources),
+    failures: failures.length,
   });
-
-  history = history.slice(-104); // roughly two years of weekly updates
+  history = history.slice(-104);
   await writeJson(HISTORY_JSON_PATH, history);
 
-  console.log(`Updated default flatbed rate: $${rates.national.toFixed(2)}/mi`);
-  console.log(`Sources: ${metadata.sourceSummary}`);
+  console.log(`Updated default flatbed base rate: $${rates.national.toFixed(2)}/mi`);
+  console.log(`Sources: ${summarizeSources(sources)}`);
   if (failures.length) console.log(`Source failures: ${JSON.stringify(failures)}`);
 }
 
