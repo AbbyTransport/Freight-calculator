@@ -800,6 +800,33 @@ button {
   padding: .72rem .86rem;
 }
 
+/* BUGFIX 2026-06-02:
+   Portal-style results panel uses a white background. The original calculator
+   result text was white because it used to sit on a dark card, which made the
+   Quote Results values invisible even though Calculate worked and History saved.
+   Human civilization, defeated briefly by CSS specificity. */
+.results .result-text {
+  color: #07182f;
+  width: 100%;
+  margin: 0;
+  text-align: left;
+  font-size: .94rem;
+  line-height: 1.45;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.results .result-text:not(:empty) {
+  display: block;
+  border-top: 1px solid var(--border);
+  background: #ffffff;
+}
+
+#trailerRecommendation.result-text {
+  color: #475569;
+  font-weight: 600;
+}
+
 .results::before { display: none; }
 
 .history {
