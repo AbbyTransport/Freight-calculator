@@ -1087,6 +1087,62 @@ button {
 
 .formula-note strong { color: #07182f; }
 
+
+.pricing-extras-note {
+  grid-column: 1 / -1;
+  margin: .1rem 0 .2rem;
+  padding: .58rem .68rem;
+  border: 1px dashed rgba(20, 93, 160, .35);
+  border-radius: 10px;
+  background: rgba(240, 249, 255, .55);
+  color: #27415f;
+  font-size: .78rem;
+  line-height: 1.35;
+}
+
+.guardrail-panel {
+  margin-top: .7rem;
+  padding: .78rem .86rem;
+  border-radius: 12px;
+  border: 1px solid rgba(154, 91, 0, .28);
+  background: linear-gradient(180deg, rgba(255,251,235,.92), rgba(255,255,255,.74));
+  color: #17324d;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.68);
+}
+
+.guardrail-panel.safe {
+  border-color: rgba(31,122,77,.24);
+  background: linear-gradient(180deg, rgba(236,253,245,.86), rgba(255,255,255,.72));
+}
+
+.guardrail-panel span {
+  display: block;
+  font-size: .68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #64748b;
+  margin-bottom: .32rem;
+}
+
+.guardrail-panel ul {
+  margin: .2rem 0 0 1.05rem;
+  padding: 0;
+}
+
+.guardrail-panel li {
+  margin: .26rem 0;
+  font-size: .84rem;
+  line-height: 1.38;
+}
+
+.guardrail-panel.safe strong { color: #064e3b; }
+.guardrail-panel strong { color: #78350f; }
+
+.result-detail-grid.compact {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .trailer-card:not(:empty) {
   display: flex !important;
   align-items: center;
@@ -1320,6 +1376,44 @@ button {
               </p>
             </div>
 
+
+            <div class="pricing-extras-note">
+              <strong>Broker Guardrails / Accessorials:</strong>
+              optional internal add-ons for items brokers normally watch before sending a quote. Leave blank/0 when not needed.
+            </div>
+
+            <div class="input-group">
+              <label for="extraStopFee">Extra Stop Fee ($ each)</label>
+              <input type="number" id="extraStopFee" name="extraStopFee"
+                     step="0.01" min="0" placeholder="0.00" />
+              <p class="field-hint">Applied to intermediate stops entered in Route Details.</p>
+            </div>
+
+            <div class="input-group">
+              <label for="tarpFee">Tarp / Special Handling ($)</label>
+              <input type="number" id="tarpFee" name="tarpFee"
+                     step="0.01" min="0" placeholder="0.00" />
+            </div>
+
+            <div class="input-group">
+              <label for="permitFee">Permits / Oversize Reserve ($)</label>
+              <input type="number" id="permitFee" name="permitFee"
+                     step="0.01" min="0" placeholder="0.00" />
+            </div>
+
+            <div class="input-group">
+              <label for="riskReserveFee">Detention / Risk Reserve ($)</label>
+              <input type="number" id="riskReserveFee" name="riskReserveFee"
+                     step="0.01" min="0" placeholder="0.00" />
+            </div>
+
+            <div class="input-group">
+              <label for="expeditedPercent">Expedited / Tight Lane Surcharge (%)</label>
+              <input type="number" id="expeditedPercent" name="expeditedPercent"
+                     step="0.1" min="0" max="100" placeholder="0" />
+              <p class="field-hint">Adds a percentage to linehaul + accessorials before profit.</p>
+            </div>
+
             <div class="market-rate-panel" id="marketRatePanel" aria-live="polite">
               <div class="market-rate-header">
                 <div>
@@ -1540,6 +1634,11 @@ const FreightCalculator = {
     costPerMile:           document.getElementById('costPerMile'),
     equipmentClass:        document.getElementById('equipmentClass'),
     profit:                document.getElementById('profit'),
+    extraStopFee:          document.getElementById('extraStopFee'),
+    tarpFee:               document.getElementById('tarpFee'),
+    permitFee:             document.getElementById('permitFee'),
+    riskReserveFee:        document.getElementById('riskReserveFee'),
+    expeditedPercent:      document.getElementById('expeditedPercent'),
     isTruck:               document.getElementById('isTruck'),
     cargoType:             document.getElementById('cargoType'),
     sendToCustomer:        document.getElementById('sendToCustomer'),
@@ -1782,6 +1881,43 @@ const FreightCalculator = {
 
   /* ─── Calculation context ─────────────────────────────────────── */
 
+  parseMoneyInput(input) {
+    const value = parseFloat(input?.value || '0');
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  },
+
+  parsePercentInput(input) {
+    const value = parseFloat(input?.value || '0');
+    if (!Number.isFinite(value) || value <= 0) return 0;
+    return Math.min(value, 100);
+  },
+
+  getExtraStopCount() {
+    return Array.from(this.elements.routeDetails.querySelectorAll('input[id^="stop"]'))
+      .filter(input => input && input.value.trim()).length;
+  },
+
+  getAccessorialInputs() {
+    const extraStopCount = this.getExtraStopCount();
+    const extraStopFee = this.parseMoneyInput(this.elements.extraStopFee);
+    const stopFees = extraStopCount * extraStopFee;
+    const tarpFee = this.parseMoneyInput(this.elements.tarpFee);
+    const permitFee = this.parseMoneyInput(this.elements.permitFee);
+    const riskReserveFee = this.parseMoneyInput(this.elements.riskReserveFee);
+    const expeditedPercent = this.parsePercentInput(this.elements.expeditedPercent);
+
+    return {
+      extraStopCount,
+      extraStopFee,
+      stopFees,
+      tarpFee,
+      permitFee,
+      riskReserveFee,
+      expeditedPercent,
+      totalBeforeExpedite: stopFees + tarpFee + permitFee + riskReserveFee,
+    };
+  },
+
   getCurrentCalculationContext() {
     const { elements } = this;
     let costPerMile = parseFloat(elements.costPerMile.value);
@@ -1791,6 +1927,7 @@ const FreightCalculator = {
       costPerMile,
       laneRateContext: this.getLaneRateSnapshot(),
       profit:         parseFloat(elements.profit.value)    || 0,
+      accessorials:   this.getAccessorialInputs(),
       length:         parseFloat(elements.length.value)    || 0,
       weight:         parseFloat(elements.weight.value)    || 0,
       height:         parseFloat(elements.height.value)    || 0,
@@ -1811,46 +1948,165 @@ const FreightCalculator = {
    *     up to +20 % at 80 k lbs). Reflects real overweight premiums.
    *  3. Tycon formula unchanged (already weight-adjusted internally).
    */
-  computePricing({ distanceValue, costPerMile, profit, length, weight, cargoType, isTruck }) {
-    let baseCost;
+  computePricing(context) {
+    const {
+      distanceValue, costPerMile, profit, length, weight, cargoType, isTruck,
+    } = context;
+
+    const accessorials = context.accessorials || {
+      extraStopCount: 0, extraStopFee: 0, stopFees: 0,
+      tarpFee: 0, permitFee: 0, riskReserveFee: 0,
+      expeditedPercent: 0, totalBeforeExpedite: 0,
+    };
+
+    const ftlBenchmark = Math.max((distanceValue || 0) * (costPerMile || this.DEFAULT_COST_PER_MILE), this.MINIMUM_CHARGE);
+    const deckShare = length > 0 ? Math.min(length / 48, 1.15) : 0;
+    let linehaulCost;
+    let rawLinehaul;
+    let weightFactor = 1;
+    let partialCapApplied = false;
+    let partialCapPercent = null;
+    let pricingMode = 'FTL / Dedicated Truck';
 
     if (isTruck) {
       // Full truckload: straight mileage rate
-      baseCost = Math.max(distanceValue * costPerMile, this.MINIMUM_CHARGE);
+      rawLinehaul = ftlBenchmark;
+      linehaulCost = ftlBenchmark;
+      pricingMode = 'FTL / Dedicated Truck';
 
     } else if (cargoType === 'tycon') {
       // Tycon-specific formula (weight-adjusted internally)
-      baseCost = this.BASE_FACTOR_TYCON
+      rawLinehaul = this.BASE_FACTOR_TYCON
         * (length * distanceValue)
         * ((weight || 0) / 47000 + 1)
         * (1 - (Math.ceil((weight || 0) / 20000) - 2) * 0.05);
-      baseCost = Math.max(baseCost, this.MINIMUM_CHARGE);
+      linehaulCost = Math.max(rawLinehaul, this.MINIMUM_CHARGE);
+      pricingMode = 'Tycon Formula';
 
     } else {
-      // Partial/hotshot/flatbed: proportional deck space pricing
-      // Weight surcharge: graduated 0 % (≤20 k lbs) → +20 % (80 k lbs)
-      const overWeight   = Math.max(0, (weight || 0) - 20000);
-      const weightFactor = 1 + Math.min(overWeight / 200000, 0.20);
-      baseCost = (((distanceValue * costPerMile) / 48) * (length || 0)) * 1.5 * weightFactor;
-      baseCost = Math.max(baseCost, this.MINIMUM_CHARGE);
+      // Partial/hotshot/flatbed: proportional deck space pricing.
+      // Broker guardrail: a partial should normally not exceed a sensible share
+      // of the FTL benchmark. When it gets too close, quote both options.
+      const overWeight = Math.max(0, (weight || 0) - 20000);
+      weightFactor = 1 + Math.min(overWeight / 200000, 0.20);
+      rawLinehaul = (((distanceValue * costPerMile) / 48) * (length || 0)) * 1.5 * weightFactor;
+      linehaulCost = Math.max(rawLinehaul, this.MINIMUM_CHARGE);
+
+      const nearFtl = (length || 0) >= 30 || (weight || 0) >= 30000 || deckShare >= 0.625;
+      partialCapPercent = nearFtl ? 0.95 : 0.88;
+      const partialCap = ftlBenchmark * partialCapPercent;
+      if (ftlBenchmark > this.MINIMUM_CHARGE && linehaulCost > partialCap) {
+        linehaulCost = Math.max(partialCap, this.MINIMUM_CHARGE);
+        partialCapApplied = true;
+      }
+      pricingMode = 'Partial / Shared Deck';
     }
 
-    return { baseCost, profit, quoteCost: baseCost + profit };
+    const accessorialTotal = accessorials.totalBeforeExpedite || 0;
+    const expeditedSurcharge = (linehaulCost + accessorialTotal) * ((accessorials.expeditedPercent || 0) / 100);
+    const baseCost = linehaulCost + accessorialTotal + expeditedSurcharge;
+    const guardrails = this.buildBrokerGuardrails(context, {
+      ftlBenchmark,
+      deckShare,
+      weightFactor,
+      linehaulCost,
+      rawLinehaul,
+      partialCapApplied,
+      partialCapPercent,
+      accessorialTotal,
+      expeditedSurcharge,
+      pricingMode,
+    });
+
+    return {
+      baseCost,
+      linehaulCost,
+      accessorialTotal,
+      expeditedSurcharge,
+      profit,
+      quoteCost: baseCost + profit,
+      ftlBenchmark,
+      deckShare,
+      weightFactor,
+      rawLinehaul,
+      partialCapApplied,
+      partialCapPercent,
+      pricingMode,
+      accessorials,
+      guardrails,
+    };
+  },
+
+  buildBrokerGuardrails(context, metrics) {
+    const warnings = [];
+    const length = context.length || 0;
+    const weight = context.weight || 0;
+    const height = context.height || 0;
+    const width = context.width || 0;
+    const isPartial = !context.isTruck && context.cargoType !== 'tycon';
+
+    if (isPartial) {
+      if (length >= 30 || metrics.deckShare >= 0.625) {
+        warnings.push('Near-FTL partial: 30+ linear feet or more than 62% of a 48 ft deck. Many brokers quote FTL/dedicated or present both options.');
+      } else if (length >= 24 || metrics.deckShare >= 0.50) {
+        warnings.push('Large partial: 24+ linear feet. Compare against an FTL benchmark before sending the quote.');
+      }
+      if (weight >= 30000) {
+        warnings.push('Heavy partial: 30,000+ lb. Check axle/weight distribution and carrier appetite before assuming shared-deck pricing.');
+      } else if (weight >= 20000) {
+        warnings.push('Medium-heavy partial: weight surcharge applied. Confirm forklift/crane loading and deck position.');
+      }
+      if (metrics.partialCapApplied) {
+        warnings.push(`Partial linehaul was capped at ${(metrics.partialCapPercent * 100).toFixed(0)}% of the FTL benchmark. Quote both partial and FTL if the lane is tight.`);
+      }
+    }
+
+    if (context.isTruck && length > 0 && length <= 14 && weight <= 12000) {
+      warnings.push('FTL selected for a small load. That is fine for dedicated service, urgency, or fragile freight, but partial/hotshot may be cheaper.');
+    }
+    if (height > 10 && !context.isTruck) {
+      warnings.push('Tall freight: verify step deck, low profile, ramps, loading method, and legal height before relying on a standard partial quote.');
+    }
+    if (width > 8.3) {
+      warnings.push('Wide load close to legal limit. Confirm exact width, securement, permits, and whether oversize reserve is needed.');
+    }
+    if ((context.accessorials?.extraStopCount || 0) > 0 && (context.accessorials?.extraStopFee || 0) <= 0) {
+      warnings.push('Route has extra stops but no extra-stop fee entered. Brokers normally price extra stops separately.');
+    }
+    if ((context.accessorials?.expeditedPercent || 0) > 0) {
+      warnings.push('Expedited/tight-lane surcharge applied before profit. Good. Freight markets punish optimism, as they should.');
+    }
+    if (!warnings.length) {
+      warnings.push('No major guardrail triggered. Still verify carrier availability, pickup window, loading method, and accessorials before sending.');
+    }
+    return warnings;
+  },
+
+  renderGuardrails(guardrails = []) {
+    const safe = guardrails.length === 1 && guardrails[0].startsWith('No major guardrail');
+    return `
+      <div class="guardrail-panel ${safe ? 'safe' : ''}">
+        <span>Broker Guardrails</span>
+        <ul>${guardrails.map(item => `<li><strong>${safe ? 'OK' : 'Check'}:</strong> ${item}</li>`).join('')}</ul>
+      </div>`;
   },
 
   renderFreightEstimate(pricing, sendToCustomer, context = this.getCurrentCalculationContext()) {
     const lane = this.getLaneRateSnapshot();
-    const modeLabel = context.isTruck
+    const modeLabel = pricing.pricingMode || (context.isTruck
       ? 'FTL / Dedicated Truck'
-      : (context.cargoType === 'tycon' ? 'Tycon Formula' : 'Partial / Shared Deck');
+      : (context.cargoType === 'tycon' ? 'Tycon Formula' : 'Partial / Shared Deck'));
     const formulaText = context.isTruck
-      ? 'FTL basis: miles × selected lane rate, then Abby profit is added. This matches the normal broker method for a dedicated truck quote, with a minimum charge floor.'
+      ? 'FTL basis: miles × selected lane rate, then accessorials/expedited surcharge and Abby profit are added. This matches the normal broker method for a dedicated truck quote, with a minimum charge floor.'
       : (context.cargoType === 'tycon'
-          ? 'Tycon basis: dedicated customer formula using length, miles, weight adjustment, and minimum charge floor.'
-          : 'Partial basis: trailer-space share using 48 ft deck capacity × load length, with a partial-load premium and weight adjustment. This is a broker estimate, not a guaranteed carrier rate.');
+          ? 'Tycon basis: dedicated customer formula using length, miles, weight adjustment, minimum charge floor, then accessorials and profit.'
+          : 'Partial basis: trailer-space share using 48 ft deck capacity × load length, with a partial-load premium, weight adjustment, and a broker cap against the FTL benchmark. This is an internal estimate, not a guaranteed carrier rate.');
     const marketBasis = lane
       ? `${this.formatCurrency(lane.rate)}/mi • ${lane.oState} → ${lane.dState} • ${lane.confidence}`
       : `${this.formatCurrency(context.costPerMile)}/mi • manual/default`;
+    const accessorialLabel = pricing.accessorialTotal > 0
+      ? `${this.formatCurrency(pricing.accessorialTotal)} + ${this.formatCurrency(pricing.expeditedSurcharge)} expedited`
+      : 'None entered';
 
     if (sendToCustomer) {
       this.elements.freightEstimate.innerHTML = `
@@ -1858,12 +2114,13 @@ const FreightCalculator = {
           <div class="result-kpi primary"><span>Customer Quote</span><strong>${this.formatCurrency(pricing.quoteCost)}</strong></div>
           <div class="result-kpi"><span>Mode</span><strong>${modeLabel}</strong></div>
           <div class="result-kpi"><span>Distance</span><strong>${Number(context.distanceValue || 0).toFixed(1)} mi</strong></div>
+          <div class="result-kpi"><span>Rate Basis</span><strong>${this.formatCurrency(context.costPerMile)}/mi</strong></div>
         </div>
         <div class="result-detail-grid">
-          <div class="result-detail"><span>Rate Basis</span><strong>${this.formatCurrency(context.costPerMile)}/mi</strong></div>
           <div class="result-detail"><span>Load Length</span><strong>${Number(context.length || 0).toFixed(1)} ft</strong></div>
+          <div class="result-detail"><span>Width</span><strong>${Number(context.width || 0).toFixed(1)} ft</strong></div>
+          <div class="result-detail"><span>Height</span><strong>${Number(context.height || 0).toFixed(1)} ft</strong></div>
           <div class="result-detail"><span>Weight</span><strong>${Number(context.weight || 0).toLocaleString('en-US')} lb</strong></div>
-          <div class="result-detail"><span>View</span><strong>Customer</strong></div>
         </div>
       `;
       return;
@@ -1871,14 +2128,22 @@ const FreightCalculator = {
 
     this.elements.freightEstimate.innerHTML = `
       <div class="result-kpi-grid">
-        <div class="result-kpi"><span>Carrier Rate</span><strong>${this.formatCurrency(pricing.baseCost)}</strong></div>
+        <div class="result-kpi"><span>Linehaul</span><strong>${this.formatCurrency(pricing.linehaulCost)}</strong></div>
+        <div class="result-kpi"><span>Accessorials / Risk</span><strong>${this.formatCurrency(pricing.accessorialTotal + pricing.expeditedSurcharge)}</strong></div>
         <div class="result-kpi"><span>Profit</span><strong>${this.formatCurrency(pricing.profit)}</strong></div>
         <div class="result-kpi primary"><span>Quote Rate</span><strong>${this.formatCurrency(pricing.quoteCost)}</strong></div>
       </div>
       <div class="result-detail-grid">
+        <div class="result-detail"><span>Carrier Estimate</span><strong>${this.formatCurrency(pricing.baseCost)}</strong></div>
         <div class="result-detail"><span>Pricing Mode</span><strong>${modeLabel}</strong></div>
         <div class="result-detail"><span>Distance</span><strong>${Number(context.distanceValue || 0).toFixed(1)} mi</strong></div>
         <div class="result-detail"><span>Rate Basis</span><strong>${this.formatCurrency(context.costPerMile)}/mi</strong></div>
+      </div>
+      <div class="result-detail-grid compact">
+        <div class="result-detail"><span>FTL Benchmark</span><strong>${this.formatCurrency(pricing.ftlBenchmark)}</strong></div>
+        <div class="result-detail"><span>Deck Share</span><strong>${Math.round((pricing.deckShare || 0) * 100)}%</strong></div>
+        <div class="result-detail"><span>Weight Factor</span><strong>${Number(pricing.weightFactor || 1).toFixed(2)}×</strong></div>
+        <div class="result-detail"><span>Accessorial Basis</span><strong>${accessorialLabel}</strong></div>
         <div class="result-detail"><span>Market Basis</span><strong>${marketBasis}</strong></div>
       </div>
       <div class="result-detail-grid">
@@ -1888,6 +2153,7 @@ const FreightCalculator = {
         <div class="result-detail"><span>Weight</span><strong>${Number(context.weight || 0).toLocaleString('en-US')} lb</strong></div>
       </div>
       <div class="formula-note"><span>Calculation Logic</span><strong>${modeLabel}:</strong> ${formulaText}</div>
+      ${this.renderGuardrails(pricing.guardrails)}
     `;
   },
 
@@ -1895,11 +2161,17 @@ const FreightCalculator = {
     if (sendToCustomer) {
       return [['Quote Rate', this.formatCurrency(pricing.quoteCost)]];
     }
-    return [
-      ['Carrier Rate', this.formatCurrency(pricing.baseCost)],
-      ['Profit',       this.formatCurrency(pricing.profit)],
-      ['Quote Rate',   this.formatCurrency(pricing.quoteCost)],
+    const rows = [
+      ['Linehaul', this.formatCurrency(pricing.linehaulCost)],
     ];
+    if ((pricing.accessorialTotal || 0) > 0) rows.push(['Accessorials / Risk', this.formatCurrency(pricing.accessorialTotal)]);
+    if ((pricing.expeditedSurcharge || 0) > 0) rows.push(['Expedited Surcharge', this.formatCurrency(pricing.expeditedSurcharge)]);
+    rows.push(
+      ['Carrier Estimate', this.formatCurrency(pricing.baseCost)],
+      ['Profit', this.formatCurrency(pricing.profit)],
+      ['Quote Rate', this.formatCurrency(pricing.quoteCost)],
+    );
+    return rows;
   },
 
   /* ─── Geocoding & routing ─────────────────────────────────────── */
@@ -2121,8 +2393,12 @@ const FreightCalculator = {
       stops:          valid.slice(1, -1).map(s => s.value),
       distance:       context.distanceValue.toFixed(1),
       baseCost:       pricing.baseCost.toFixed(2),
+      linehaulCost:   pricing.linehaulCost.toFixed(2),
+      accessorials:   pricing.accessorialTotal.toFixed(2),
       profit:         pricing.profit.toFixed(2),
       quoteCost:      pricing.quoteCost.toFixed(2),
+      pricingMode:    pricing.pricingMode,
+      guardrails:     pricing.guardrails,
       sendToCustomer: context.sendToCustomer,
       laneRate: context.laneRateContext ? {
         rate: context.laneRateContext.rate,
@@ -2169,6 +2445,10 @@ const FreightCalculator = {
         input.checked = false;
       } else if (input.id === 'costPerMile') {
         input.value = this.DEFAULT_COST_PER_MILE.toFixed(2);
+      } else if (input.id === 'cargoType') {
+        input.value = 'general';
+      } else if (input.id === 'equipmentClass') {
+        input.value = 'flatbed';
       } else {
         input.value = '';
       }
@@ -2181,6 +2461,7 @@ const FreightCalculator = {
       .querySelectorAll('input[id^="stop"]')
       .forEach(inp => inp.parentElement.remove());
     this.stopCounter = 0;
+    if (this.elements.equipmentClass) this.elements.equipmentClass.value = 'flatbed';
     this.elements.freightEstimate.innerHTML      = '';
     this.elements.trailerRecommendation.innerHTML = '';
     // Clear lane-rate hint and visible market panel
@@ -2362,17 +2643,9 @@ const FreightCalculator = {
     // Cost
     const sendToCustomer = this.elements.sendToCustomer.checked;
     sectionTitle(sendToCustomer ? 'Quote Summary' : 'Cost Breakdown');
-    const pricing = this.computePricing({
-      distanceValue: totalDist,
-      costPerMile:   parseFloat(this.elements.costPerMile.value) > 0
-                       ? parseFloat(this.elements.costPerMile.value)
-                       : this.DEFAULT_COST_PER_MILE,
-      profit:    parseFloat(this.elements.profit.value) || 0,
-      length:    parseFloat(this.elements.length.value) || 0,
-      weight:    parseFloat(this.elements.weight.value) || 0,
-      cargoType: this.elements.cargoType.value,
-      isTruck:   this.elements.isTruck.checked,
-    });
+    const pdfContext = this.getCurrentCalculationContext();
+    pdfContext.distanceValue = totalDist;
+    const pricing = this.computePricing(pdfContext);
     drawTable(
       ['Description', 'Amount (USD)'],
       this.getCostRows(pricing, sendToCustomer).map(r => ({
@@ -2380,6 +2653,22 @@ const FreightCalculator = {
       })),
       [90, CW - 90]
     );
+
+    if (!sendToCustomer) {
+      sectionTitle('Broker Pricing Guardrails');
+      drawTable(
+        ['Field', 'Value'],
+        [
+          { cells:['Pricing mode', pricing.pricingMode] },
+          { cells:['FTL benchmark', this.formatCurrency(pricing.ftlBenchmark)] },
+          { cells:['Deck share', `${Math.round((pricing.deckShare || 0) * 100)}% of 48 ft deck`] },
+          { cells:['Accessorials / risk', this.formatCurrency(pricing.accessorialTotal)] },
+          { cells:['Expedited surcharge', this.formatCurrency(pricing.expeditedSurcharge)] },
+          { cells:['Guardrails', `${(pricing.guardrails || []).length} note(s). Review Quote Results screen before sending.`] },
+        ],
+        [55, CW - 55]
+      );
+    }
 
     const lane = this.getLaneRateSnapshot();
     if (!sendToCustomer && lane) {
@@ -2468,9 +2757,14 @@ const FreightCalculator = {
     const laneStr = calculation.laneRate
       ? ` | Lane: $${Number(calculation.laneRate.rate || 0).toFixed(2)}/mi ${calculation.laneRate.lane || ''}`
       : '';
+    const priceMode = calculation.pricingMode ? ` | ${calculation.pricingMode}` : '';
+    const guardrailCount = Array.isArray(calculation.guardrails)
+      ? calculation.guardrails.filter(g => !String(g).startsWith('No major guardrail')).length
+      : 0;
+    const guardrailStr = guardrailCount ? ` | ${guardrailCount} guardrail check${guardrailCount > 1 ? 's' : ''}` : '';
     li.textContent = `${calculation.date}: ${calculation.customer} — `
       + `${calculation.origin} to ${calculation.destination}${stopsStr} — `
-      + `${this.formatCurrency(calculation.quoteCost)} (${modeStr})${laneStr}`;
+      + `${this.formatCurrency(calculation.quoteCost)} (${modeStr})${priceMode}${laneStr}${guardrailStr}`;
     this.elements.historyList.prepend(li);
     if (this.elements.historyList.children.length > 10) {
       this.elements.historyList.removeChild(this.elements.historyList.lastChild);
@@ -2547,6 +2841,11 @@ const FreightCalculator = {
       this.validateInput(elements.distance, 10000, 'Distance must be between 0 and 10,000 miles'));
     elements.costPerMile.addEventListener('input', () =>
       this.validateInput(elements.costPerMile, 100, 'Cost per mile must be between $0 and $100'));
+    [elements.extraStopFee, elements.tarpFee, elements.permitFee, elements.riskReserveFee].forEach(input => {
+      input?.addEventListener('input', () => this.validateInput(input, 100000, 'Amount must be between $0 and $100,000'));
+    });
+    elements.expeditedPercent?.addEventListener('input', () =>
+      this.validateInput(elements.expeditedPercent, 100, 'Expedited surcharge must be between 0% and 100%'));
     elements.equipmentClass?.addEventListener('change', () => this.applyLaneRate(true));
 
     document.getElementById('useMarketRateButton')?.addEventListener('click', () => this.applyLaneRate(true));
