@@ -964,6 +964,166 @@ button {
   }
 }
 
+
+
+/* ── Quote Results: clear broker-style breakdown ─────────────────────
+   Keeps the portal/glassmorphism look, but stops hiding the most important
+   answer in one sad little line. */
+.results {
+  align-items: stretch;
+  justify-content: flex-start;
+  text-align: left;
+  padding: .9rem;
+  gap: .75rem;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.88), rgba(247,250,253,.78));
+  border: 1px solid rgba(132, 153, 177, .55);
+  box-shadow: 0 12px 34px rgba(7,24,47,.12), inset 0 1px 0 rgba(255,255,255,.7);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.results h2 {
+  margin: 0;
+  padding: .62rem .82rem;
+  border-radius: 10px;
+  color: #ffffff;
+  background: linear-gradient(180deg, #0b2b4d 0%, #07182f 100%);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
+  letter-spacing: .12em;
+}
+
+.results .result-summary,
+.results .trailer-card {
+  border-top: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.result-summary { display: block; }
+
+.result-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .65rem;
+  margin-bottom: .7rem;
+}
+
+.result-kpi {
+  min-height: 72px;
+  padding: .76rem .82rem;
+  border: 1px solid rgba(185,199,216,.9);
+  border-radius: 12px;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 1px 2px rgba(15,23,42,.04), inset 0 1px 0 rgba(255,255,255,.75);
+}
+
+.result-kpi.primary {
+  background: linear-gradient(180deg, #0f5f9b 0%, #0a3f68 100%);
+  border-color: rgba(16, 86, 145, .9);
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 95, 155, .24), inset 0 1px 0 rgba(255,255,255,.20);
+}
+
+.result-kpi span,
+.result-detail span,
+.formula-note span {
+  display: block;
+  font-size: .68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #64748b;
+  margin-bottom: .22rem;
+}
+
+.result-kpi.primary span { color: rgba(255,255,255,.72); }
+
+.result-kpi strong {
+  display: block;
+  color: #07182f;
+  font-family: var(--font-heading);
+  font-size: 1.18rem;
+  line-height: 1.05;
+  letter-spacing: -.025em;
+}
+
+.result-kpi.primary strong {
+  color: #ffffff;
+  font-size: 1.38rem;
+}
+
+.result-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .55rem;
+  margin-bottom: .7rem;
+}
+
+.result-detail {
+  padding: .62rem .72rem;
+  border: 1px solid rgba(203,213,225,.82);
+  border-radius: 10px;
+  background: rgba(248,250,252,.86);
+}
+
+.result-detail strong {
+  display: block;
+  color: #07182f;
+  font-size: .92rem;
+  line-height: 1.25;
+}
+
+.formula-note {
+  padding: .72rem .82rem;
+  border: 1px solid rgba(14, 116, 144, .26);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(240,249,255,.88), rgba(255,255,255,.70));
+  color: #17324d;
+  font-size: .86rem;
+  line-height: 1.42;
+}
+
+.formula-note strong { color: #07182f; }
+
+.trailer-card:not(:empty) {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .7rem .82rem !important;
+  border-radius: 12px;
+  border: 1px solid rgba(31,122,77,.24);
+  background: linear-gradient(180deg, rgba(236,253,245,.86), rgba(255,255,255,.72)) !important;
+  color: #064e3b !important;
+  font-weight: 800;
+}
+
+.trailer-card .trailer-label {
+  font-size: .7rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #047857;
+}
+
+.trailer-card .trailer-value {
+  font-family: var(--font-heading);
+  color: #052e24;
+  font-size: 1rem;
+}
+
+@media (max-width: 760px) {
+  .result-kpi-grid,
+  .result-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .trailer-card:not(:empty) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -1207,8 +1367,8 @@ button {
     <!-- Quote Results -->
     <section class="results" aria-live="polite" aria-label="Quote Results">
       <h2>Quote Results</h2>
-      <p id="freightEstimate" class="result-text"></p>
-      <p id="trailerRecommendation" class="result-text"></p>
+      <div id="freightEstimate" class="result-text result-summary"></div>
+      <div id="trailerRecommendation" class="result-text trailer-card"></div>
     </section>
 
     <!-- Calculation History -->
@@ -1678,21 +1838,57 @@ const FreightCalculator = {
     return { baseCost, profit, quoteCost: baseCost + profit };
   },
 
-  renderFreightEstimate(pricing, sendToCustomer) {
+  renderFreightEstimate(pricing, sendToCustomer, context = this.getCurrentCalculationContext()) {
+    const lane = this.getLaneRateSnapshot();
+    const modeLabel = context.isTruck
+      ? 'FTL / Dedicated Truck'
+      : (context.cargoType === 'tycon' ? 'Tycon Formula' : 'Partial / Shared Deck');
+    const formulaText = context.isTruck
+      ? 'FTL basis: miles × selected lane rate, then Abby profit is added. This matches the normal broker method for a dedicated truck quote, with a minimum charge floor.'
+      : (context.cargoType === 'tycon'
+          ? 'Tycon basis: dedicated customer formula using length, miles, weight adjustment, and minimum charge floor.'
+          : 'Partial basis: trailer-space share using 48 ft deck capacity × load length, with a partial-load premium and weight adjustment. This is a broker estimate, not a guaranteed carrier rate.');
+    const marketBasis = lane
+      ? `${this.formatCurrency(lane.rate)}/mi • ${lane.oState} → ${lane.dState} • ${lane.confidence}`
+      : `${this.formatCurrency(context.costPerMile)}/mi • manual/default`;
+
     if (sendToCustomer) {
-      this.elements.freightEstimate.textContent =
-        `Quote Rate: ${this.formatCurrency(pricing.quoteCost)}`;
-    } else {
-      const lane = this.getLaneRateSnapshot();
-      const laneText = lane
-        ? ` | Market Basis: ${this.formatCurrency(lane.rate)}/mi (${lane.oState} → ${lane.dState}, ${lane.confidence})`
-        : '';
-      this.elements.freightEstimate.textContent =
-        `Carrier Rate: ${this.formatCurrency(pricing.baseCost)}`
-        + ` | Profit: ${this.formatCurrency(pricing.profit)}`
-        + ` | Quote Rate: ${this.formatCurrency(pricing.quoteCost)}`
-        + laneText;
+      this.elements.freightEstimate.innerHTML = `
+        <div class="result-kpi-grid">
+          <div class="result-kpi primary"><span>Customer Quote</span><strong>${this.formatCurrency(pricing.quoteCost)}</strong></div>
+          <div class="result-kpi"><span>Mode</span><strong>${modeLabel}</strong></div>
+          <div class="result-kpi"><span>Distance</span><strong>${Number(context.distanceValue || 0).toFixed(1)} mi</strong></div>
+        </div>
+        <div class="result-detail-grid">
+          <div class="result-detail"><span>Rate Basis</span><strong>${this.formatCurrency(context.costPerMile)}/mi</strong></div>
+          <div class="result-detail"><span>Load Length</span><strong>${Number(context.length || 0).toFixed(1)} ft</strong></div>
+          <div class="result-detail"><span>Weight</span><strong>${Number(context.weight || 0).toLocaleString('en-US')} lb</strong></div>
+          <div class="result-detail"><span>View</span><strong>Customer</strong></div>
+        </div>
+      `;
+      return;
     }
+
+    this.elements.freightEstimate.innerHTML = `
+      <div class="result-kpi-grid">
+        <div class="result-kpi"><span>Carrier Rate</span><strong>${this.formatCurrency(pricing.baseCost)}</strong></div>
+        <div class="result-kpi"><span>Profit</span><strong>${this.formatCurrency(pricing.profit)}</strong></div>
+        <div class="result-kpi primary"><span>Quote Rate</span><strong>${this.formatCurrency(pricing.quoteCost)}</strong></div>
+      </div>
+      <div class="result-detail-grid">
+        <div class="result-detail"><span>Pricing Mode</span><strong>${modeLabel}</strong></div>
+        <div class="result-detail"><span>Distance</span><strong>${Number(context.distanceValue || 0).toFixed(1)} mi</strong></div>
+        <div class="result-detail"><span>Rate Basis</span><strong>${this.formatCurrency(context.costPerMile)}/mi</strong></div>
+        <div class="result-detail"><span>Market Basis</span><strong>${marketBasis}</strong></div>
+      </div>
+      <div class="result-detail-grid">
+        <div class="result-detail"><span>Load Length</span><strong>${Number(context.length || 0).toFixed(1)} ft</strong></div>
+        <div class="result-detail"><span>Load Width</span><strong>${Number(context.width || 0).toFixed(1)} ft</strong></div>
+        <div class="result-detail"><span>Load Height</span><strong>${Number(context.height || 0).toFixed(1)} ft</strong></div>
+        <div class="result-detail"><span>Weight</span><strong>${Number(context.weight || 0).toLocaleString('en-US')} lb</strong></div>
+      </div>
+      <div class="formula-note"><span>Calculation Logic</span><strong>${modeLabel}:</strong> ${formulaText}</div>
+    `;
   },
 
   getCostRows(pricing, sendToCustomer) {
@@ -1910,12 +2106,12 @@ const FreightCalculator = {
       return;
     }
     const pricing = this.computePricing(context);
-    this.renderFreightEstimate(pricing, context.sendToCustomer);
+    this.renderFreightEstimate(pricing, context.sendToCustomer, context);
     const trailer = this.getTrailerRecommendation(
       context.isVehicleTruck, context.cargoType,
       context.weight, context.height, context.length, context.width
     );
-    elements.trailerRecommendation.textContent = `Recommended Trailer: ${trailer}`;
+    elements.trailerRecommendation.innerHTML = `<span class="trailer-label">Recommended Trailer</span><span class="trailer-value">${trailer}</span>`;
     const allStops = [elements.origin, ...stopInputs, elements.destination];
     const valid    = allStops.filter(s => s.value.trim());
     this.saveCalculation({
@@ -1985,8 +2181,8 @@ const FreightCalculator = {
       .querySelectorAll('input[id^="stop"]')
       .forEach(inp => inp.parentElement.remove());
     this.stopCounter = 0;
-    this.elements.freightEstimate.textContent      = '';
-    this.elements.trailerRecommendation.textContent = '';
+    this.elements.freightEstimate.innerHTML      = '';
+    this.elements.trailerRecommendation.innerHTML = '';
     // Clear lane-rate hint and visible market panel
     const hint = document.getElementById('laneRateHint');
     if (hint) { hint.textContent = ''; hint.style.display = 'none'; }
