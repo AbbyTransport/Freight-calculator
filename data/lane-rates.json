@@ -1,0 +1,125 @@
+{
+  "updatedAt": "2026-06-01T18:59:57.527Z",
+  "equipment": "flatbed",
+  "rateType": "estimated all-in spot rate per mile",
+  "defaultCostPerMile": 3.6,
+  "regionalAnchors": {
+    "midwest": 2.86,
+    "west": 3.03
+  },
+  "regionCodes": {
+    "NOR": "Northeast",
+    "SOU": "Southeast",
+    "MID": "Midwest",
+    "SPL": "South Plains",
+    "TEX": "Texas",
+    "MTN": "Mountain",
+    "SWE": "Southwest / West",
+    "NWE": "Northwest / West"
+  },
+  "regionRates": {
+    "NOR": {
+      "NOR": 3.67,
+      "SOU": 3.87,
+      "MID": 3.78,
+      "SPL": 4,
+      "TEX": 4.13,
+      "MTN": 4.15,
+      "SWE": 4.14,
+      "NWE": 4.21
+    },
+    "SOU": {
+      "NOR": 3.8,
+      "SOU": 3.6,
+      "MID": 3.59,
+      "SPL": 3.74,
+      "TEX": 3.67,
+      "MTN": 3.95,
+      "SWE": 3.95,
+      "NWE": 4.08
+    },
+    "MID": {
+      "NOR": 3.85,
+      "SOU": 3.72,
+      "MID": 3.46,
+      "SPL": 3.41,
+      "TEX": 3.66,
+      "MTN": 3.68,
+      "SWE": 3.74,
+      "NWE": 3.81
+    },
+    "SPL": {
+      "NOR": 3.93,
+      "SOU": 3.61,
+      "MID": 3.35,
+      "SPL": 3.29,
+      "TEX": 3.41,
+      "MTN": 3.5,
+      "SWE": 3.57,
+      "NWE": 3.7
+    },
+    "TEX": {
+      "NOR": 4.07,
+      "SOU": 3.53,
+      "MID": 3.46,
+      "SPL": 3.34,
+      "TEX": 3.27,
+      "MTN": 3.56,
+      "SWE": 3.43,
+      "NWE": 3.75
+    },
+    "MTN": {
+      "NOR": 4.09,
+      "SOU": 3.82,
+      "MID": 3.49,
+      "SPL": 3.44,
+      "TEX": 3.56,
+      "MTN": 3.19,
+      "SWE": 3.27,
+      "NWE": 3.27
+    },
+    "SWE": {
+      "NOR": 4.08,
+      "SOU": 3.88,
+      "MID": 3.56,
+      "SPL": 3.5,
+      "TEX": 3.43,
+      "MTN": 3.27,
+      "SWE": 3.02,
+      "NWE": 3.27
+    },
+    "NWE": {
+      "NOR": 4.21,
+      "SOU": 4.01,
+      "MID": 3.68,
+      "SPL": 3.7,
+      "TEX": 3.75,
+      "MTN": 3.33,
+      "SWE": 3.34,
+      "NWE": 3.15
+    }
+  },
+  "methodology": {
+    "baseNationalAverage": 2.7,
+    "note": "The updater scales the existing Abby Transport regional matrix using the newest parseable national flatbed rate. Midwest and West anchors are blended gently when available. This is an estimating model, not a substitute for DAT RateView or another paid lane-level API."
+  },
+  "sources": [
+    {
+      "source": "Scale Funding Current Freight Rates",
+      "url": "https://getscalefunding.com/resources/current-freight-rates/",
+      "weight": 2.5,
+      "foundAt": "2026-06-01T18:59:57.811Z",
+      "rates": {
+        "national": 3.6,
+        "midwest": 2.86,
+        "west": 3.03
+      }
+    }
+  ],
+  "failures": [
+    {
+      "source": "DAT Trendlines",
+      "error": "No parseable flatbed rates found"
+    }
+  ]
+}

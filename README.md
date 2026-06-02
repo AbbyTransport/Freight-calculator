@@ -1,2 +1,2 @@
-# Freight-calculator
-Freight calculator
+# Freigh-Calculator
+Freight Calculator

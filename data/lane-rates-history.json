@@ -1,0 +1,65 @@
+[
+  {
+    "updatedAt": "2026-04-28T00:00:00.000Z",
+    "defaultCostPerMile": 2.92,
+    "regionalAnchors": {
+      "midwest": 3.14,
+      "west": 2.39
+    },
+    "sourceSummary": "Initial seed from public DAT/Scale Funding references"
+  },
+  {
+    "updatedAt": "2026-04-29T15:30:07.522Z",
+    "defaultCostPerMile": 3.44,
+    "regionalAnchors": {
+      "midwest": 2.88,
+      "west": 2.92
+    },
+    "sourceSummary": "Scale Funding Current Freight Rates"
+  },
+  {
+    "updatedAt": "2026-05-04T15:23:04.255Z",
+    "defaultCostPerMile": 3.44,
+    "regionalAnchors": {
+      "midwest": 2.88,
+      "west": 2.92
+    },
+    "sourceSummary": "Scale Funding Current Freight Rates"
+  },
+  {
+    "updatedAt": "2026-05-11T16:11:35.704Z",
+    "defaultCostPerMile": 3.44,
+    "regionalAnchors": {
+      "midwest": 2.88,
+      "west": 2.92
+    },
+    "sourceSummary": "Scale Funding Current Freight Rates"
+  },
+  {
+    "updatedAt": "2026-05-18T16:33:15.477Z",
+    "defaultCostPerMile": 3.44,
+    "regionalAnchors": {
+      "midwest": 2.88,
+      "west": 2.92
+    },
+    "sourceSummary": "Scale Funding Current Freight Rates"
+  },
+  {
+    "updatedAt": "2026-05-25T16:03:15.474Z",
+    "defaultCostPerMile": 3.44,
+    "regionalAnchors": {
+      "midwest": 2.88,
+      "west": 2.92
+    },
+    "sourceSummary": "Scale Funding Current Freight Rates"
+  },
+  {
+    "updatedAt": "2026-06-01T18:59:57.527Z",
+    "defaultCostPerMile": 3.6,
+    "regionalAnchors": {
+      "midwest": 2.86,
+      "west": 3.03
+    },
+    "sourceSummary": "Scale Funding Current Freight Rates"
+  }
+]
