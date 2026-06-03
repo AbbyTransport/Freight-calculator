@@ -1,6 +1,6 @@
 {
-  "version": "2026.06-general-realistic-discount-tycon-stable-v1",
-  "notes": "General pricing recalibrated upward to a realistic market-minus-small-discount posture. Tycon Systems Win Mode remains effectively unchanged and still activates only when Customer Name matches Tycon Systems.",
+  "version": "2026.06-auto-mode-ltl-partial-ftl-v1",
+  "notes": "Manual Truck Load checkbox removed. Freight mode is now auto-detected as LTL, Partial/Hotshot, FTL, or Specialized based on dimensions, weight, equipment, and cargo type. Tycon Win Mode remains unchanged except for optional LTL-specific lean pricing when a true small-freight load is detected.",
   "partialDeckFeet": 48,
   "minimumCharge": 625,
   "partialLongHaulFloorPerMile": 1.2,
@@ -40,13 +40,15 @@
         "ftl": 0.12,
         "partial": 0.17,
         "hotshot": 0.145,
-        "rgn": 0.18
+        "rgn": 0.18,
+        "ltl": 0.19
       },
       "minimums": {
         "ftl": 325,
         "partial": 250,
         "hotshot": 200,
-        "rgn": 600
+        "rgn": 600,
+        "ltl": 175
       },
       "defaultExpeditedPercent": 0
     },
@@ -57,13 +59,15 @@
         "ftl": 0.09,
         "partial": 0.13,
         "hotshot": 0.105,
-        "rgn": 0.15
+        "rgn": 0.15,
+        "ltl": 0.145
       },
       "minimums": {
         "ftl": 250,
         "partial": 200,
         "hotshot": 160,
-        "rgn": 500
+        "rgn": 500,
+        "ltl": 125
       },
       "defaultExpeditedPercent": 0
     },
@@ -74,13 +78,15 @@
         "ftl": 0.165,
         "partial": 0.215,
         "hotshot": 0.18,
-        "rgn": 0.24
+        "rgn": 0.24,
+        "ltl": 0.24
       },
       "minimums": {
         "ftl": 450,
         "partial": 350,
         "hotshot": 285,
-        "rgn": 825
+        "rgn": 825,
+        "ltl": 250
       },
       "defaultExpeditedPercent": 0
     },
@@ -91,13 +97,15 @@
         "ftl": 0.195,
         "partial": 0.245,
         "hotshot": 0.21,
-        "rgn": 0.28
+        "rgn": 0.28,
+        "ltl": 0.275
       },
       "minimums": {
         "ftl": 575,
         "partial": 425,
         "hotshot": 350,
-        "rgn": 950
+        "rgn": 950,
+        "ltl": 325
       },
       "defaultExpeditedPercent": 6
     },
@@ -108,13 +116,15 @@
         "ftl": 0.105,
         "partial": 0.145,
         "hotshot": 0.12,
-        "rgn": 0.16
+        "rgn": 0.16,
+        "ltl": 0.165
       },
       "minimums": {
         "ftl": 275,
         "partial": 225,
         "hotshot": 175,
-        "rgn": 525
+        "rgn": 525,
+        "ltl": 150
       },
       "defaultExpeditedPercent": 0
     }
@@ -145,16 +155,30 @@
           "ftl": 0.045,
           "partial": 0.055,
           "hotshot": 0.05,
-          "rgn": 0.1
+          "rgn": 0.1,
+          "ltl": 0.05
         },
         "minimums": {
           "ftl": 150,
           "partial": 125,
           "hotshot": 100,
-          "rgn": 350
+          "rgn": 350,
+          "ltl": 95
         }
       },
-      "actionNote": "Tycon Systems uses automatic aggressive bid pricing: lower lane basis, leaner margin, and reduced buffer. The Tycon discount is preserved separately from the new general-market calibration so Tycon remains a win-first customer profile."
+      "actionNote": "Tycon Systems uses automatic aggressive bid pricing: lower lane basis, leaner margin, and reduced buffer. The Tycon discount is preserved separately from the new general-market calibration so Tycon remains a win-first customer profile.",
+      "ltlMileageFactor": 0.28,
+      "ltlCwtRate": 10,
+      "ltlLinearFootRate": 45,
+      "ltlMinimumCharge": 350,
+      "ltlCapPercent": 0.52
     }
+  },
+  "ltlEstimate": {
+    "minimumCharge": 425,
+    "mileageFactor": 0.34,
+    "cwtRate": 14,
+    "linearFootRate": 65,
+    "ftlCapPercent": 0.62
   }
 }

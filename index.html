@@ -291,6 +291,56 @@ input[type="checkbox"] {
 
 input[type="checkbox"]:focus { box-shadow: none; border: none; }
 
+.auto-mode-card {
+  display: flex;
+  flex-direction: column;
+  gap: .28rem;
+  margin-top: .5rem;
+  padding: .75rem .9rem;
+  background: linear-gradient(135deg, rgba(15,23,42,.92), rgba(30,64,175,.82));
+  border: 1px solid rgba(191,219,254,.35);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  color: #fff;
+}
+
+.auto-mode-card .auto-mode-label {
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: rgba(219,234,254,.88);
+}
+
+.auto-mode-card strong {
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.auto-mode-card small {
+  font-size: .78rem;
+  line-height: 1.35;
+  color: rgba(226,232,240,.9);
+}
+
+.auto-mode-card.mode-ltl {
+  background: linear-gradient(135deg, rgba(6,78,59,.94), rgba(13,148,136,.78));
+}
+
+.auto-mode-card.mode-partial,
+.auto-mode-card.mode-hotshot {
+  background: linear-gradient(135deg, rgba(30,64,175,.94), rgba(14,165,233,.78));
+}
+
+.auto-mode-card.mode-ftl {
+  background: linear-gradient(135deg, rgba(88,28,135,.94), rgba(124,58,237,.76));
+}
+
+.auto-mode-card.mode-rgn {
+  background: linear-gradient(135deg, rgba(127,29,29,.94), rgba(220,38,38,.76));
+}
+
 .field-hint {
   font-size: .8rem;
   color: var(--ink-500);
@@ -1575,9 +1625,10 @@ button {
             </select>
           </div>
 
-          <div class="checkbox-group">
-            <input type="checkbox" id="isTruck" name="isTruck" />
-            <label for="isTruck">Truck Load (TL)</label>
+          <div class="auto-mode-card full-width" id="autoModeCard" aria-live="polite">
+            <span class="auto-mode-label">Auto Freight Mode</span>
+            <strong id="autoModePreview">Enter dimensions and weight</strong>
+            <small>The system now detects LTL, Partial, FTL, or Specialized automatically from dimensions, weight, equipment class, and cargo type.</small>
           </div>
         </div>
       </section>
@@ -2017,7 +2068,8 @@ const FreightCalculator = {
     permitFee:             document.getElementById('permitFee'),
     riskReserveFee:        document.getElementById('riskReserveFee'),
     expeditedPercent:      document.getElementById('expeditedPercent'),
-    isTruck:               document.getElementById('isTruck'),
+    autoModeCard:          document.getElementById('autoModeCard'),
+    autoModePreview:       document.getElementById('autoModePreview'),
     cargoType:             document.getElementById('cargoType'),
     sendToCustomer:        document.getElementById('sendToCustomer'),
     freightEstimate:       document.getElementById('freightEstimate'),
@@ -2384,7 +2436,6 @@ const FreightCalculator = {
       weight:         parseFloat(elements.weight.value)    || 0,
       height:         parseFloat(elements.height.value)    || 0,
       width:          parseFloat(elements.width.value)     || 0,
-      isTruck:        elements.isTruck.checked,
       isVehicleTruck: elements.cargoType.value === 'load-is-a-truck',
       cargoType:      elements.cargoType.value,
       equipmentClass: elements.equipmentClass?.value || 'flatbed',
@@ -2402,13 +2453,47 @@ const FreightCalculator = {
    *  3. Customer-specific win profiles now live under Customer Name, not Cargo Type.
    */
   classifyPricingMode(context, deckShare) {
-    if (context.equipmentClass === 'rgn' || context.width > 8.5 || context.height > 13.5 || context.length > 53) {
-      return { key: 'rgn', label: 'RGN / Specialized' };
+    const length = Number(context.length || 0);
+    const weight = Number(context.weight || 0);
+    const height = Number(context.height || 0);
+    const width  = Number(context.width  || 0);
+    const cargoType = context.cargoType || 'general';
+    const equipment = context.equipmentClass || 'flatbed';
+
+    const isOversize = equipment === 'rgn' || cargoType === 'oversize'
+      || width > 8.5 || height > 13.5 || length > 53 || weight > 80000;
+    if (isOversize) {
+      return { key: 'rgn', label: 'Specialized / RGN' };
     }
-    if (context.isTruck) return { key: 'ftl', label: 'FTL / Dedicated Truck' };
-    if ((context.equipmentClass === 'hotshot' || (context.length <= 18 && context.weight <= 16000 && context.height <= 10.5)) && deckShare <= 0.42) {
-      return { key: 'hotshot', label: 'Hotshot / Dedicated Partial' };
+
+    const isVehicleTruck = context.isVehicleTruck || cargoType === 'load-is-a-truck';
+    const mustMoveDedicated = equipment === 'poweronly' || isVehicleTruck
+      || length >= 32 || deckShare >= 0.67 || weight >= 30000;
+    if (mustMoveDedicated) {
+      return { key: 'ftl', label: 'FTL / Dedicated Truck' };
     }
+
+    const ltlEquipment = ['dryvan', 'boxtruck', 'reefer'].includes(equipment);
+    const ltlCargoTypes = ['palletized', 'crated-fragile', 'temperature-controlled'].includes(cargoType);
+    const smallEnoughForLtl = length > 0 && length <= 8
+      && weight > 0 && weight <= 5000
+      && width > 0 && width <= 8.5
+      && height > 0 && height <= 8.5
+      && deckShare <= 0.20;
+    const borderlineLtl = length > 0 && length <= 12
+      && weight > 0 && weight <= 8000
+      && width > 0 && width <= 8.5
+      && height > 0 && height <= 9.5
+      && deckShare <= 0.25;
+
+    if ((ltlEquipment || ltlCargoTypes) && (smallEnoughForLtl || (ltlCargoTypes && borderlineLtl))) {
+      return { key: 'ltl', label: 'LTL / Small Freight' };
+    }
+
+    if ((equipment === 'hotshot' || (length > 0 && length <= 18 && weight <= 16000 && height <= 10.5)) && deckShare <= 0.42) {
+      return { key: 'hotshot', label: 'Partial / Hotshot Candidate' };
+    }
+
     return { key: 'partial', label: 'Partial / Shared Deck' };
   },
 
@@ -2422,6 +2507,30 @@ const FreightCalculator = {
       effectiveLinearFeet,
       deckShare: effectiveLinearFeet > 0 ? Math.min(effectiveLinearFeet / deckFeet, 1.18) : 0,
     };
+  },
+
+  getAutoModeFromContext(context) {
+    const hasUsefulInputs = context && (context.length > 0 || context.weight > 0 || context.height > 0 || context.width > 0);
+    if (!hasUsefulInputs) return { key: 'pending', label: 'Enter dimensions and weight' };
+    const deckMetrics = this.computeEffectiveDeckShare(context);
+    return this.classifyPricingMode(context, deckMetrics.deckShare);
+  },
+
+  getAutoModePreviewLabel(context = null) {
+    try {
+      const ctx = context || this.getCurrentCalculationContext();
+      return this.getAutoModeFromContext(ctx).label;
+    } catch (_) {
+      return 'Enter dimensions and weight';
+    }
+  },
+
+  updateAutoModePreview() {
+    if (!this.elements.autoModePreview || !this.elements.autoModeCard) return;
+    const context = this.getCurrentCalculationContext();
+    const mode = this.getAutoModeFromContext(context);
+    this.elements.autoModePreview.textContent = mode.label;
+    this.elements.autoModeCard.className = `auto-mode-card full-width mode-${mode.key}`;
   },
 
   computeWeightFactor(weight) {
@@ -2560,6 +2669,7 @@ const FreightCalculator = {
     if ((context.weight || 0) > 45000) { loadScore -= 4; addReason(negatives, 'Weight is near/above normal legal payload comfort zone.'); }
     else if ((context.weight || 0) > 30000) loadScore -= 2;
     if (pricing.modeKey === 'rgn') loadScore -= 2;
+    if (pricing.modeKey === 'ltl' && (context.weight || 0) > 8000) loadScore -= 2;
     if (context.cargoType === 'general') loadScore -= 1;
     loadScore = clamp(Math.round(loadScore), 0, 20);
     breakdown.push({ label:'Load Fit', points: loadScore, max:20 });
@@ -2567,6 +2677,10 @@ const FreightCalculator = {
     // 3) Mode fit and partial/FTL realism, max 15.
     let modeScore = 12;
     if (pricing.modeKey === 'ftl') modeScore += 2;
+    if (pricing.modeKey === 'ltl') {
+      if ((pricing.deckShare || 0) <= 0.20 && (context.weight || 0) <= 5000) { modeScore += 2; addReason(positives, 'LTL auto-detection fits small freight dimensions.'); }
+      else { modeScore -= 2; addReason(negatives, 'LTL was detected, but the load is near the upper edge of small-freight territory.'); }
+    }
     if (pricing.modeKey === 'hotshot' && (context.length || 0) <= 18 && (context.weight || 0) <= 16000) modeScore += 2;
     if (pricing.modeKey === 'partial') {
       if ((pricing.deckShare || 0) <= 0.28) { modeScore += 2; addReason(positives, 'Partial deck share is in a good shared-space range.'); }
@@ -2574,7 +2688,7 @@ const FreightCalculator = {
       else if ((pricing.deckShare || 0) >= 0.50) { modeScore -= 3; addReason(negatives, 'Large partial: broker should compare with FTL.'); }
     }
     if (pricing.partialCapApplied) { modeScore -= 3; addReason(negatives, 'Partial cap was needed, meaning the math nearly reached FTL pricing.'); }
-    if (context.isTruck && (context.length || 0) <= 14 && (context.weight || 0) <= 12000) modeScore -= 2;
+    if (pricing.modeKey === 'ftl' && (context.length || 0) <= 14 && (context.weight || 0) <= 12000) modeScore -= 2;
     modeScore = clamp(Math.round(modeScore), 0, 15);
     breakdown.push({ label:'Mode Fit', points: modeScore, max:15 });
 
@@ -2698,7 +2812,26 @@ const FreightCalculator = {
 
     if (mode.key === 'ftl' || mode.key === 'rgn') {
       rawLinehaul = mode.key === 'rgn' ? ftlBenchmark * 1.08 : ftlBenchmark;
-      linehaulCost = Math.max(rawLinehaul, minCharge)
+      linehaulCost = Math.max(rawLinehaul, minCharge);
+
+    } else if (mode.key === 'ltl') {
+      const ltlCfg = engine.ltlEstimate || {};
+      const ltlMileageFactor = Number(customerProfile?.ltlMileageFactor ?? ltlCfg.mileageFactor ?? 0.34);
+      const ltlCwtRate = Number(customerProfile?.ltlCwtRate ?? ltlCfg.cwtRate ?? 14);
+      const ltlLinearFootRate = Number(customerProfile?.ltlLinearFootRate ?? ltlCfg.linearFootRate ?? 65);
+      const ltlMinimumCharge = Number(customerProfile?.ltlMinimumCharge ?? ltlCfg.minimumCharge ?? 425);
+      const ltlCapPercent = Number(customerProfile?.ltlCapPercent ?? ltlCfg.ftlCapPercent ?? 0.62);
+      const mileageComponent = (distanceValue || 0) * (costPerMile || this.DEFAULT_COST_PER_MILE) * ltlMileageFactor;
+      const weightComponent = Math.max(0, (weight || 0) / 100) * ltlCwtRate;
+      const cubeComponent = Math.max(0, deckMetrics.effectiveLinearFeet || 0) * ltlLinearFootRate;
+      rawLinehaul = mileageComponent + weightComponent + cubeComponent;
+      linehaulCost = Math.max(rawLinehaul, ltlMinimumCharge);
+      const ltlCap = ftlBenchmark * ltlCapPercent;
+      if (ftlBenchmark > minCharge && linehaulCost > ltlCap) {
+        linehaulCost = Math.max(ltlCap, ltlMinimumCharge);
+        partialCapApplied = true;
+        partialCapPercent = ltlCapPercent;
+      }
 
     } else {
       const premiumMultiplier = Number(customerProfile?.partialPremiumMultiplier || 1);
@@ -2717,7 +2850,7 @@ const FreightCalculator = {
         : Number(this.BROKER_PRICING_ENGINE?.partialCaps?.standard || 0.88);
       const partialCap = ftlBenchmark * partialCapPercent;
       if (ftlBenchmark > (this.BROKER_PRICING_ENGINE?.minimumCharge || this.MINIMUM_CHARGE) && linehaulCost > partialCap) {
-        linehaulCost = Math.max(partialCap, minCharge)
+        linehaulCost = Math.max(partialCap, minCharge);
         partialCapApplied = true;
       }
     }
@@ -2793,7 +2926,10 @@ const FreightCalculator = {
     const actions = [];
     const customerProfile = context.customerProfile || this.getCustomerPricingProfile(context.customerName);
     if (customerProfile?.actionNote) actions.push(customerProfile.actionNote);
-    if (pricing.modeKey === 'partial' && pricing.deckShare >= .50) {
+    if (pricing.modeKey === 'ltl') {
+      actions.push('Auto mode detected LTL/small freight. Confirm NMFC/class, pallet count, accessorials, and whether an LTL carrier is actually available before sending. Because naturally even small freight finds ways to become complicated.');
+    }
+    if ((pricing.modeKey === 'partial' || pricing.modeKey === 'hotshot') && pricing.deckShare >= .50) {
       actions.push('Quote partial and FTL side-by-side before committing. Large partials can price like dedicated freight fast. Humanity calls this nuance.');
     }
     if (context.width > 8.5 || context.height > 12 || context.length > 48) {
@@ -2818,6 +2954,7 @@ const FreightCalculator = {
     const height = context.height || 0;
     const width = context.width || 0;
     const isPartial = metrics.modeKey === 'partial' || metrics.modeKey === 'hotshot';
+    const isLtl = metrics.modeKey === 'ltl';
 
     if (isPartial) {
       if (length >= 30 || metrics.deckShare >= 0.625) {
@@ -2835,8 +2972,15 @@ const FreightCalculator = {
       }
     }
 
-    if (context.isTruck && length > 0 && length <= 14 && weight <= 12000) {
-      warnings.push('FTL selected for a small load. Fine for dedicated/urgent/fragile freight, but hotshot or partial may be cheaper.');
+    if (isLtl) {
+      if (weight > 8000 || length > 12 || height > 9.5) {
+        warnings.push('LTL upper edge: confirm class, dimensions, pallet count, and carrier limits before treating this as standard LTL.');
+      } else {
+        warnings.push('Auto-detected LTL: verify NMFC/class, residential/commercial access, liftgate, appointment, and limited-access fees. Tiny freight, enormous paperwork. Naturally.');
+      }
+    }
+    if (metrics.modeKey === 'ftl' && length > 0 && length <= 14 && weight <= 12000) {
+      warnings.push('Auto-detected FTL for a small load because cargo/equipment suggests dedicated movement. If urgency is low, compare partial/hotshot before sending.');
     }
     if (height > 10 && metrics.modeKey !== 'ftl') {
       warnings.push('Tall freight: verify step deck, low profile, ramps, loading method, and legal height before relying on a standard partial quote.');
@@ -2927,7 +3071,7 @@ const FreightCalculator = {
           <div class="result-score-card"><span>Estimate Confidence</span><strong>${pricing.quoteScore?.label || 'Usable estimate'}</strong><div class="result-score-meter" style="--score-width:${scoreWidth}"><i></i></div></div>
         </div>
         <div class="result-detail-grid">
-          <div class="result-detail"><span>Mode</span><strong>${modeLabel}</strong></div>
+          <div class="result-detail"><span>Auto Mode</span><strong>${modeLabel}</strong></div>
           <div class="result-detail"><span>Distance</span><strong>${Number(context.distanceValue || 0).toFixed(1)} mi</strong></div>
           <div class="result-detail"><span>Rate Basis</span><strong>${this.formatCurrency(context.costPerMile)}/mi</strong></div>
           <div class="result-detail"><span>Recommended Trailer</span><strong>${this.getTrailerRecommendation(context.isVehicleTruck, context.cargoType, context.weight, context.height, context.length, context.width)}</strong></div>
@@ -3317,6 +3461,7 @@ const FreightCalculator = {
     if (hint) { hint.textContent = ''; hint.style.display = 'none'; }
     this.lastLaneRateContext = null;
     this.updateMarketRatePanel(null, 'Waiting for origin and destination.');
+    this.updateAutoModePreview();
   },
 
   /* ─── PDF export (modern design — unchanged from prev iteration) ─ */
@@ -3482,7 +3627,7 @@ const FreightCalculator = {
         { cells:['Height',        `${parseFloat(this.elements.height.value  || 0).toFixed(1)} ft`]  },
         { cells:['Width',         `${parseFloat(this.elements.width.value   || 0).toFixed(1)} ft`]  },
         { cells:['Cargo Type',    this.elements.cargoType.options[this.elements.cargoType.selectedIndex].text] },
-        { cells:['Truck Load',    this.elements.isTruck.checked ? 'Yes' : 'No'] },
+        { cells:['Auto Freight Mode', this.getAutoModePreviewLabel()] },
         { cells:['Vehicle Truck', this.elements.cargoType.value === 'load-is-a-truck' ? 'Yes' : 'No'] },
       ],
       [55, CW - 55]
@@ -3507,7 +3652,7 @@ const FreightCalculator = {
       drawTable(
         ['Field', 'Value'],
         [
-          { cells:['Pricing mode', pricing.pricingMode] },
+          { cells:['Auto freight mode', pricing.pricingMode] },
           { cells:['Pricing strategy', pricing.strategyLabel || 'Balanced Broker'] },
           { cells:['Broker score', pricing.quoteScore ? `${pricing.quoteScore.score}/100 — ${pricing.quoteScore.label}` : 'N/A'] },
           { cells:['Score breakdown', pricing.quoteScore?.breakdown?.map(item => `${item.label}: ${item.points}/${item.max}`).join(' | ') || 'N/A'] },
@@ -3665,8 +3810,8 @@ const FreightCalculator = {
   /* ─── Event listeners ─────────────────────────────────────────── */
   /*
    * NOT registered (intentional — no auto-recalculation):
-   *   profit.input, sendToCustomer.change, isTruck.change,
-   *   cargoType.change, costPerMile auto-recalc.
+   *   profit.input, sendToCustomer.change, cargoType.change,
+   *   costPerMile auto-recalc.
    * Quote Results update ONLY on "Calculate" click.
    */
   addEventListeners() {
@@ -3715,6 +3860,13 @@ const FreightCalculator = {
       this.validateInput(elements.targetMarginPercent, 60, 'Target margin must be between 0% and 60%'));
     elements.minimumProfit?.addEventListener('input', () =>
       this.validateInput(elements.minimumProfit, 100000, 'Minimum profit must be between $0 and $100,000'));
+
+    [elements.length, elements.width, elements.height, elements.weight].forEach(input =>
+      input?.addEventListener('input', () => this.updateAutoModePreview()));
+    [elements.cargoType, elements.equipmentClass].forEach(input =>
+      input?.addEventListener('change', () => this.updateAutoModePreview()));
+    this.updateAutoModePreview();
+
     elements.equipmentClass?.addEventListener('change', () => this.applyLaneRate(true));
     elements.customerName?.addEventListener('change', () => {
       const profile = this.getCustomerPricingProfile(elements.customerName.value);
