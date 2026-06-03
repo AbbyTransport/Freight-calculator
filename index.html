@@ -1180,6 +1180,185 @@ button {
   }
 }
 
+
+/* ── Free Broker Mode: premium portal/glass quote dashboard ─────────────── */
+.strategy-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .42rem;
+  margin-top: .32rem;
+}
+.strategy-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .28rem;
+  padding: .24rem .46rem;
+  border-radius: 999px;
+  border: 1px solid rgba(37,99,235,.18);
+  background: rgba(239,246,255,.72);
+  color: #0b3d66;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.smart-buffer-card {
+  flex: 1 1 100%;
+  display: grid;
+  grid-template-columns: minmax(220px, .9fr) minmax(240px, 1.1fr);
+  gap: .7rem;
+  padding: .72rem .82rem;
+  border-radius: 12px;
+  border: 1px solid rgba(14,116,144,.22);
+  background: linear-gradient(180deg, rgba(240,249,255,.84), rgba(255,255,255,.72));
+}
+.smart-buffer-card .checkbox-inline {
+  align-items: flex-start;
+}
+.smart-buffer-card input[type="checkbox"] {
+  margin-top: .18rem;
+}
+.smart-buffer-card strong {
+  display: block;
+  color: #07182f;
+  font-family: var(--font-heading);
+  margin-bottom: .18rem;
+}
+.smart-buffer-card p {
+  color: #475569;
+  font-size: .78rem;
+  line-height: 1.42;
+  margin: 0;
+}
+.result-command-center {
+  display: grid;
+  grid-template-columns: 1.25fr .75fr;
+  gap: .7rem;
+  margin-bottom: .7rem;
+}
+.result-hero {
+  position: relative;
+  overflow: hidden;
+  padding: .88rem .94rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(7,24,47,.98), rgba(15,95,155,.94));
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 22px rgba(7,24,47,.22), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.result-hero::after {
+  content: '';
+  position: absolute;
+  right: -34px;
+  top: -38px;
+  width: 130px;
+  height: 130px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,.18), rgba(255,255,255,0) 70%);
+}
+.result-hero span,
+.result-score-card span,
+.result-action-plan span,
+.result-range-card span {
+  display: block;
+  font-size: .68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  opacity: .78;
+  margin-bottom: .24rem;
+}
+.result-hero strong {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: clamp(1.8rem, 4vw, 2.65rem);
+  line-height: .98;
+  letter-spacing: -.045em;
+}
+.result-hero small {
+  display: block;
+  margin-top: .34rem;
+  color: rgba(255,255,255,.78);
+  font-weight: 700;
+}
+.result-score-card,
+.result-range-card,
+.result-action-plan {
+  border-radius: 14px;
+  border: 1px solid rgba(185,199,216,.78);
+  background: rgba(255,255,255,.80);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.74);
+  padding: .78rem .82rem;
+}
+.result-score-card strong,
+.result-range-card strong,
+.result-action-plan strong {
+  display: block;
+  color: #07182f;
+  font-family: var(--font-heading);
+  font-size: 1.02rem;
+  line-height: 1.2;
+}
+.result-score-meter {
+  height: 9px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #dbe5ef;
+  margin-top: .52rem;
+  border: 1px solid rgba(148,163,184,.35);
+}
+.result-score-meter i {
+  display: block;
+  height: 100%;
+  width: var(--score-width, 50%);
+  border-radius: inherit;
+  background: linear-gradient(90deg, #c2410c, #ca8a04, #16a34a);
+}
+.result-range-card {
+  margin-bottom: .7rem;
+  background: linear-gradient(180deg, rgba(255,251,235,.88), rgba(255,255,255,.76));
+  border-color: rgba(202,138,4,.24);
+}
+.result-range-card strong {
+  color: #7c3e00;
+}
+.result-action-plan {
+  margin-top: .68rem;
+  background: linear-gradient(180deg, rgba(240,253,250,.9), rgba(255,255,255,.78));
+  border-color: rgba(13,148,136,.24);
+}
+.result-action-plan ul {
+  margin: .5rem 0 0 1rem;
+  color: #244155;
+  font-size: .82rem;
+  line-height: 1.45;
+}
+.result-action-plan li + li { margin-top: .24rem; }
+.result-kpi.secondary-accent {
+  background: linear-gradient(180deg, #ecfdf5, #ffffff);
+  border-color: rgba(16,185,129,.32);
+}
+.result-kpi.warning-accent {
+  background: linear-gradient(180deg, #fffbeb, #ffffff);
+  border-color: rgba(245,158,11,.32);
+}
+.result-kpi.danger-accent {
+  background: linear-gradient(180deg, #fef2f2, #ffffff);
+  border-color: rgba(220,38,38,.22);
+}
+.result-detail-grid.compact {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.guardrail-panel ul li strong { white-space: nowrap; }
+@media (max-width: 900px) {
+  .result-command-center,
+  .smart-buffer-card { grid-template-columns: 1fr; }
+  .result-detail-grid.compact { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 760px) {
+  .result-detail-grid.compact { grid-template-columns: 1fr; }
+}
+
   </style>
 </head>
 <body>
@@ -1271,8 +1450,8 @@ button {
           <div class="input-group">
             <label for="length">Load Length (ft)</label>
             <input type="number" id="length" name="length"
-                   min="0" max="53" step="0.1"
-                   placeholder="0 – 53 ft"
+                   min="0" max="120" step="0.1"
+                   placeholder="0 – 120 ft"
                    aria-describedby="lengthError" />
             <span class="error-message" id="lengthError" aria-live="polite"></span>
           </div>
@@ -1280,8 +1459,8 @@ button {
           <div class="input-group">
             <label for="weight">Load Weight (lbs)</label>
             <input type="number" id="weight" name="weight"
-                   min="0" max="80000"
-                   placeholder="0 – 80,000 lbs"
+                   min="0" max="120000"
+                   placeholder="0 – 120,000 lbs"
                    aria-describedby="weightError" />
             <span class="error-message" id="weightError" aria-live="polite"></span>
           </div>
@@ -1289,8 +1468,8 @@ button {
           <div class="input-group">
             <label for="height">Load Height (ft)</label>
             <input type="number" id="height" name="height"
-                   min="0" max="13.5" step="0.1"
-                   placeholder="0 – 13.5 ft"
+                   min="0" max="20" step="0.1"
+                   placeholder="0 – 20 ft"
                    aria-describedby="heightError" />
             <span class="error-message" id="heightError" aria-live="polite"></span>
           </div>
@@ -1298,8 +1477,8 @@ button {
           <div class="input-group">
             <label for="width">Load Width (ft)</label>
             <input type="number" id="width" name="width"
-                   min="0" max="8.5" step="0.1"
-                   placeholder="0 – 8.5 ft"
+                   min="0" max="20" step="0.1"
+                   placeholder="0 – 20 ft"
                    aria-describedby="widthError" />
             <span class="error-message" id="widthError" aria-live="polite"></span>
           </div>
@@ -1308,6 +1487,13 @@ button {
             <label for="cargoType">Cargo Type</label>
             <select id="cargoType" name="cargoType">
               <option value="general">General</option>
+              <option value="machinery">Machinery / Equipment</option>
+              <option value="construction">Construction Materials</option>
+              <option value="palletized">Palletized Freight</option>
+              <option value="pipe-steel">Pipe / Steel</option>
+              <option value="lumber">Lumber / Trusses</option>
+              <option value="crated-fragile">Crated / Fragile</option>
+              <option value="oversize">Oversize / Permit Load</option>
               <option value="load-is-a-truck">Load is a Truck</option>
               <option value="liquid">Liquid</option>
               <option value="temperature-controlled">Temperature‑Controlled</option>
@@ -1351,19 +1537,57 @@ button {
               <select id="equipmentClass" name="equipmentClass">
                 <option value="flatbed">Flatbed</option>
                 <option value="stepdeck">Step deck</option>
+                <option value="conestoga">Conestoga</option>
                 <option value="dryvan">Dry van</option>
                 <option value="reefer">Reefer</option>
                 <option value="hotshot">Hotshot</option>
+                <option value="boxtruck">Box Truck / Sprinter</option>
+                <option value="poweronly">Power Only</option>
                 <option value="rgn">RGN / Specialized</option>
               </select>
               <p class="field-hint">Used for the weekly lane estimate. Manual override still wins.</p>
             </div>
 
             <div class="input-group">
-              <label for="profit">Desired Profit ($)</label>
+              <label for="profit">Desired Profit Override ($)</label>
               <input type="number" id="profit" name="profit"
                      step="0.01" min="0"
-                     placeholder="0.00" />
+                     placeholder="Auto if blank" />
+              <p class="field-hint">Leave blank/0 and the broker engine recommends profit from strategy, load size, risk, and minimum margin.</p>
+            </div>
+
+            <div class="input-group">
+              <label for="pricingStrategy">Pricing Strategy</label>
+              <select id="pricingStrategy" name="pricingStrategy">
+                <option value="balanced" selected>Balanced Broker</option>
+                <option value="aggressive">Aggressive / Win the Load</option>
+                <option value="protective">Protective / Tight Market</option>
+                <option value="expedited">Expedited / Urgent</option>
+                <option value="strategic">Strategic Customer</option>
+              </select>
+              <p class="field-hint">Controls suggested margin, minimum profit, and risk posture. Manual profit still overrides it.</p>
+            </div>
+
+            <div class="input-group">
+              <label for="targetMarginPercent">Target Margin % Override</label>
+              <input type="number" id="targetMarginPercent" name="targetMarginPercent"
+                     step="0.1" min="0" max="60" placeholder="Auto" />
+              <p class="field-hint">Optional. Uses percent over carrier estimate before final quote.</p>
+            </div>
+
+            <div class="input-group">
+              <label for="minimumProfit">Minimum Profit Override ($)</label>
+              <input type="number" id="minimumProfit" name="minimumProfit"
+                     step="0.01" min="0" placeholder="Auto" />
+              <p class="field-hint">Optional. Keeps small loads from becoming charity work with paperwork.</p>
+            </div>
+
+            <div class="smart-buffer-card">
+              <div class="checkbox-inline">
+                <input type="checkbox" id="autoBrokerBuffer" name="autoBrokerBuffer" checked />
+                <label for="autoBrokerBuffer"><strong>Auto Broker Buffer</strong></label>
+              </div>
+              <p>Automatically adds internal reserve for width/height/weight, extra stops without fees, low-confidence lanes, and near-FTL partials. The amount is shown in Quote Results and PDF internal view.</p>
             </div>
 
             <div class="checkbox-group checkbox-group-column">
@@ -1510,6 +1734,81 @@ const FreightCalculator = {
   DEFAULT_COST_PER_MILE: 3.60, // auto-updated weekly; see data/lane-rates.json
   MINIMUM_CHARGE:        600,    // ← raised from $500
 
+
+  /* ─── Broker pricing engine ─────────────────────────────────────
+   * Embedded defaults are intentionally present so the calculator still works
+   * if GitHub Pages cannot load data/pricing-engine-config.json locally.
+   * Values are configurable, not sacred scripture carved on a rate con tablet.
+   */
+  BROKER_PRICING_ENGINE: {
+    version: '2026.06-broker-free-mode',
+    partialDeckFeet: 48,
+    minimumCharge: 650,
+    partialPremium: {
+      small: 1.72,
+      standard: 1.58,
+      large: 1.42,
+      nearFtl: 1.18
+    },
+    partialCaps: {
+      standard: 0.88,
+      nearFtl: 0.95
+    },
+    autoBuffer: {
+      extraStopDefault: 100,
+      tallOver10: 125,
+      tallOver12: 275,
+      wideOverLegal: 325,
+      longOver48: 350,
+      heavyOver30000: 175,
+      heavyOver45000: 350,
+      lowConfidenceLane: 125,
+      nearFtlPartial: 175,
+      rgnSpecialized: 500
+    },
+    quoteRange: {
+      low: -0.04,
+      high: 0.07
+    },
+    strategies: {
+      balanced: {
+        label: 'Balanced Broker',
+        description: 'Best everyday setting: competitive but not desperate.',
+        margins: { ftl: 0.14, partial: 0.20, hotshot: 0.17, rgn: 0.20, tycon: 0.15 },
+        minimums:{ ftl: 350,  partial: 275,  hotshot: 225,  rgn: 650,  tycon: 300 },
+        defaultExpeditedPercent: 0
+      },
+      aggressive: {
+        label: 'Aggressive / Win the Load',
+        description: 'Lower margin for competitive lanes or important opportunities.',
+        margins: { ftl: 0.10, partial: 0.16, hotshot: 0.13, rgn: 0.16, tycon: 0.12 },
+        minimums:{ ftl: 250,  partial: 200,  hotshot: 175,  rgn: 500,  tycon: 225 },
+        defaultExpeditedPercent: 0
+      },
+      protective: {
+        label: 'Protective / Tight Market',
+        description: 'Adds room for carrier scarcity, awkward freight, and lanes that like to bite.',
+        margins: { ftl: 0.18, partial: 0.24, hotshot: 0.20, rgn: 0.25, tycon: 0.18 },
+        minimums:{ ftl: 475,  partial: 350,  hotshot: 300,  rgn: 850,  tycon: 400 },
+        defaultExpeditedPercent: 0
+      },
+      expedited: {
+        label: 'Expedited / Urgent',
+        description: 'Urgency pricing. The market charges for panic, because naturally it does.',
+        margins: { ftl: 0.22, partial: 0.28, hotshot: 0.24, rgn: 0.30, tycon: 0.22 },
+        minimums:{ ftl: 600,  partial: 425,  hotshot: 350,  rgn: 1000, tycon: 500 },
+        defaultExpeditedPercent: 8
+      },
+      strategic: {
+        label: 'Strategic Customer',
+        description: 'Slightly leaner margin for recurring customers where relationship matters.',
+        margins: { ftl: 0.11, partial: 0.17, hotshot: 0.14, rgn: 0.17, tycon: 0.13 },
+        minimums:{ ftl: 300,  partial: 225,  hotshot: 200,  rgn: 575,  tycon: 250 },
+        defaultExpeditedPercent: 0
+      }
+    }
+  },
+
   /* ─── State → Region mapping ──────────────────────────────────
    * Region codes (distinct from state abbreviations to avoid collision):
    *   NOR = Northeast   SOU = Southeast   MID = Midwest
@@ -1595,6 +1894,11 @@ const FreightCalculator = {
         "multiplier": 1.05,
         "confidenceBoost": -1
     },
+    conestoga: {
+        "label": "Conestoga",
+        "multiplier": 1.12,
+        "confidenceBoost": -1
+    },
     dryvan: {
         "label": "Dry van",
         "multiplier": 0.78,
@@ -1609,6 +1913,16 @@ const FreightCalculator = {
         "label": "Hotshot",
         "multiplier": 0.88,
         "confidenceBoost": -1
+    },
+    boxtruck: {
+        "label": "Box Truck / Sprinter",
+        "multiplier": 0.72,
+        "confidenceBoost": -2
+    },
+    poweronly: {
+        "label": "Power Only",
+        "multiplier": 0.82,
+        "confidenceBoost": -2
     },
     rgn: {
         "label": "RGN / Specialized",
@@ -1634,6 +1948,10 @@ const FreightCalculator = {
     costPerMile:           document.getElementById('costPerMile'),
     equipmentClass:        document.getElementById('equipmentClass'),
     profit:                document.getElementById('profit'),
+    pricingStrategy:       document.getElementById('pricingStrategy'),
+    targetMarginPercent:   document.getElementById('targetMarginPercent'),
+    minimumProfit:         document.getElementById('minimumProfit'),
+    autoBrokerBuffer:      document.getElementById('autoBrokerBuffer'),
     extraStopFee:          document.getElementById('extraStopFee'),
     tarpFee:               document.getElementById('tarpFee'),
     permitFee:             document.getElementById('permitFee'),
@@ -1668,10 +1986,10 @@ const FreightCalculator = {
 
   /* ─── Predefined customers ────────────────────────────────────── */
   initialCustomers: [
-    'Black Bull Trucks and Trailers', 'Dump Bodies Inc.', 'Energy Solutions',
-    'Eric Richins', 'Jason Bird', 'MTS', 'Northwest Standard',
-    'Rock Solid Truck Bodies', 'Scott McDonald', 'Tycon Systems',
-    'Utah Tank & Trailer', 'Vigil Industrial Protection',
+    'Black Bull Trucks and Trailers', 'D&L Supply', 'Dump Bodies Inc.',
+    'Energy Solutions', 'Eric Richins', 'Jason Bird', 'Joe Ambrosius Aviation & Ramp Services',
+    'MTS', 'Northwest Standard', 'Rock Solid Truck Bodies', 'Scott McDonald',
+    'Tycon Systems', 'Utah Tank & Trailer', 'Victory GSE', 'Vigil Industrial Protection',
   ],
 
   stopCounter: 0,
@@ -1702,6 +2020,43 @@ const FreightCalculator = {
     return `$${Number(value || 0).toFixed(2)}`;
   },
 
+  roundMoney(value, increment = 5) {
+    const n = Number(value || 0);
+    if (!Number.isFinite(n)) return 0;
+    return Math.round(n / increment) * increment;
+  },
+
+  async loadPricingConfig(force = false) {
+    if (this.pricingConfigLoaded && !force) return this.BROKER_PRICING_ENGINE;
+    try {
+      const cacheKey = force ? Date.now() : 'broker-engine';
+      const res = await fetch(`data/pricing-engine-config.json?v=${cacheKey}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data && data.strategies && data.autoBuffer) {
+        this.BROKER_PRICING_ENGINE = {
+          ...this.BROKER_PRICING_ENGINE,
+          ...data,
+          strategies: { ...this.BROKER_PRICING_ENGINE.strategies, ...data.strategies },
+          autoBuffer: { ...this.BROKER_PRICING_ENGINE.autoBuffer, ...data.autoBuffer },
+        };
+        this.pricingConfigLoaded = true;
+      }
+    } catch (err) {
+      console.warn('loadPricingConfig:', err);
+      this.pricingConfigLoaded = false;
+    }
+    return this.BROKER_PRICING_ENGINE;
+  },
+
+  getPricingStrategyProfile(key) {
+    const engine = this.BROKER_PRICING_ENGINE || {};
+    return (engine.strategies && engine.strategies[key]) || engine.strategies?.balanced || {
+      label: 'Balanced Broker', margins: { ftl:.14, partial:.20, hotshot:.17, rgn:.20, tycon:.15 },
+      minimums: { ftl:350, partial:275, hotshot:225, rgn:650, tycon:300 }, defaultExpeditedPercent: 0
+    };
+  },
+
   /* ─── Weekly lane-rate data + auto-population ─────────────────── */
 
   async loadLaneRates(force = false) {
@@ -1720,7 +2075,7 @@ const FreightCalculator = {
       }
       if (data.regionRates) this.REGION_RATES = data.regionRates;
       if (data.regionCodes) this.REGION_LABELS = data.regionCodes;
-      if (data.equipmentProfiles) this.EQUIPMENT_PROFILES = data.equipmentProfiles;
+      if (data.equipmentProfiles) this.EQUIPMENT_PROFILES = { ...this.EQUIPMENT_PROFILES, ...data.equipmentProfiles };
 
       this.laneRateData = data;
       this.laneRateLoadedAt = new Date();
@@ -1927,6 +2282,10 @@ const FreightCalculator = {
       costPerMile,
       laneRateContext: this.getLaneRateSnapshot(),
       profit:         parseFloat(elements.profit.value)    || 0,
+      targetMarginPercent: this.parsePercentInput(elements.targetMarginPercent),
+      minimumProfitOverride: this.parseMoneyInput(elements.minimumProfit),
+      pricingStrategy: elements.pricingStrategy?.value || 'balanced',
+      autoBrokerBuffer: elements.autoBrokerBuffer ? elements.autoBrokerBuffer.checked : true,
       accessorials:   this.getAccessorialInputs(),
       length:         parseFloat(elements.length.value)    || 0,
       weight:         parseFloat(elements.weight.value)    || 0,
@@ -1935,6 +2294,7 @@ const FreightCalculator = {
       isTruck:        elements.isTruck.checked,
       isVehicleTruck: elements.cargoType.value === 'load-is-a-truck',
       cargoType:      elements.cargoType.value,
+      equipmentClass: elements.equipmentClass?.value || 'flatbed',
       sendToCustomer: elements.sendToCustomer.checked,
     };
   },
@@ -1948,66 +2308,188 @@ const FreightCalculator = {
    *     up to +20 % at 80 k lbs). Reflects real overweight premiums.
    *  3. Tycon formula unchanged (already weight-adjusted internally).
    */
+  classifyPricingMode(context, deckShare) {
+    if (context.cargoType === 'tycon') return { key: 'tycon', label: 'Tycon Formula' };
+    if (context.equipmentClass === 'rgn' || context.width > 8.5 || context.height > 13.5 || context.length > 53) {
+      return { key: 'rgn', label: 'RGN / Specialized' };
+    }
+    if (context.isTruck) return { key: 'ftl', label: 'FTL / Dedicated Truck' };
+    if ((context.equipmentClass === 'hotshot' || (context.length <= 18 && context.weight <= 16000 && context.height <= 10.5)) && deckShare <= 0.42) {
+      return { key: 'hotshot', label: 'Hotshot / Dedicated Partial' };
+    }
+    return { key: 'partial', label: 'Partial / Shared Deck' };
+  },
+
+  computeEffectiveDeckShare(context) {
+    const deckFeet = Number(this.BROKER_PRICING_ENGINE?.partialDeckFeet || 48);
+    const widthFactor = Math.max(1, (context.width || 0) / 8.5);
+    const effectiveLinearFeet = Math.max(0, context.length || 0) * widthFactor;
+    return {
+      deckFeet,
+      widthFactor,
+      effectiveLinearFeet,
+      deckShare: effectiveLinearFeet > 0 ? Math.min(effectiveLinearFeet / deckFeet, 1.18) : 0,
+    };
+  },
+
+  computeWeightFactor(weight) {
+    const w = Number(weight || 0);
+    if (w <= 10000) return 1.00;
+    if (w <= 20000) return 1.06;
+    if (w <= 30000) return 1.14;
+    if (w <= 40000) return 1.24;
+    if (w <= 47000) return 1.34;
+    return 1.46;
+  },
+
+  getPartialPremium(deckShare) {
+    const p = this.BROKER_PRICING_ENGINE?.partialPremium || {};
+    if (deckShare >= 0.625) return Number(p.nearFtl || 1.18);
+    if (deckShare >= 0.50)  return Number(p.large || 1.42);
+    if (deckShare <= 0.25)  return Number(p.small || 1.72);
+    return Number(p.standard || 1.58);
+  },
+
+  computeAutoBrokerBuffer(context, metrics, modeKey) {
+    if (!context.autoBrokerBuffer) return { total: 0, items: [] };
+    const cfg = this.BROKER_PRICING_ENGINE?.autoBuffer || {};
+    const items = [];
+    const add = (label, amount) => {
+      amount = Number(amount || 0);
+      if (amount > 0) items.push({ label, amount });
+    };
+    if ((context.accessorials?.extraStopCount || 0) > 0 && (context.accessorials?.extraStopFee || 0) <= 0) {
+      add(`Auto extra-stop reserve (${context.accessorials.extraStopCount})`, (context.accessorials.extraStopCount || 0) * Number(cfg.extraStopDefault || 100));
+    }
+    if ((context.height || 0) > 12) add('Tall freight reserve', cfg.tallOver12 || 275);
+    else if ((context.height || 0) > 10) add('Height handling reserve', cfg.tallOver10 || 125);
+    if ((context.width || 0) > 8.5) add('Oversize width reserve', cfg.wideOverLegal || 325);
+    if ((context.length || 0) > 48) add('Long freight reserve', cfg.longOver48 || 350);
+    if ((context.weight || 0) > 45000) add('Heavy freight reserve', cfg.heavyOver45000 || 350);
+    else if ((context.weight || 0) > 30000) add('Weight/axle reserve', cfg.heavyOver30000 || 175);
+    if (context.laneRateContext?.confidence === 'Low') add('Low-confidence lane reserve', cfg.lowConfidenceLane || 125);
+    if (modeKey === 'partial' && ((context.length || 0) >= 30 || (metrics.deckShare || 0) >= .625)) add('Near-FTL partial reserve', cfg.nearFtlPartial || 175);
+    if (modeKey === 'rgn') add('Specialized/RGN reserve', cfg.rgnSpecialized || 500);
+    return {
+      total: items.reduce((sum, item) => sum + item.amount, 0),
+      items,
+    };
+  },
+
+  getProfitRecommendation(context, baseCost, modeKey, strategy) {
+    const manualProfit = Number(context.profit || 0);
+    if (manualProfit > 0) {
+      return {
+        profit: manualProfit,
+        method: 'Manual profit override',
+        targetMargin: baseCost > 0 ? manualProfit / baseCost : 0,
+        minimumProfit: manualProfit,
+      };
+    }
+    const targetMargin = context.targetMarginPercent > 0
+      ? context.targetMarginPercent / 100
+      : Number(strategy?.margins?.[modeKey] ?? strategy?.margins?.ftl ?? .14);
+    const minimumProfit = context.minimumProfitOverride > 0
+      ? context.minimumProfitOverride
+      : Number(strategy?.minimums?.[modeKey] ?? strategy?.minimums?.ftl ?? 300);
+    const rawProfit = Math.max(baseCost * targetMargin, minimumProfit);
+    const profit = this.roundMoney(rawProfit, 5);
+    return {
+      profit,
+      method: context.targetMarginPercent > 0 || context.minimumProfitOverride > 0
+        ? 'Auto profit with user override'
+        : 'Auto profit from selected strategy',
+      targetMargin,
+      minimumProfit,
+    };
+  },
+
+  getSuggestedSellRange(quoteCost) {
+    const cfg = this.BROKER_PRICING_ENGINE?.quoteRange || { low: -0.04, high: .07 };
+    const low = this.roundMoney(quoteCost * (1 + Number(cfg.low || 0)), 5);
+    const high = this.roundMoney(quoteCost * (1 + Number(cfg.high || 0)), 5);
+    return { low, high };
+  },
+
+  getQuoteScore(context, pricing) {
+    let score = 74;
+    if (context.laneRateContext?.confidence === 'High') score += 8;
+    if (context.laneRateContext?.confidence === 'Medium') score += 3;
+    if (context.laneRateContext?.confidence === 'Low') score -= 8;
+    if (pricing.modeKey === 'partial' && pricing.deckShare >= .625) score -= 12;
+    if (context.width > 8.5 || context.height > 12 || context.weight > 45000) score -= 10;
+    if ((pricing.autoBufferTotal || 0) > 0) score += 4;
+    if (pricing.profitMethod && pricing.profitMethod.startsWith('Auto')) score += 4;
+    if ((pricing.guardrails || []).some(g => !String(g).startsWith('No major guardrail'))) score -= Math.min(12, pricing.guardrails.length * 3);
+    score = Math.max(38, Math.min(96, Math.round(score)));
+    let label = 'Needs broker review';
+    if (score >= 82) label = 'Strong estimate';
+    else if (score >= 68) label = 'Usable estimate';
+    return { score, label };
+  },
+
   computePricing(context) {
     const {
-      distanceValue, costPerMile, profit, length, weight, cargoType, isTruck,
+      distanceValue, costPerMile, length, weight, cargoType,
     } = context;
 
+    const strategy = this.getPricingStrategyProfile(context.pricingStrategy);
     const accessorials = context.accessorials || {
       extraStopCount: 0, extraStopFee: 0, stopFees: 0,
       tarpFee: 0, permitFee: 0, riskReserveFee: 0,
       expeditedPercent: 0, totalBeforeExpedite: 0,
     };
 
-    const ftlBenchmark = Math.max((distanceValue || 0) * (costPerMile || this.DEFAULT_COST_PER_MILE), this.MINIMUM_CHARGE);
-    const deckShare = length > 0 ? Math.min(length / 48, 1.15) : 0;
+    const deckMetrics = this.computeEffectiveDeckShare(context);
+    const ftlBenchmark = Math.max((distanceValue || 0) * (costPerMile || this.DEFAULT_COST_PER_MILE), this.BROKER_PRICING_ENGINE?.minimumCharge || this.MINIMUM_CHARGE);
+    const mode = this.classifyPricingMode(context, deckMetrics.deckShare);
     let linehaulCost;
     let rawLinehaul;
-    let weightFactor = 1;
     let partialCapApplied = false;
     let partialCapPercent = null;
-    let pricingMode = 'FTL / Dedicated Truck';
+    let partialPremium = 1;
+    const weightFactor = this.computeWeightFactor(weight);
 
-    if (isTruck) {
-      // Full truckload: straight mileage rate
-      rawLinehaul = ftlBenchmark;
-      linehaulCost = ftlBenchmark;
-      pricingMode = 'FTL / Dedicated Truck';
+    if (mode.key === 'ftl' || mode.key === 'rgn') {
+      rawLinehaul = mode.key === 'rgn' ? ftlBenchmark * 1.08 : ftlBenchmark;
+      linehaulCost = Math.max(rawLinehaul, this.BROKER_PRICING_ENGINE?.minimumCharge || this.MINIMUM_CHARGE);
 
-    } else if (cargoType === 'tycon') {
-      // Tycon-specific formula (weight-adjusted internally)
+    } else if (mode.key === 'tycon' || cargoType === 'tycon') {
       rawLinehaul = this.BASE_FACTOR_TYCON
-        * (length * distanceValue)
+        * ((length || 0) * (distanceValue || 0))
         * ((weight || 0) / 47000 + 1)
         * (1 - (Math.ceil((weight || 0) / 20000) - 2) * 0.05);
-      linehaulCost = Math.max(rawLinehaul, this.MINIMUM_CHARGE);
-      pricingMode = 'Tycon Formula';
+      linehaulCost = Math.max(rawLinehaul, this.BROKER_PRICING_ENGINE?.minimumCharge || this.MINIMUM_CHARGE);
 
     } else {
-      // Partial/hotshot/flatbed: proportional deck space pricing.
-      // Broker guardrail: a partial should normally not exceed a sensible share
-      // of the FTL benchmark. When it gets too close, quote both options.
-      const overWeight = Math.max(0, (weight || 0) - 20000);
-      weightFactor = 1 + Math.min(overWeight / 200000, 0.20);
-      rawLinehaul = (((distanceValue * costPerMile) / 48) * (length || 0)) * 1.5 * weightFactor;
-      linehaulCost = Math.max(rawLinehaul, this.MINIMUM_CHARGE);
+      partialPremium = this.getPartialPremium(deckMetrics.deckShare);
+      rawLinehaul = ftlBenchmark * deckMetrics.deckShare * partialPremium * weightFactor;
+      const partialFloor = Math.max(this.BROKER_PRICING_ENGINE?.minimumCharge || this.MINIMUM_CHARGE, Math.min(ftlBenchmark * .36, 950));
+      linehaulCost = Math.max(rawLinehaul, partialFloor);
 
-      const nearFtl = (length || 0) >= 30 || (weight || 0) >= 30000 || deckShare >= 0.625;
-      partialCapPercent = nearFtl ? 0.95 : 0.88;
+      const nearFtl = (length || 0) >= 30 || (weight || 0) >= 30000 || deckMetrics.deckShare >= 0.625;
+      partialCapPercent = nearFtl
+        ? Number(this.BROKER_PRICING_ENGINE?.partialCaps?.nearFtl || 0.95)
+        : Number(this.BROKER_PRICING_ENGINE?.partialCaps?.standard || 0.88);
       const partialCap = ftlBenchmark * partialCapPercent;
-      if (ftlBenchmark > this.MINIMUM_CHARGE && linehaulCost > partialCap) {
-        linehaulCost = Math.max(partialCap, this.MINIMUM_CHARGE);
+      if (ftlBenchmark > (this.BROKER_PRICING_ENGINE?.minimumCharge || this.MINIMUM_CHARGE) && linehaulCost > partialCap) {
+        linehaulCost = Math.max(partialCap, this.BROKER_PRICING_ENGINE?.minimumCharge || this.MINIMUM_CHARGE);
         partialCapApplied = true;
       }
-      pricingMode = 'Partial / Shared Deck';
     }
 
-    const accessorialTotal = accessorials.totalBeforeExpedite || 0;
-    const expeditedSurcharge = (linehaulCost + accessorialTotal) * ((accessorials.expeditedPercent || 0) / 100);
+    const baseManualAccessorials = accessorials.totalBeforeExpedite || 0;
+    const autoBuffer = this.computeAutoBrokerBuffer(context, deckMetrics, mode.key);
+    const accessorialTotal = baseManualAccessorials + (autoBuffer.total || 0);
+    const strategyExpeditedPercent = Number(strategy?.defaultExpeditedPercent || 0);
+    const expeditedPercent = Math.max(accessorials.expeditedPercent || 0, strategyExpeditedPercent);
+    const expeditedSurcharge = (linehaulCost + accessorialTotal) * (expeditedPercent / 100);
     const baseCost = linehaulCost + accessorialTotal + expeditedSurcharge;
-    const guardrails = this.buildBrokerGuardrails(context, {
+    const profitRecommendation = this.getProfitRecommendation(context, baseCost, mode.key, strategy);
+
+    const preliminary = {
       ftlBenchmark,
-      deckShare,
+      deckShare: deckMetrics.deckShare,
       weightFactor,
       linehaulCost,
       rawLinehaul,
@@ -2015,26 +2497,71 @@ const FreightCalculator = {
       partialCapPercent,
       accessorialTotal,
       expeditedSurcharge,
-      pricingMode,
-    });
-
-    return {
+      pricingMode: mode.label,
+      modeKey: mode.key,
+      autoBufferTotal: autoBuffer.total,
+    };
+    const guardrails = this.buildBrokerGuardrails(context, preliminary);
+    const quoteCost = baseCost + profitRecommendation.profit;
+    const sellRange = this.getSuggestedSellRange(quoteCost);
+    const pricing = {
       baseCost,
       linehaulCost,
       accessorialTotal,
+      manualAccessorialTotal: baseManualAccessorials,
+      autoBufferTotal: autoBuffer.total,
+      autoBufferItems: autoBuffer.items,
       expeditedSurcharge,
-      profit,
-      quoteCost: baseCost + profit,
+      expeditedPercent,
+      profit: profitRecommendation.profit,
+      profitMethod: profitRecommendation.method,
+      targetMargin: profitRecommendation.targetMargin,
+      minimumProfit: profitRecommendation.minimumProfit,
+      quoteCost,
+      quotePerMile: distanceValue > 0 ? quoteCost / distanceValue : 0,
       ftlBenchmark,
-      deckShare,
+      deckShare: deckMetrics.deckShare,
+      effectiveLinearFeet: deckMetrics.effectiveLinearFeet,
+      widthFactor: deckMetrics.widthFactor,
+      deckFeet: deckMetrics.deckFeet,
       weightFactor,
+      partialPremium,
       rawLinehaul,
       partialCapApplied,
       partialCapPercent,
-      pricingMode,
-      accessorials,
+      pricingMode: mode.label,
+      modeKey: mode.key,
+      pricingStrategy: context.pricingStrategy || 'balanced',
+      strategyLabel: strategy?.label || 'Balanced Broker',
+      strategyDescription: strategy?.description || '',
+      accessorials: { ...accessorials, expeditedPercent },
       guardrails,
+      sellRange,
+      actionPlan: [],
     };
+    pricing.quoteScore = this.getQuoteScore(context, pricing);
+    pricing.actionPlan = this.buildBrokerActionPlan(context, pricing);
+    return pricing;
+  },
+
+  buildBrokerActionPlan(context, pricing) {
+    const actions = [];
+    if (pricing.modeKey === 'partial' && pricing.deckShare >= .50) {
+      actions.push('Quote partial and FTL side-by-side before committing. Large partials can price like dedicated freight fast. Humanity calls this nuance.');
+    }
+    if (context.width > 8.5 || context.height > 12 || context.length > 48) {
+      actions.push('Verify legal dimensions, permits, escort/routing needs, loading method, and whether the carrier needs specialized equipment.');
+    }
+    if (context.weight > 30000) {
+      actions.push('Confirm axle/weight distribution, shipper loading capability, and carrier appetite before treating this as shared deck.');
+    }
+    if ((pricing.autoBufferTotal || 0) > 0) {
+      actions.push(`Auto buffer added ${this.formatCurrency(pricing.autoBufferTotal)}. Keep it unless the carrier confirms the risk is harmless, which would be a charming plot twist.`);
+    }
+    if (!actions.length) {
+      actions.push('Sendable estimate after confirming pickup/delivery windows, loading method, commodity sensitivity, and carrier availability.');
+    }
+    return actions;
   },
 
   buildBrokerGuardrails(context, metrics) {
@@ -2043,18 +2570,18 @@ const FreightCalculator = {
     const weight = context.weight || 0;
     const height = context.height || 0;
     const width = context.width || 0;
-    const isPartial = !context.isTruck && context.cargoType !== 'tycon';
+    const isPartial = metrics.modeKey === 'partial' || metrics.modeKey === 'hotshot';
 
     if (isPartial) {
       if (length >= 30 || metrics.deckShare >= 0.625) {
-        warnings.push('Near-FTL partial: 30+ linear feet or more than 62% of a 48 ft deck. Many brokers quote FTL/dedicated or present both options.');
+        warnings.push('Near-FTL partial: 30+ linear feet or more than 62% of a 48 ft deck. Quote FTL/dedicated as a comparison.');
       } else if (length >= 24 || metrics.deckShare >= 0.50) {
-        warnings.push('Large partial: 24+ linear feet. Compare against an FTL benchmark before sending the quote.');
+        warnings.push('Large partial: 24+ linear feet or half the deck. Compare against FTL before sending.');
       }
       if (weight >= 30000) {
         warnings.push('Heavy partial: 30,000+ lb. Check axle/weight distribution and carrier appetite before assuming shared-deck pricing.');
       } else if (weight >= 20000) {
-        warnings.push('Medium-heavy partial: weight surcharge applied. Confirm forklift/crane loading and deck position.');
+        warnings.push('Medium-heavy partial: weight factor applied. Confirm forklift/crane loading and deck position.');
       }
       if (metrics.partialCapApplied) {
         warnings.push(`Partial linehaul was capped at ${(metrics.partialCapPercent * 100).toFixed(0)}% of the FTL benchmark. Quote both partial and FTL if the lane is tight.`);
@@ -2062,18 +2589,30 @@ const FreightCalculator = {
     }
 
     if (context.isTruck && length > 0 && length <= 14 && weight <= 12000) {
-      warnings.push('FTL selected for a small load. That is fine for dedicated service, urgency, or fragile freight, but partial/hotshot may be cheaper.');
+      warnings.push('FTL selected for a small load. Fine for dedicated/urgent/fragile freight, but hotshot or partial may be cheaper.');
     }
-    if (height > 10 && !context.isTruck) {
+    if (height > 10 && metrics.modeKey !== 'ftl') {
       warnings.push('Tall freight: verify step deck, low profile, ramps, loading method, and legal height before relying on a standard partial quote.');
     }
-    if (width > 8.3) {
-      warnings.push('Wide load close to legal limit. Confirm exact width, securement, permits, and whether oversize reserve is needed.');
+    if (width > 8.3 && width <= 8.5) {
+      warnings.push('Wide freight near legal limit. Confirm exact width, securement, and whether tarp/permits are needed.');
     }
-    if ((context.accessorials?.extraStopCount || 0) > 0 && (context.accessorials?.extraStopFee || 0) <= 0) {
-      warnings.push('Route has extra stops but no extra-stop fee entered. Brokers normally price extra stops separately.');
+    if (width > 8.5) {
+      warnings.push('Oversize width: permits/routing/escort risk. Specialized quote review required.');
     }
-    if ((context.accessorials?.expeditedPercent || 0) > 0) {
+    if (context.cargoType === 'crated-fragile') {
+      warnings.push('Fragile/crated cargo: confirm value, loading method, blocking/bracing, and whether customer requires air-ride or enclosed equipment.');
+    }
+    if (context.cargoType === 'pipe-steel' || context.cargoType === 'lumber') {
+      warnings.push('Long material freight: confirm exact bundle dimensions, loading/unloading method, dunnage, and securement expectations.');
+    }
+    if (context.cargoType === 'oversize') {
+      warnings.push('Oversize cargo type selected. Verify permits, route survey, escort need, and loading/unloading equipment before sending.');
+    }
+    if ((context.accessorials?.extraStopCount || 0) > 0 && (context.accessorials?.extraStopFee || 0) <= 0 && !context.autoBrokerBuffer) {
+      warnings.push('Route has extra stops but no extra-stop fee entered. Add stop fee or enable Auto Broker Buffer.');
+    }
+    if ((metrics.expeditedSurcharge || 0) > 0) {
       warnings.push('Expedited/tight-lane surcharge applied before profit. Good. Freight markets punish optimism, as they should.');
     }
     if (!warnings.length) {
@@ -2093,28 +2632,30 @@ const FreightCalculator = {
 
   renderFreightEstimate(pricing, sendToCustomer, context = this.getCurrentCalculationContext()) {
     const lane = this.getLaneRateSnapshot();
-    const modeLabel = pricing.pricingMode || (context.isTruck
-      ? 'FTL / Dedicated Truck'
-      : (context.cargoType === 'tycon' ? 'Tycon Formula' : 'Partial / Shared Deck'));
-    const formulaText = context.isTruck
-      ? 'FTL basis: miles × selected lane rate, then accessorials/expedited surcharge and Abby profit are added. This matches the normal broker method for a dedicated truck quote, with a minimum charge floor.'
-      : (context.cargoType === 'tycon'
-          ? 'Tycon basis: dedicated customer formula using length, miles, weight adjustment, minimum charge floor, then accessorials and profit.'
-          : 'Partial basis: trailer-space share using 48 ft deck capacity × load length, with a partial-load premium, weight adjustment, and a broker cap against the FTL benchmark. This is an internal estimate, not a guaranteed carrier rate.');
+    const modeLabel = pricing.pricingMode || 'Broker Estimate';
     const marketBasis = lane
       ? `${this.formatCurrency(lane.rate)}/mi • ${lane.oState} → ${lane.dState} • ${lane.confidence}`
       : `${this.formatCurrency(context.costPerMile)}/mi • manual/default`;
     const accessorialLabel = pricing.accessorialTotal > 0
-      ? `${this.formatCurrency(pricing.accessorialTotal)} + ${this.formatCurrency(pricing.expeditedSurcharge)} expedited`
+      ? `${this.formatCurrency(pricing.manualAccessorialTotal || 0)} manual + ${this.formatCurrency(pricing.autoBufferTotal || 0)} auto + ${this.formatCurrency(pricing.expeditedSurcharge)} expedited`
       : 'None entered';
+    const marginPct = pricing.baseCost > 0 ? (pricing.profit / pricing.baseCost) * 100 : 0;
+    const scoreWidth = `${Math.max(0, Math.min(100, pricing.quoteScore?.score || 50))}%`;
+    const autoBufferItems = (pricing.autoBufferItems || []).length
+      ? pricing.autoBufferItems.map(item => `${item.label}: ${this.formatCurrency(item.amount)}`).join('<br>')
+      : 'No automatic buffer';
 
     if (sendToCustomer) {
       this.elements.freightEstimate.innerHTML = `
-        <div class="result-kpi-grid">
-          <div class="result-kpi primary"><span>Customer Quote</span><strong>${this.formatCurrency(pricing.quoteCost)}</strong></div>
-          <div class="result-kpi"><span>Mode</span><strong>${modeLabel}</strong></div>
-          <div class="result-kpi"><span>Distance</span><strong>${Number(context.distanceValue || 0).toFixed(1)} mi</strong></div>
-          <div class="result-kpi"><span>Rate Basis</span><strong>${this.formatCurrency(context.costPerMile)}/mi</strong></div>
+        <div class="result-command-center">
+          <div class="result-hero"><span>Customer Quote</span><strong>${this.formatCurrency(pricing.quoteCost)}</strong><small>${modeLabel} • ${Number(context.distanceValue || 0).toFixed(1)} miles</small></div>
+          <div class="result-score-card"><span>Estimate Confidence</span><strong>${pricing.quoteScore?.label || 'Usable estimate'}</strong><div class="result-score-meter" style="--score-width:${scoreWidth}"><i></i></div></div>
+        </div>
+        <div class="result-detail-grid">
+          <div class="result-detail"><span>Mode</span><strong>${modeLabel}</strong></div>
+          <div class="result-detail"><span>Distance</span><strong>${Number(context.distanceValue || 0).toFixed(1)} mi</strong></div>
+          <div class="result-detail"><span>Rate Basis</span><strong>${this.formatCurrency(context.costPerMile)}/mi</strong></div>
+          <div class="result-detail"><span>Recommended Trailer</span><strong>${this.getTrailerRecommendation(context.isVehicleTruck, context.cargoType, context.weight, context.height, context.length, context.width)}</strong></div>
         </div>
         <div class="result-detail-grid">
           <div class="result-detail"><span>Load Length</span><strong>${Number(context.length || 0).toFixed(1)} ft</strong></div>
@@ -2127,24 +2668,37 @@ const FreightCalculator = {
     }
 
     this.elements.freightEstimate.innerHTML = `
+      <div class="result-command-center">
+        <div class="result-hero"><span>Quote to Customer</span><strong>${this.formatCurrency(pricing.quoteCost)}</strong><small>${pricing.strategyLabel} • ${modeLabel} • ${this.formatCurrency(pricing.quotePerMile)}/mi sell rate</small></div>
+        <div class="result-score-card"><span>Broker Score</span><strong>${pricing.quoteScore?.score || 0}/100 — ${pricing.quoteScore?.label || 'Needs review'}</strong><div class="result-score-meter" style="--score-width:${scoreWidth}"><i></i></div></div>
+      </div>
+
+      <div class="result-range-card"><span>Suggested Sell Range</span><strong>${this.formatCurrency(pricing.sellRange.low)} – ${this.formatCurrency(pricing.sellRange.high)}</strong><small>Use this band for negotiation. Below the low end, you are probably donating labor to the freight gods.</small></div>
+
       <div class="result-kpi-grid">
         <div class="result-kpi"><span>Linehaul</span><strong>${this.formatCurrency(pricing.linehaulCost)}</strong></div>
-        <div class="result-kpi"><span>Accessorials / Risk</span><strong>${this.formatCurrency(pricing.accessorialTotal + pricing.expeditedSurcharge)}</strong></div>
-        <div class="result-kpi"><span>Profit</span><strong>${this.formatCurrency(pricing.profit)}</strong></div>
-        <div class="result-kpi primary"><span>Quote Rate</span><strong>${this.formatCurrency(pricing.quoteCost)}</strong></div>
+        <div class="result-kpi warning-accent"><span>Accessorials / Buffer</span><strong>${this.formatCurrency(pricing.accessorialTotal + pricing.expeditedSurcharge)}</strong></div>
+        <div class="result-kpi secondary-accent"><span>Profit</span><strong>${this.formatCurrency(pricing.profit)}</strong></div>
+        <div class="result-kpi primary"><span>Final Quote</span><strong>${this.formatCurrency(pricing.quoteCost)}</strong></div>
       </div>
       <div class="result-detail-grid">
         <div class="result-detail"><span>Carrier Estimate</span><strong>${this.formatCurrency(pricing.baseCost)}</strong></div>
-        <div class="result-detail"><span>Pricing Mode</span><strong>${modeLabel}</strong></div>
-        <div class="result-detail"><span>Distance</span><strong>${Number(context.distanceValue || 0).toFixed(1)} mi</strong></div>
-        <div class="result-detail"><span>Rate Basis</span><strong>${this.formatCurrency(context.costPerMile)}/mi</strong></div>
+        <div class="result-detail"><span>Profit Method</span><strong>${pricing.profitMethod}</strong></div>
+        <div class="result-detail"><span>Target Margin</span><strong>${marginPct.toFixed(1)}%</strong></div>
+        <div class="result-detail"><span>Pricing Strategy</span><strong>${pricing.strategyLabel}</strong></div>
       </div>
       <div class="result-detail-grid compact">
         <div class="result-detail"><span>FTL Benchmark</span><strong>${this.formatCurrency(pricing.ftlBenchmark)}</strong></div>
-        <div class="result-detail"><span>Deck Share</span><strong>${Math.round((pricing.deckShare || 0) * 100)}%</strong></div>
+        <div class="result-detail"><span>Effective Deck</span><strong>${Number(pricing.effectiveLinearFeet || 0).toFixed(1)} ft / ${Math.round((pricing.deckShare || 0) * 100)}%</strong></div>
         <div class="result-detail"><span>Weight Factor</span><strong>${Number(pricing.weightFactor || 1).toFixed(2)}×</strong></div>
-        <div class="result-detail"><span>Accessorial Basis</span><strong>${accessorialLabel}</strong></div>
+        <div class="result-detail"><span>Partial Premium</span><strong>${Number(pricing.partialPremium || 1).toFixed(2)}×</strong></div>
         <div class="result-detail"><span>Market Basis</span><strong>${marketBasis}</strong></div>
+      </div>
+      <div class="result-detail-grid">
+        <div class="result-detail"><span>Manual Accessorials</span><strong>${this.formatCurrency(pricing.manualAccessorialTotal || 0)}</strong></div>
+        <div class="result-detail"><span>Auto Buffer</span><strong>${this.formatCurrency(pricing.autoBufferTotal || 0)}</strong></div>
+        <div class="result-detail"><span>Expedited %</span><strong>${Number(pricing.expeditedPercent || 0).toFixed(1)}%</strong></div>
+        <div class="result-detail"><span>Accessorial Basis</span><strong>${accessorialLabel}</strong></div>
       </div>
       <div class="result-detail-grid">
         <div class="result-detail"><span>Load Length</span><strong>${Number(context.length || 0).toFixed(1)} ft</strong></div>
@@ -2152,8 +2706,9 @@ const FreightCalculator = {
         <div class="result-detail"><span>Load Height</span><strong>${Number(context.height || 0).toFixed(1)} ft</strong></div>
         <div class="result-detail"><span>Weight</span><strong>${Number(context.weight || 0).toLocaleString('en-US')} lb</strong></div>
       </div>
-      <div class="formula-note"><span>Calculation Logic</span><strong>${modeLabel}:</strong> ${formulaText}</div>
+      <div class="formula-note"><span>Auto Buffer Detail</span><strong>${autoBufferItems}</strong></div>
       ${this.renderGuardrails(pricing.guardrails)}
+      <div class="result-action-plan"><span>Broker Action Plan</span><strong>${modeLabel} using ${pricing.strategyLabel}</strong><ul>${(pricing.actionPlan || []).map(item => `<li>${item}</li>`).join('')}</ul></div>
     `;
   },
 
@@ -2164,11 +2719,12 @@ const FreightCalculator = {
     const rows = [
       ['Linehaul', this.formatCurrency(pricing.linehaulCost)],
     ];
-    if ((pricing.accessorialTotal || 0) > 0) rows.push(['Accessorials / Risk', this.formatCurrency(pricing.accessorialTotal)]);
+    if ((pricing.manualAccessorialTotal || 0) > 0) rows.push(['Manual Accessorials / Risk', this.formatCurrency(pricing.manualAccessorialTotal)]);
+    if ((pricing.autoBufferTotal || 0) > 0) rows.push(['Auto Broker Buffer', this.formatCurrency(pricing.autoBufferTotal)]);
     if ((pricing.expeditedSurcharge || 0) > 0) rows.push(['Expedited Surcharge', this.formatCurrency(pricing.expeditedSurcharge)]);
     rows.push(
       ['Carrier Estimate', this.formatCurrency(pricing.baseCost)],
-      ['Profit', this.formatCurrency(pricing.profit)],
+      ['Profit', `${this.formatCurrency(pricing.profit)} (${pricing.profitMethod || 'manual'})`],
       ['Quote Rate', this.formatCurrency(pricing.quoteCost)],
     );
     return rows;
@@ -2398,6 +2954,10 @@ const FreightCalculator = {
       profit:         pricing.profit.toFixed(2),
       quoteCost:      pricing.quoteCost.toFixed(2),
       pricingMode:    pricing.pricingMode,
+      pricingStrategy: pricing.strategyLabel,
+      quoteScore:     pricing.quoteScore,
+      autoBufferTotal: pricing.autoBufferTotal,
+      profitMethod:   pricing.profitMethod,
       guardrails:     pricing.guardrails,
       sendToCustomer: context.sendToCustomer,
       laneRate: context.laneRateContext ? {
@@ -2420,6 +2980,13 @@ const FreightCalculator = {
       return 'Low Boy';
     }
     const typeMap = {
+      machinery:                'Step Deck or Flatbed',
+      construction:             'Flatbed or Step Deck',
+      palletized:               'Dry Van, Flatbed, or Box Truck depending size',
+      'pipe-steel':             'Flatbed with proper securement / pipe stakes',
+      lumber:                   'Flatbed or Conestoga',
+      'crated-fragile':         'Conestoga or Air-Ride Van if dimensions allow',
+      oversize:                 'RGN / Step Deck with permits',
       liquid:                   'Tanker Trailer',
       'temperature-controlled': 'Refrigerated Trailer',
       vehicles:                 'Car Hauler Trailer',
@@ -2449,6 +3016,8 @@ const FreightCalculator = {
         input.value = 'general';
       } else if (input.id === 'equipmentClass') {
         input.value = 'flatbed';
+      } else if (input.id === 'pricingStrategy') {
+        input.value = 'balanced';
       } else {
         input.value = '';
       }
@@ -2462,6 +3031,8 @@ const FreightCalculator = {
       .forEach(inp => inp.parentElement.remove());
     this.stopCounter = 0;
     if (this.elements.equipmentClass) this.elements.equipmentClass.value = 'flatbed';
+    if (this.elements.pricingStrategy) this.elements.pricingStrategy.value = 'balanced';
+    if (this.elements.autoBrokerBuffer) this.elements.autoBrokerBuffer.checked = true;
     this.elements.freightEstimate.innerHTML      = '';
     this.elements.trailerRecommendation.innerHTML = '';
     // Clear lane-rate hint and visible market panel
@@ -2660,13 +3231,26 @@ const FreightCalculator = {
         ['Field', 'Value'],
         [
           { cells:['Pricing mode', pricing.pricingMode] },
+          { cells:['Pricing strategy', pricing.strategyLabel || 'Balanced Broker'] },
+          { cells:['Broker score', pricing.quoteScore ? `${pricing.quoteScore.score}/100 — ${pricing.quoteScore.label}` : 'N/A'] },
           { cells:['FTL benchmark', this.formatCurrency(pricing.ftlBenchmark)] },
-          { cells:['Deck share', `${Math.round((pricing.deckShare || 0) * 100)}% of 48 ft deck`] },
-          { cells:['Accessorials / risk', this.formatCurrency(pricing.accessorialTotal)] },
+          { cells:['Effective deck', `${Number(pricing.effectiveLinearFeet || 0).toFixed(1)} ft / ${Math.round((pricing.deckShare || 0) * 100)}% of 48 ft deck`] },
+          { cells:['Manual accessorials', this.formatCurrency(pricing.manualAccessorialTotal || 0)] },
+          { cells:['Auto broker buffer', this.formatCurrency(pricing.autoBufferTotal || 0)] },
           { cells:['Expedited surcharge', this.formatCurrency(pricing.expeditedSurcharge)] },
+          { cells:['Profit method', pricing.profitMethod || 'Manual'] },
           { cells:['Guardrails', `${(pricing.guardrails || []).length} note(s). Review Quote Results screen before sending.`] },
         ],
         [55, CW - 55]
+      );
+    }
+
+    if (!sendToCustomer && pricing.actionPlan?.length) {
+      sectionTitle('Broker Action Plan');
+      drawTable(
+        ['Item', 'Recommendation'],
+        pricing.actionPlan.slice(0, 4).map((item, index) => ({ cells:[String(index + 1), item] })),
+        [18, CW - 18]
       );
     }
 
@@ -2762,9 +3346,11 @@ const FreightCalculator = {
       ? calculation.guardrails.filter(g => !String(g).startsWith('No major guardrail')).length
       : 0;
     const guardrailStr = guardrailCount ? ` | ${guardrailCount} guardrail check${guardrailCount > 1 ? 's' : ''}` : '';
+    const scoreStr = calculation.quoteScore?.score ? ` | Score: ${calculation.quoteScore.score}/100` : '';
+    const strategyStr = calculation.pricingStrategy ? ` | ${calculation.pricingStrategy}` : '';
     li.textContent = `${calculation.date}: ${calculation.customer} — `
       + `${calculation.origin} to ${calculation.destination}${stopsStr} — `
-      + `${this.formatCurrency(calculation.quoteCost)} (${modeStr})${priceMode}${laneStr}${guardrailStr}`;
+      + `${this.formatCurrency(calculation.quoteCost)} (${modeStr})${priceMode}${strategyStr}${laneStr}${scoreStr}${guardrailStr}`;
     this.elements.historyList.prepend(li);
     if (this.elements.historyList.children.length > 10) {
       this.elements.historyList.removeChild(this.elements.historyList.lastChild);
@@ -2830,13 +3416,13 @@ const FreightCalculator = {
 
     // Inline validation only (no side-effects on quote)
     elements.weight.addEventListener('input', () =>
-      this.validateInput(elements.weight, 80000, 'Weight must be between 0 and 80,000 lbs'));
+      this.validateInput(elements.weight, 120000, 'Weight must be between 0 and 120,000 lbs'));
     elements.height.addEventListener('input', () =>
-      this.validateInput(elements.height, 13.5, 'Height must be between 0 and 13.5 ft'));
+      this.validateInput(elements.height, 20, 'Height must be between 0 and 20 ft'));
     elements.length.addEventListener('input', () =>
-      this.validateInput(elements.length, 53, 'Length must be between 0 and 53 ft'));
+      this.validateInput(elements.length, 120, 'Length must be between 0 and 120 ft'));
     elements.width.addEventListener('input', () =>
-      this.validateInput(elements.width, 8.5, 'Width must be between 0 and 8.5 ft'));
+      this.validateInput(elements.width, 20, 'Width must be between 0 and 20 ft'));
     elements.distance.addEventListener('input', () =>
       this.validateInput(elements.distance, 10000, 'Distance must be between 0 and 10,000 miles'));
     elements.costPerMile.addEventListener('input', () =>
@@ -2846,6 +3432,10 @@ const FreightCalculator = {
     });
     elements.expeditedPercent?.addEventListener('input', () =>
       this.validateInput(elements.expeditedPercent, 100, 'Expedited surcharge must be between 0% and 100%'));
+    elements.targetMarginPercent?.addEventListener('input', () =>
+      this.validateInput(elements.targetMarginPercent, 60, 'Target margin must be between 0% and 60%'));
+    elements.minimumProfit?.addEventListener('input', () =>
+      this.validateInput(elements.minimumProfit, 100000, 'Minimum profit must be between $0 and $100,000'));
     elements.equipmentClass?.addEventListener('change', () => this.applyLaneRate(true));
 
     document.getElementById('useMarketRateButton')?.addEventListener('click', () => this.applyLaneRate(true));
@@ -2889,6 +3479,7 @@ const FreightCalculator = {
       this.loadCustomers();
       this.addEventListeners();
       this.loadHistory();
+      this.loadPricingConfig(false);
       this.loadLaneRates(false);
     };
     if (document.readyState === 'loading') {

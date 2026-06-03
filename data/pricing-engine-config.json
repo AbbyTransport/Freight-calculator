@@ -1,0 +1,129 @@
+{
+  "version": "2026.06-broker-free-mode",
+  "notes": "External config for Abby Freight Calculator. Adjust conservatively and test after changes.",
+  "partialDeckFeet": 48,
+  "minimumCharge": 650,
+  "partialPremium": {
+    "small": 1.72,
+    "standard": 1.58,
+    "large": 1.42,
+    "nearFtl": 1.18
+  },
+  "partialCaps": {
+    "standard": 0.88,
+    "nearFtl": 0.95
+  },
+  "autoBuffer": {
+    "extraStopDefault": 100,
+    "tallOver10": 125,
+    "tallOver12": 275,
+    "wideOverLegal": 325,
+    "longOver48": 350,
+    "heavyOver30000": 175,
+    "heavyOver45000": 350,
+    "lowConfidenceLane": 125,
+    "nearFtlPartial": 175,
+    "rgnSpecialized": 500
+  },
+  "quoteRange": {
+    "low": -0.04,
+    "high": 0.07
+  },
+  "strategies": {
+    "balanced": {
+      "label": "Balanced Broker",
+      "description": "Best everyday setting: competitive but not desperate.",
+      "margins": {
+        "ftl": 0.14,
+        "partial": 0.2,
+        "hotshot": 0.17,
+        "rgn": 0.2,
+        "tycon": 0.15
+      },
+      "minimums": {
+        "ftl": 350,
+        "partial": 275,
+        "hotshot": 225,
+        "rgn": 650,
+        "tycon": 300
+      },
+      "defaultExpeditedPercent": 0
+    },
+    "aggressive": {
+      "label": "Aggressive / Win the Load",
+      "description": "Lower margin for competitive lanes or important opportunities.",
+      "margins": {
+        "ftl": 0.1,
+        "partial": 0.16,
+        "hotshot": 0.13,
+        "rgn": 0.16,
+        "tycon": 0.12
+      },
+      "minimums": {
+        "ftl": 250,
+        "partial": 200,
+        "hotshot": 175,
+        "rgn": 500,
+        "tycon": 225
+      },
+      "defaultExpeditedPercent": 0
+    },
+    "protective": {
+      "label": "Protective / Tight Market",
+      "description": "Adds room for carrier scarcity, awkward freight, and hard lanes.",
+      "margins": {
+        "ftl": 0.18,
+        "partial": 0.24,
+        "hotshot": 0.2,
+        "rgn": 0.25,
+        "tycon": 0.18
+      },
+      "minimums": {
+        "ftl": 475,
+        "partial": 350,
+        "hotshot": 300,
+        "rgn": 850,
+        "tycon": 400
+      },
+      "defaultExpeditedPercent": 0
+    },
+    "expedited": {
+      "label": "Expedited / Urgent",
+      "description": "Urgency pricing with higher margins and automatic tight-lane surcharge.",
+      "margins": {
+        "ftl": 0.22,
+        "partial": 0.28,
+        "hotshot": 0.24,
+        "rgn": 0.3,
+        "tycon": 0.22
+      },
+      "minimums": {
+        "ftl": 600,
+        "partial": 425,
+        "hotshot": 350,
+        "rgn": 1000,
+        "tycon": 500
+      },
+      "defaultExpeditedPercent": 8
+    },
+    "strategic": {
+      "label": "Strategic Customer",
+      "description": "Slightly leaner margin for recurring customers where relationship matters.",
+      "margins": {
+        "ftl": 0.11,
+        "partial": 0.17,
+        "hotshot": 0.14,
+        "rgn": 0.17,
+        "tycon": 0.13
+      },
+      "minimums": {
+        "ftl": 300,
+        "partial": 225,
+        "hotshot": 200,
+        "rgn": 575,
+        "tycon": 250
+      },
+      "defaultExpeditedPercent": 0
+    }
+  }
+}
