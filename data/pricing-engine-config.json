@@ -1,70 +1,69 @@
 {
-  "version": "2026.06-broker-free-mode",
-  "notes": "External config for Abby Freight Calculator. Adjust conservatively and test after changes.",
+  "version": "2026.06-tycon-win-mode-v1",
+  "notes": "Competitive Abby broker engine. Tycon Systems uses automatic Win Mode when Customer Name matches Tycon Systems. Tycon is no longer a Cargo Type.",
   "partialDeckFeet": 48,
-  "minimumCharge": 650,
+  "minimumCharge": 575,
+  "partialLongHaulFloorPerMile": 1.1,
+  "partialFloorPercent": 0.28,
+  "partialFloorMax": 875,
   "partialPremium": {
-    "small": 1.72,
-    "standard": 1.58,
-    "large": 1.42,
-    "nearFtl": 1.18
+    "small": 1.48,
+    "standard": 1.36,
+    "large": 1.24,
+    "nearFtl": 1.08
   },
   "partialCaps": {
-    "standard": 0.88,
-    "nearFtl": 0.95
+    "standard": 0.78,
+    "nearFtl": 0.89
   },
   "autoBuffer": {
-    "extraStopDefault": 100,
-    "tallOver10": 125,
-    "tallOver12": 275,
-    "wideOverLegal": 325,
-    "longOver48": 350,
-    "heavyOver30000": 175,
-    "heavyOver45000": 350,
-    "lowConfidenceLane": 125,
-    "nearFtlPartial": 175,
-    "rgnSpecialized": 500
+    "extraStopDefault": 85,
+    "tallOver10": 85,
+    "tallOver12": 200,
+    "wideOverLegal": 250,
+    "longOver48": 250,
+    "heavyOver30000": 125,
+    "heavyOver45000": 250,
+    "lowConfidenceLane": 75,
+    "nearFtlPartial": 100,
+    "rgnSpecialized": 425
   },
   "quoteRange": {
-    "low": -0.04,
-    "high": 0.07
+    "low": -0.06,
+    "high": 0.04
   },
   "strategies": {
     "balanced": {
       "label": "Balanced Broker",
-      "description": "Best everyday setting: competitive but not desperate.",
+      "description": "Competitive everyday setting with leaner Abby margins.",
       "margins": {
-        "ftl": 0.14,
-        "partial": 0.2,
-        "hotshot": 0.17,
-        "rgn": 0.2,
-        "tycon": 0.15
+        "ftl": 0.1,
+        "partial": 0.14,
+        "hotshot": 0.12,
+        "rgn": 0.16
       },
       "minimums": {
-        "ftl": 350,
-        "partial": 275,
-        "hotshot": 225,
-        "rgn": 650,
-        "tycon": 300
+        "ftl": 275,
+        "partial": 200,
+        "hotshot": 175,
+        "rgn": 525
       },
       "defaultExpeditedPercent": 0
     },
     "aggressive": {
       "label": "Aggressive / Win the Load",
-      "description": "Lower margin for competitive lanes or important opportunities.",
+      "description": "Lower margin for bid boards, multi-broker customers, and price-sensitive lanes.",
       "margins": {
-        "ftl": 0.1,
-        "partial": 0.16,
-        "hotshot": 0.13,
-        "rgn": 0.16,
-        "tycon": 0.12
+        "ftl": 0.075,
+        "partial": 0.1,
+        "hotshot": 0.085,
+        "rgn": 0.13
       },
       "minimums": {
-        "ftl": 250,
-        "partial": 200,
-        "hotshot": 175,
-        "rgn": 500,
-        "tycon": 225
+        "ftl": 200,
+        "partial": 150,
+        "hotshot": 125,
+        "rgn": 425
       },
       "defaultExpeditedPercent": 0
     },
@@ -72,18 +71,16 @@
       "label": "Protective / Tight Market",
       "description": "Adds room for carrier scarcity, awkward freight, and hard lanes.",
       "margins": {
-        "ftl": 0.18,
-        "partial": 0.24,
-        "hotshot": 0.2,
-        "rgn": 0.25,
-        "tycon": 0.18
+        "ftl": 0.15,
+        "partial": 0.19,
+        "hotshot": 0.16,
+        "rgn": 0.22
       },
       "minimums": {
-        "ftl": 475,
-        "partial": 350,
-        "hotshot": 300,
-        "rgn": 850,
-        "tycon": 400
+        "ftl": 400,
+        "partial": 300,
+        "hotshot": 250,
+        "rgn": 750
       },
       "defaultExpeditedPercent": 0
     },
@@ -91,39 +88,73 @@
       "label": "Expedited / Urgent",
       "description": "Urgency pricing with higher margins and automatic tight-lane surcharge.",
       "margins": {
-        "ftl": 0.22,
-        "partial": 0.28,
-        "hotshot": 0.24,
-        "rgn": 0.3,
-        "tycon": 0.22
+        "ftl": 0.18,
+        "partial": 0.22,
+        "hotshot": 0.19,
+        "rgn": 0.26
       },
       "minimums": {
-        "ftl": 600,
-        "partial": 425,
-        "hotshot": 350,
-        "rgn": 1000,
-        "tycon": 500
+        "ftl": 500,
+        "partial": 350,
+        "hotshot": 300,
+        "rgn": 900
       },
-      "defaultExpeditedPercent": 8
+      "defaultExpeditedPercent": 6
     },
     "strategic": {
       "label": "Strategic Customer",
-      "description": "Slightly leaner margin for recurring customers where relationship matters.",
+      "description": "Relationship pricing for recurring accounts where volume matters.",
       "margins": {
-        "ftl": 0.11,
-        "partial": 0.17,
-        "hotshot": 0.14,
-        "rgn": 0.17,
-        "tycon": 0.13
+        "ftl": 0.08,
+        "partial": 0.11,
+        "hotshot": 0.095,
+        "rgn": 0.14
       },
       "minimums": {
-        "ftl": 300,
-        "partial": 225,
-        "hotshot": 200,
-        "rgn": 575,
-        "tycon": 250
+        "ftl": 225,
+        "partial": 175,
+        "hotshot": 150,
+        "rgn": 450
       },
       "defaultExpeditedPercent": 0
+    }
+  },
+  "customerProfiles": {
+    "tyconSystems": {
+      "label": "Tycon Systems \u2014 Win Mode",
+      "shortLabel": "Tycon Win Mode",
+      "aliases": [
+        "tycon",
+        "tycon systems",
+        "tyconsystems"
+      ],
+      "forceStrategy": "aggressive",
+      "marketRateMultiplier": 0.88,
+      "partialPremiumMultiplier": 0.88,
+      "autoBufferMultiplier": 0.35,
+      "minimumCharge": 525,
+      "partialLongHaulFloorPerMile": 1.03,
+      "partialFloorPercent": 0.23,
+      "partialFloorMax": 775,
+      "quoteRange": {
+        "low": -0.05,
+        "high": 0.015
+      },
+      "profitProfile": {
+        "margins": {
+          "ftl": 0.045,
+          "partial": 0.055,
+          "hotshot": 0.05,
+          "rgn": 0.1
+        },
+        "minimums": {
+          "ftl": 150,
+          "partial": 125,
+          "hotshot": 100,
+          "rgn": 350
+        }
+      },
+      "actionNote": "Tycon Systems uses automatic aggressive bid pricing: lower lane basis, leaner margin, and reduced buffer. Use it to win bid-board freight, then protect Abby with carrier confirmation before committing."
     }
   }
 }

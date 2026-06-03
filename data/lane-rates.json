@@ -1,13 +1,15 @@
 {
-  "schemaVersion": 2,
-  "updatedAt": "2026-06-02T20:39:25.761Z",
-  "model": "weekly-public-update-plus-abby-regional-matrix",
+  "schemaVersion": 3,
+  "updatedAt": "2026-06-03T03:26:43.290Z",
+  "model": "weekly-public-update-plus-competitive-abby-bid-matrix",
   "equipment": "flatbed-base-with-equipment-multipliers",
-  "rateType": "estimated all-in spot rate per mile",
-  "defaultCostPerMile": 3.6,
+  "rateType": "estimated competitive booking target per mile; not a guaranteed live lane average",
+  "defaultCostPerMile": 2.65,
+  "rawMarketNationalAverage": 2.88,
+  "competitiveMarketMultiplier": 0.92,
   "regionalAnchors": {
-    "midwest": 2.86,
-    "west": 3.03
+    "midwest": 2.69,
+    "west": 2.43
   },
   "regionCodes": {
     "NOR": "Northeast",
@@ -21,115 +23,130 @@
   },
   "regionRates": {
     "NOR": {
-      "NOR": 3.67,
-      "SOU": 3.87,
-      "MID": 3.78,
-      "SPL": 4,
-      "TEX": 4.13,
-      "MTN": 4.15,
-      "SWE": 4.14,
-      "NWE": 4.21
+      "NOR": 2.58,
+      "SOU": 2.73,
+      "MID": 2.77,
+      "SPL": 2.87,
+      "TEX": 2.91,
+      "MTN": 2.96,
+      "SWE": 3.01,
+      "NWE": 3.06
     },
     "SOU": {
-      "NOR": 3.8,
-      "SOU": 3.6,
-      "MID": 3.59,
-      "SPL": 3.74,
-      "TEX": 3.67,
-      "MTN": 3.95,
-      "SWE": 3.95,
-      "NWE": 4.08
+      "NOR": 2.68,
+      "SOU": 2.54,
+      "MID": 2.63,
+      "SPL": 2.68,
+      "TEX": 2.59,
+      "MTN": 2.82,
+      "SWE": 2.87,
+      "NWE": 2.96
     },
     "MID": {
-      "NOR": 3.85,
-      "SOU": 3.72,
-      "MID": 3.46,
-      "SPL": 3.41,
-      "TEX": 3.66,
-      "MTN": 3.68,
-      "SWE": 3.74,
-      "NWE": 3.81
+      "NOR": 2.82,
+      "SOU": 2.73,
+      "MID": 2.63,
+      "SPL": 2.54,
+      "TEX": 2.68,
+      "MTN": 2.73,
+      "SWE": 2.82,
+      "NWE": 2.87
     },
     "SPL": {
-      "NOR": 3.93,
-      "SOU": 3.61,
-      "MID": 3.35,
-      "SPL": 3.29,
-      "TEX": 3.41,
-      "MTN": 3.5,
-      "SWE": 3.57,
-      "NWE": 3.7
+      "NOR": 2.82,
+      "SOU": 2.59,
+      "MID": 2.49,
+      "SPL": 2.4,
+      "TEX": 2.44,
+      "MTN": 2.54,
+      "SWE": 2.63,
+      "NWE": 2.73
     },
     "TEX": {
-      "NOR": 4.07,
-      "SOU": 3.53,
-      "MID": 3.46,
-      "SPL": 3.34,
-      "TEX": 3.27,
-      "MTN": 3.56,
-      "SWE": 3.43,
-      "NWE": 3.75
+      "NOR": 2.87,
+      "SOU": 2.49,
+      "MID": 2.54,
+      "SPL": 2.4,
+      "TEX": 2.3,
+      "MTN": 2.54,
+      "SWE": 2.49,
+      "NWE": 2.73
     },
     "MTN": {
-      "NOR": 4.09,
-      "SOU": 3.82,
-      "MID": 3.49,
-      "SPL": 3.44,
-      "TEX": 3.56,
-      "MTN": 3.19,
-      "SWE": 3.27,
-      "NWE": 3.27
+      "NOR": 2.91,
+      "SOU": 2.73,
+      "MID": 2.59,
+      "SPL": 2.49,
+      "TEX": 2.54,
+      "MTN": 2.3,
+      "SWE": 2.4,
+      "NWE": 2.4
     },
     "SWE": {
-      "NOR": 4.08,
-      "SOU": 3.88,
-      "MID": 3.56,
-      "SPL": 3.5,
-      "TEX": 3.43,
-      "MTN": 3.27,
-      "SWE": 3.02,
-      "NWE": 3.27
+      "NOR": 2.96,
+      "SOU": 2.82,
+      "MID": 2.68,
+      "SPL": 2.59,
+      "TEX": 2.49,
+      "MTN": 2.4,
+      "SWE": 2.26,
+      "NWE": 2.44
     },
     "NWE": {
-      "NOR": 4.21,
-      "SOU": 4.01,
-      "MID": 3.68,
-      "SPL": 3.7,
-      "TEX": 3.75,
-      "MTN": 3.33,
-      "SWE": 3.34,
-      "NWE": 3.15
+      "NOR": 3.06,
+      "SOU": 2.91,
+      "MID": 2.77,
+      "SPL": 2.73,
+      "TEX": 2.73,
+      "MTN": 2.44,
+      "SWE": 2.49,
+      "NWE": 2.35
     }
   },
   "equipmentProfiles": {
     "flatbed": {
       "label": "Flatbed",
-      "multiplier": 1,
+      "multiplier": 1.0,
       "confidenceBoost": 0
     },
     "stepdeck": {
       "label": "Step deck",
-      "multiplier": 1.05,
+      "multiplier": 1.03,
+      "confidenceBoost": -1
+    },
+    "conestoga": {
+      "label": "Conestoga",
+      "multiplier": 1.08,
       "confidenceBoost": -1
     },
     "dryvan": {
       "label": "Dry van",
-      "multiplier": 0.78,
+      "multiplier": 0.72,
       "confidenceBoost": -1
     },
     "reefer": {
       "label": "Reefer",
-      "multiplier": 0.92,
+      "multiplier": 0.86,
       "confidenceBoost": -1
     },
     "hotshot": {
       "label": "Hotshot",
-      "multiplier": 0.88,
+      "multiplier": 0.82,
       "confidenceBoost": -1
+    },
+    "boxtruck": {
+      "label": "Box Truck / Sprinter",
+      "multiplier": 0.64,
+      "confidenceBoost": -2
+    },
+    "poweronly": {
+      "label": "Power Only",
+      "multiplier": 0.76,
+      "confidenceBoost": -2
     },
     "rgn": {
       "label": "RGN / Specialized",
-      "multiplier": 1.42,
+      "multiplier": 1.32,
       "confidenceBoost": -2
     }
   },
@@ -139,18 +156,8 @@
     "customerPdfHidesMarketBasis": true
   },
   "methodology": {
-    "baseNationalAverage": 2.7,
-    "note": "Weekly public freight-rate data is parsed when available, then blended into Abby Transport regional lane matrix. The app applies an equipment multiplier on top of the flatbed matrix. This is a semi-real estimating model, not a replacement for paid lane-level rate products."
+    "note": "This file intentionally stores a competitive broker booking target, not a retail/high-side market number. It is calibrated lower for quote competitiveness. Tycon Systems receives an additional customer-profile discount inside the calculator when Customer Name is Tycon Systems."
   },
   "sources": [],
-  "failures": [
-    {
-      "source": "DAT Trendlines",
-      "error": "fetch failed"
-    },
-    {
-      "source": "Scale Funding Current Freight Rates",
-      "error": "fetch failed"
-    }
-  ]
+  "failures": []
 }

@@ -1,75 +1,12 @@
 [
   {
-    "updatedAt": "2026-04-28T00:00:00.000Z",
-    "defaultCostPerMile": 2.92,
+    "updatedAt": "2026-06-03T03:26:43.290Z",
+    "defaultCostPerMile": 2.65,
     "regionalAnchors": {
-      "midwest": 3.14,
-      "west": 2.39
+      "midwest": 2.69,
+      "west": 2.43
     },
-    "sourceSummary": "Initial seed from public DAT/Scale Funding references"
-  },
-  {
-    "updatedAt": "2026-04-29T15:30:07.522Z",
-    "defaultCostPerMile": 3.44,
-    "regionalAnchors": {
-      "midwest": 2.88,
-      "west": 2.92
-    },
-    "sourceSummary": "Scale Funding Current Freight Rates"
-  },
-  {
-    "updatedAt": "2026-05-04T15:23:04.255Z",
-    "defaultCostPerMile": 3.44,
-    "regionalAnchors": {
-      "midwest": 2.88,
-      "west": 2.92
-    },
-    "sourceSummary": "Scale Funding Current Freight Rates"
-  },
-  {
-    "updatedAt": "2026-05-11T16:11:35.704Z",
-    "defaultCostPerMile": 3.44,
-    "regionalAnchors": {
-      "midwest": 2.88,
-      "west": 2.92
-    },
-    "sourceSummary": "Scale Funding Current Freight Rates"
-  },
-  {
-    "updatedAt": "2026-05-18T16:33:15.477Z",
-    "defaultCostPerMile": 3.44,
-    "regionalAnchors": {
-      "midwest": 2.88,
-      "west": 2.92
-    },
-    "sourceSummary": "Scale Funding Current Freight Rates"
-  },
-  {
-    "updatedAt": "2026-05-25T16:03:15.474Z",
-    "defaultCostPerMile": 3.44,
-    "regionalAnchors": {
-      "midwest": 2.88,
-      "west": 2.92
-    },
-    "sourceSummary": "Scale Funding Current Freight Rates"
-  },
-  {
-    "updatedAt": "2026-06-01T18:59:57.527Z",
-    "defaultCostPerMile": 3.6,
-    "regionalAnchors": {
-      "midwest": 2.86,
-      "west": 3.03
-    },
-    "sourceSummary": "Scale Funding Current Freight Rates"
-  },
-  {
-    "updatedAt": "2026-06-02T20:39:25.761Z",
-    "defaultCostPerMile": 3.6,
-    "regionalAnchors": {
-      "midwest": 2.86,
-      "west": 3.03
-    },
-    "sourceSummary": "Previous lane-rate data retained; no public source parsed successfully",
-    "failures": 2
+    "sourceSummary": "Competitive baseline generated from Abby bid matrix; Tycon profile handled in pricing engine",
+    "failures": 0
   }
 ]

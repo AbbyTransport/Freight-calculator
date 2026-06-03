@@ -27,6 +27,7 @@ const HISTORY_JSON_PATH = path.join(DATA_DIR, "lane-rates-history.json");
 
 const REGION_CODES = ["NOR", "SOU", "MID", "SPL", "TEX", "MTN", "SWE", "NWE"];
 const BASE_NATIONAL_AVERAGE = 2.70;
+const COMPETITIVE_MARKET_MULTIPLIER = 0.92;
 
 const REGION_LABELS = {
   NOR: "Northeast",
@@ -41,11 +42,14 @@ const REGION_LABELS = {
 
 const EQUIPMENT_PROFILES = {
   flatbed:  { label: "Flatbed", multiplier: 1.00, confidenceBoost: 0 },
-  stepdeck: { label: "Step deck", multiplier: 1.05, confidenceBoost: -1 },
-  dryvan:   { label: "Dry van", multiplier: 0.78, confidenceBoost: -1 },
-  reefer:   { label: "Reefer", multiplier: 0.92, confidenceBoost: -1 },
-  hotshot:  { label: "Hotshot", multiplier: 0.88, confidenceBoost: -1 },
-  rgn:      { label: "RGN / Specialized", multiplier: 1.42, confidenceBoost: -2 },
+  stepdeck: { label: "Step deck", multiplier: 1.03, confidenceBoost: -1 },
+  conestoga:{ label: "Conestoga", multiplier: 1.08, confidenceBoost: -1 },
+  dryvan:   { label: "Dry van", multiplier: 0.72, confidenceBoost: -1 },
+  reefer:   { label: "Reefer", multiplier: 0.86, confidenceBoost: -1 },
+  hotshot:  { label: "Hotshot", multiplier: 0.82, confidenceBoost: -1 },
+  boxtruck: { label: "Box Truck / Sprinter", multiplier: 0.64, confidenceBoost: -2 },
+  poweronly:{ label: "Power Only", multiplier: 0.76, confidenceBoost: -2 },
+  rgn:      { label: "RGN / Specialized", multiplier: 1.32, confidenceBoost: -2 },
 };
 
 const BASE_REGION_RATES = {
@@ -221,7 +225,7 @@ function generateRegionRates(rates) {
       const baseRate = BASE_REGION_RATES[origin][destination];
       const rawRegionFactor = Math.sqrt(regionFactors[origin] * regionFactors[destination]);
       const blendedFactor = 1 + (rawRegionFactor - 1) * anchorStrength;
-      const adjusted = baseRate * nationalScale * blendedFactor;
+      const adjusted = baseRate * nationalScale * blendedFactor * COMPETITIVE_MARKET_MULTIPLIER;
       output[origin][destination] = round2(clamp(adjusted, national * 0.72, national * 1.42));
     }
   }
@@ -324,7 +328,8 @@ async function main() {
   let midwest = weightedAverage(sources, "midwest");
   let west = weightedAverage(sources, "west");
 
-  if (!isUsableRate(national) && existing?.defaultCostPerMile) national = Number(existing.defaultCostPerMile);
+  if (!isUsableRate(national) && existing?.rawMarketNationalAverage) national = Number(existing.rawMarketNationalAverage);
+  if (!isUsableRate(national) && existing?.defaultCostPerMile) national = Number(existing.defaultCostPerMile) / COMPETITIVE_MARKET_MULTIPLIER;
   if (!isUsableRate(midwest) && existing?.regionalAnchors?.midwest) midwest = Number(existing.regionalAnchors.midwest);
   if (!isUsableRate(west) && existing?.regionalAnchors?.west) west = Number(existing.regionalAnchors.west);
   if (!isUsableRate(national)) national = BASE_NATIONAL_AVERAGE;
@@ -335,18 +340,21 @@ async function main() {
     west: isUsableRate(west) ? round2(west) : null,
   };
 
+  const competitiveDefaultCostPerMile = round2(rates.national * COMPETITIVE_MARKET_MULTIPLIER);
   const regionRates = generateRegionRates(rates);
   const indexOriginal = await fs.readFile(INDEX_PATH, "utf8");
-  await fs.writeFile(INDEX_PATH, patchIndexHtml(indexOriginal, rates.national, regionRates), "utf8");
+  await fs.writeFile(INDEX_PATH, patchIndexHtml(indexOriginal, competitiveDefaultCostPerMile, regionRates), "utf8");
 
   const data = {
     schemaVersion: 2,
     updatedAt: now,
     model: "weekly-public-update-plus-abby-regional-matrix",
     equipment: "flatbed-base-with-equipment-multipliers",
-    rateType: "estimated all-in spot rate per mile",
-    defaultCostPerMile: rates.national,
-    regionalAnchors: { midwest: rates.midwest, west: rates.west },
+    rateType: "estimated competitive booking target per mile; not a guaranteed live lane average",
+    defaultCostPerMile: competitiveDefaultCostPerMile,
+    rawMarketNationalAverage: rates.national,
+    competitiveMarketMultiplier: COMPETITIVE_MARKET_MULTIPLIER,
+    regionalAnchors: { midwest: rates.midwest ? round2(rates.midwest * COMPETITIVE_MARKET_MULTIPLIER) : null, west: rates.west ? round2(rates.west * COMPETITIVE_MARKET_MULTIPLIER) : null },
     regionCodes: REGION_LABELS,
     regionRates,
     equipmentProfiles: EQUIPMENT_PROFILES,
@@ -357,7 +365,8 @@ async function main() {
     },
     methodology: {
       baseNationalAverage: BASE_NATIONAL_AVERAGE,
-      note: "Weekly public freight-rate data is parsed when available, then blended into Abby Transport regional lane matrix. The app applies an equipment multiplier on top of the flatbed matrix. This is a semi-real estimating model, not a replacement for paid lane-level rate products.",
+      competitiveMarketMultiplier: COMPETITIVE_MARKET_MULTIPLIER,
+      note: "Weekly public freight-rate data is parsed when available, then discounted into a competitive Abby booking target. This is intentionally lower than a high-side market average because bid-board customers usually award to the lowest realistic quote. This is a semi-real estimating model, not a replacement for paid lane-level rate products.",
     },
     sources: sources.map(s => ({ source: s.source, url: s.url, weight: s.weight, foundAt: s.foundAt, rates: s.rates })),
     failures,
@@ -372,7 +381,8 @@ async function main() {
 
   history.push({
     updatedAt: now,
-    defaultCostPerMile: rates.national,
+    defaultCostPerMile: competitiveDefaultCostPerMile,
+    rawMarketNationalAverage: rates.national,
     regionalAnchors: data.regionalAnchors,
     sourceSummary: summarizeSources(sources),
     failures: failures.length,
@@ -380,7 +390,7 @@ async function main() {
   history = history.slice(-104);
   await writeJson(HISTORY_JSON_PATH, history);
 
-  console.log(`Updated default flatbed base rate: $${rates.national.toFixed(2)}/mi`);
+  console.log(`Updated competitive flatbed bid rate: $${competitiveDefaultCostPerMile.toFixed(2)}/mi (raw market anchor $${rates.national.toFixed(2)}/mi)`);
   console.log(`Sources: ${summarizeSources(sources)}`);
   if (failures.length) console.log(`Source failures: ${JSON.stringify(failures)}`);
 }
