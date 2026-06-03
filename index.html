@@ -1314,6 +1314,75 @@ button {
   border-radius: inherit;
   background: linear-gradient(90deg, #c2410c, #ca8a04, #16a34a);
 }
+
+.score-breakdown-panel {
+  margin: .7rem 0;
+  padding: .78rem .82rem;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 95, 155, .20);
+  background: linear-gradient(180deg, rgba(248,250,252,.88), rgba(255,255,255,.76));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+}
+.score-breakdown-panel > span {
+  display: block;
+  font-size: .68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: #38536f;
+  margin-bottom: .48rem;
+}
+.score-breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: .48rem;
+}
+.score-breakdown-item {
+  padding: .58rem .62rem;
+  border-radius: 12px;
+  border: 1px solid rgba(185,199,216,.72);
+  background: rgba(255,255,255,.76);
+}
+.score-breakdown-item span {
+  display: block;
+  color: #64748b;
+  font-size: .64rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin-bottom: .18rem;
+}
+.score-breakdown-item strong {
+  display: block;
+  color: #07182f;
+  font-family: var(--font-heading);
+  font-size: .98rem;
+}
+.score-reason-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .55rem;
+  margin-top: .62rem;
+}
+.score-reason-card {
+  padding: .62rem .7rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,.72);
+  border: 1px solid rgba(185,199,216,.72);
+}
+.score-reason-card.good { border-color: rgba(22,163,74,.26); background: linear-gradient(180deg, rgba(240,253,244,.82), rgba(255,255,255,.72)); }
+.score-reason-card.warn { border-color: rgba(202,138,4,.28); background: linear-gradient(180deg, rgba(255,251,235,.86), rgba(255,255,255,.72)); }
+.score-reason-card span {
+  display: block;
+  font-size: .64rem;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: #38536f;
+  margin-bottom: .32rem;
+}
+.score-reason-card ul { margin: 0 0 0 1rem; color: #244155; font-size: .78rem; line-height: 1.38; }
+.score-reason-card li + li { margin-top: .2rem; }
 .result-range-card {
   margin-bottom: .7rem;
   background: linear-gradient(180deg, rgba(255,251,235,.88), rgba(255,255,255,.76));
@@ -1353,11 +1422,15 @@ button {
 @media (max-width: 900px) {
   .result-command-center,
   .smart-buffer-card { grid-template-columns: 1fr; }
-  .result-detail-grid.compact { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .result-detail-grid.compact,
+  .score-breakdown-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .score-reason-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 760px) {
-  .result-detail-grid.compact { grid-template-columns: 1fr; }
+  .result-detail-grid.compact,
+  .score-breakdown-grid { grid-template-columns: 1fr; }
 }
+
 
   </style>
 </head>
@@ -2445,20 +2518,157 @@ const FreightCalculator = {
   },
 
   getQuoteScore(context, pricing) {
-    let score = 74;
-    if (context.laneRateContext?.confidence === 'High') score += 8;
-    if (context.laneRateContext?.confidence === 'Medium') score += 3;
-    if (context.laneRateContext?.confidence === 'Low') score -= 8;
-    if (pricing.modeKey === 'partial' && pricing.deckShare >= .625) score -= 12;
-    if (context.width > 8.5 || context.height > 12 || context.weight > 45000) score -= 10;
-    if ((pricing.autoBufferTotal || 0) > 0) score += 4;
-    if (pricing.profitMethod && pricing.profitMethod.startsWith('Auto')) score += 4;
-    if ((pricing.guardrails || []).some(g => !String(g).startsWith('No major guardrail'))) score -= Math.min(12, pricing.guardrails.length * 3);
-    score = Math.max(38, Math.min(96, Math.round(score)));
-    let label = 'Needs broker review';
-    if (score >= 82) label = 'Strong estimate';
-    else if (score >= 68) label = 'Usable estimate';
-    return { score, label };
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, Number(value || 0)));
+    const addReason = (bucket, message) => {
+      if (message && bucket.length < 5) bucket.push(message);
+    };
+    const positives = [];
+    const negatives = [];
+    const breakdown = [];
+    const customerProfile = context.customerProfile || this.getCustomerPricingProfile(context.customerName);
+    const isTycon = String(customerProfile?.key || '').toLowerCase().includes('tycon')
+      || this.normalizeCustomerName(context.customerName).includes('tycon');
+    const lane = context.laneRateContext || null;
+    const laneConfidence = lane?.confidence || 'None';
+    const laneUpdated = lane?.updatedAt ? new Date(lane.updatedAt) : null;
+    const laneAgeDays = laneUpdated && !Number.isNaN(laneUpdated.getTime())
+      ? Math.max(0, (Date.now() - laneUpdated.getTime()) / 86400000)
+      : null;
+
+    // 1) Market data quality, max 20.
+    let marketScore = 4;
+    if (laneConfidence === 'High') marketScore = 15;
+    else if (laneConfidence === 'Medium') marketScore = 12;
+    else if (laneConfidence === 'Low') marketScore = 7;
+    if (lane?.oState && lane?.dState) { marketScore += 2; addReason(positives, `Lane resolved as ${lane.oState} → ${lane.dState}.`); }
+    if (laneAgeDays !== null && laneAgeDays <= 14) { marketScore += 2; addReason(positives, 'Weekly rate data is fresh.'); }
+    else if (laneAgeDays !== null && laneAgeDays <= 45) marketScore += 1;
+    else if (laneAgeDays !== null && laneAgeDays > 60) { marketScore -= 2; addReason(negatives, 'Weekly rate data is getting stale.'); }
+    if (this.laneRateData?.sources?.length) marketScore += 1;
+    if (!lane) addReason(negatives, 'No lane-market snapshot was available; score relies more on local math.');
+    marketScore = clamp(Math.round(marketScore), 0, 20);
+    breakdown.push({ label:'Market Data', points: marketScore, max:20 });
+
+    // 2) Load and equipment fit, max 20.
+    let loadScore = 18;
+    if (!context.length || !context.weight || !context.height || !context.width) { loadScore -= 5; addReason(negatives, 'One or more cargo dimensions are missing or zero.'); }
+    if ((context.width || 0) > 8.5) { loadScore -= 4; addReason(negatives, 'Width is over legal flatbed width; permits/routing may change price.'); }
+    if ((context.width || 0) > 10) loadScore -= 2;
+    if ((context.height || 0) > 12) { loadScore -= 3; addReason(negatives, 'Height adds trailer and routing risk.'); }
+    if ((context.height || 0) > 13.5) loadScore -= 3;
+    if ((context.length || 0) > 48) { loadScore -= 3; addReason(negatives, 'Length exceeds standard 48 ft deck assumption.'); }
+    if ((context.weight || 0) > 45000) { loadScore -= 4; addReason(negatives, 'Weight is near/above normal legal payload comfort zone.'); }
+    else if ((context.weight || 0) > 30000) loadScore -= 2;
+    if (pricing.modeKey === 'rgn') loadScore -= 2;
+    if (context.cargoType === 'general') loadScore -= 1;
+    loadScore = clamp(Math.round(loadScore), 0, 20);
+    breakdown.push({ label:'Load Fit', points: loadScore, max:20 });
+
+    // 3) Mode fit and partial/FTL realism, max 15.
+    let modeScore = 12;
+    if (pricing.modeKey === 'ftl') modeScore += 2;
+    if (pricing.modeKey === 'hotshot' && (context.length || 0) <= 18 && (context.weight || 0) <= 16000) modeScore += 2;
+    if (pricing.modeKey === 'partial') {
+      if ((pricing.deckShare || 0) <= 0.28) { modeScore += 2; addReason(positives, 'Partial deck share is in a good shared-space range.'); }
+      else if ((pricing.deckShare || 0) >= 0.625) { modeScore -= 5; addReason(negatives, 'Partial is close to FTL territory.'); }
+      else if ((pricing.deckShare || 0) >= 0.50) { modeScore -= 3; addReason(negatives, 'Large partial: broker should compare with FTL.'); }
+    }
+    if (pricing.partialCapApplied) { modeScore -= 3; addReason(negatives, 'Partial cap was needed, meaning the math nearly reached FTL pricing.'); }
+    if (context.isTruck && (context.length || 0) <= 14 && (context.weight || 0) <= 12000) modeScore -= 2;
+    modeScore = clamp(Math.round(modeScore), 0, 15);
+    breakdown.push({ label:'Mode Fit', points: modeScore, max:15 });
+
+    // 4) Pricing health, max 25. This is not just “high margin good”; it weighs win probability.
+    let priceScore = 17;
+    const quotePerMile = Number(pricing.quotePerMile || 0);
+    const marketRate = Number(lane?.rate || context.costPerMile || 0);
+    const profit = Number(pricing.profit || 0);
+    const baseCost = Number(pricing.baseCost || 0);
+    const quoteCost = Number(pricing.quoteCost || 0);
+    const actualMarkup = baseCost > 0 ? profit / baseCost : 0;
+    const targetMarkup = Number(pricing.targetMargin || 0);
+    const minimumProfit = Number(pricing.minimumProfit || 0);
+    const minProfitRatio = minimumProfit > 0 ? profit / minimumProfit : 1;
+    const rateRatio = marketRate > 0 ? quotePerMile / marketRate : 1;
+
+    if (profit >= minimumProfit) { priceScore += 3; addReason(positives, 'Profit clears the configured minimum.'); }
+    else { priceScore -= 5; addReason(negatives, 'Profit is below configured minimum.'); }
+
+    if (targetMarkup > 0) {
+      if (actualMarkup >= targetMarkup * .92 && actualMarkup <= targetMarkup * 1.35) priceScore += 3;
+      else if (actualMarkup < targetMarkup * .75) { priceScore -= 4; addReason(negatives, 'Margin is well under target.'); }
+      else if (actualMarkup > targetMarkup * 1.75 && !isTycon) { priceScore -= 2; addReason(negatives, 'Margin may be too fat for a competitive bid.'); }
+    }
+
+    const lowRatio = isTycon ? 0.68 : 0.86;
+    const targetLow = isTycon ? 0.72 : 0.92;
+    const targetHigh = isTycon ? 0.98 : 1.12;
+    const veryHigh = isTycon ? 1.16 : 1.28;
+    if (marketRate > 0) {
+      if (rateRatio >= targetLow && rateRatio <= targetHigh) {
+        priceScore += 4;
+        addReason(positives, isTycon ? 'Tycon win-mode sell rate is aggressive but still inside the intended lane band.' : 'Sell rate is realistic with a competitive discount.');
+      } else if (rateRatio < lowRatio) {
+        priceScore -= 6;
+        addReason(negatives, isTycon ? 'Tycon price is extremely aggressive; verify carrier availability before sending.' : 'Sell rate is too far below lane basis for normal customers.');
+      } else if (rateRatio > veryHigh) {
+        priceScore -= 5;
+        addReason(negatives, 'Sell rate is high versus lane basis; win probability may drop.');
+      } else if (rateRatio > targetHigh) {
+        priceScore -= 2;
+        addReason(negatives, 'Sell rate is above the preferred competitive band.');
+      }
+    }
+    if (quoteCost <= 0 || quotePerMile <= 0) priceScore = Math.min(priceScore, 8);
+    if (pricing.profitMethod && pricing.profitMethod.startsWith('Auto')) priceScore += 1;
+    priceScore = clamp(Math.round(priceScore), 0, 25);
+    breakdown.push({ label:'Price Health', points: priceScore, max:25 });
+
+    // 5) Risk coverage and broker readiness, max 20.
+    let riskScore = 14;
+    const guardrails = pricing.guardrails || [];
+    const majorGuardrails = guardrails.filter(g => !String(g).startsWith('No major guardrail'));
+    const accessorialCoverage = Number(pricing.manualAccessorialTotal || 0) + Number(pricing.autoBufferTotal || 0) + Number(pricing.expeditedSurcharge || 0);
+    const hasRisk = majorGuardrails.length > 0;
+    if (!hasRisk) { riskScore += 4; addReason(positives, 'No major broker guardrail was triggered.'); }
+    else {
+      riskScore -= Math.min(8, majorGuardrails.length * 2);
+      if (accessorialCoverage > 0) { riskScore += 4; addReason(positives, 'Risk/accessorial coverage is included.'); }
+      else { riskScore -= 4; addReason(negatives, 'Risk flags exist but no accessorial/buffer coverage was added.'); }
+    }
+    if ((context.accessorials?.extraStopCount || 0) > 0 && ((context.accessorials?.extraStopFee || 0) > 0 || (pricing.autoBufferTotal || 0) > 0)) riskScore += 2;
+    if ((context.width || 0) > 8.5 && (context.accessorials?.permitFee || 0) <= 0 && (pricing.autoBufferTotal || 0) <= 0) riskScore -= 4;
+    if (context.autoBrokerBuffer && hasRisk) riskScore += 1;
+    riskScore = clamp(Math.round(riskScore), 0, 20);
+    breakdown.push({ label:'Risk Coverage', points: riskScore, max:20 });
+
+    let score = breakdown.reduce((sum, item) => sum + item.points, 0);
+    if (laneConfidence === 'Low') score = Math.min(score, 88);
+    if (!lane) score = Math.min(score, 82);
+    if ((context.width || 0) > 8.5 || (context.height || 0) > 13.5 || pricing.modeKey === 'rgn') score = Math.min(score, 84);
+    if (majorGuardrails.length >= 4) score = Math.min(score, 79);
+    if (priceScore <= 10) score = Math.min(score, 76);
+    if (isTycon && priceScore >= 19 && lane) addReason(positives, 'Tycon-specific score weighs bid competitiveness more heavily than normal margin comfort.');
+
+    score = clamp(Math.round(score), 35, 98);
+    let label = 'High-risk estimate';
+    if (score >= 92) label = 'Very strong estimate';
+    else if (score >= 84) label = 'Strong estimate';
+    else if (score >= 74) label = 'Competitive estimate';
+    else if (score >= 62) label = 'Needs broker review';
+
+    return {
+      score,
+      label,
+      breakdown,
+      positives,
+      negatives,
+      laneAgeDays: laneAgeDays === null ? null : Math.round(laneAgeDays),
+      marketRate,
+      rateRatio,
+      actualMarkup,
+      riskFlagCount: majorGuardrails.length,
+    };
   },
 
   computePricing(context) {
@@ -2658,6 +2868,33 @@ const FreightCalculator = {
     return warnings;
   },
 
+  renderScoreBreakdown(scoreObj = {}) {
+    const breakdown = scoreObj.breakdown || [];
+    if (!breakdown.length) return '';
+    const positives = scoreObj.positives || [];
+    const negatives = scoreObj.negatives || [];
+    const itemHtml = breakdown.map(item => `
+      <div class="score-breakdown-item">
+        <span>${item.label}</span>
+        <strong>${item.points}/${item.max}</strong>
+      </div>`).join('');
+    const positiveHtml = positives.length
+      ? `<div class="score-reason-card good"><span>What supports this score</span><ul>${positives.slice(0, 4).map(item => `<li>${item}</li>`).join('')}</ul></div>`
+      : '';
+    const negativeHtml = negatives.length
+      ? `<div class="score-reason-card warn"><span>What lowers the score</span><ul>${negatives.slice(0, 4).map(item => `<li>${item}</li>`).join('')}</ul></div>`
+      : `<div class="score-reason-card good"><span>What lowers the score</span><ul><li>No major score deductions detected.</li></ul></div>`;
+    const ratioText = Number.isFinite(Number(scoreObj.rateRatio)) && scoreObj.rateRatio > 0
+      ? ` • Sell/market ratio ${(scoreObj.rateRatio * 100).toFixed(0)}%`
+      : '';
+    return `
+      <div class="score-breakdown-panel">
+        <span>Broker Score Intelligence${ratioText}</span>
+        <div class="score-breakdown-grid">${itemHtml}</div>
+        <div class="score-reason-grid">${positiveHtml}${negativeHtml}</div>
+      </div>`;
+  },
+
   renderGuardrails(guardrails = []) {
     const safe = guardrails.length === 1 && guardrails[0].startsWith('No major guardrail');
     return `
@@ -2681,6 +2918,7 @@ const FreightCalculator = {
     const autoBufferItems = (pricing.autoBufferItems || []).length
       ? pricing.autoBufferItems.map(item => `${item.label}: ${this.formatCurrency(item.amount)}`).join('<br>')
       : 'No automatic buffer';
+    const scoreBreakdownHtml = this.renderScoreBreakdown(pricing.quoteScore);
 
     if (sendToCustomer) {
       this.elements.freightEstimate.innerHTML = `
@@ -2709,6 +2947,8 @@ const FreightCalculator = {
         <div class="result-hero"><span>Quote to Customer</span><strong>${this.formatCurrency(pricing.quoteCost)}</strong><small>${pricing.strategyLabel} • ${modeLabel} • ${this.formatCurrency(pricing.quotePerMile)}/mi sell rate</small></div>
         <div class="result-score-card"><span>Broker Score</span><strong>${pricing.quoteScore?.score || 0}/100 — ${pricing.quoteScore?.label || 'Needs review'}</strong><div class="result-score-meter" style="--score-width:${scoreWidth}"><i></i></div></div>
       </div>
+
+      ${scoreBreakdownHtml}
 
       <div class="result-range-card"><span>Suggested Sell Range</span><strong>${this.formatCurrency(pricing.sellRange.low)} – ${this.formatCurrency(pricing.sellRange.high)}</strong><small>Use this band for negotiation. Below the low end, you are probably donating labor to the freight gods.</small></div>
 
@@ -3270,6 +3510,8 @@ const FreightCalculator = {
           { cells:['Pricing mode', pricing.pricingMode] },
           { cells:['Pricing strategy', pricing.strategyLabel || 'Balanced Broker'] },
           { cells:['Broker score', pricing.quoteScore ? `${pricing.quoteScore.score}/100 — ${pricing.quoteScore.label}` : 'N/A'] },
+          { cells:['Score breakdown', pricing.quoteScore?.breakdown?.map(item => `${item.label}: ${item.points}/${item.max}`).join(' | ') || 'N/A'] },
+          { cells:['Score deductions', pricing.quoteScore?.negatives?.slice(0, 3).join(' | ') || 'None'] },
           { cells:['FTL benchmark', this.formatCurrency(pricing.ftlBenchmark)] },
           { cells:['Effective deck', `${Number(pricing.effectiveLinearFeet || 0).toFixed(1)} ft / ${Math.round((pricing.deckShare || 0) * 100)}% of 48 ft deck`] },
           { cells:['Manual accessorials', this.formatCurrency(pricing.manualAccessorialTotal || 0)] },
