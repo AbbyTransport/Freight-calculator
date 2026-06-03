@@ -8,5 +8,16 @@
     },
     "sourceSummary": "Competitive baseline generated from Abby bid matrix; Tycon profile handled in pricing engine",
     "failures": 0
+  },
+  {
+    "updatedAt": "2026-06-03T04:05:00.000Z",
+    "defaultCostPerMile": 3.15,
+    "rawMarketNationalAverage": 3.6,
+    "regionalAnchors": {
+      "midwest": 3.25,
+      "west": 2.78
+    },
+    "sourceSummary": "General calibration raised to realistic market-minus-small-discount; Tycon Win Mode preserved",
+    "failures": 0
   }
 ]

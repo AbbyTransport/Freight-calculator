@@ -27,7 +27,7 @@ const HISTORY_JSON_PATH = path.join(DATA_DIR, "lane-rates-history.json");
 
 const REGION_CODES = ["NOR", "SOU", "MID", "SPL", "TEX", "MTN", "SWE", "NWE"];
 const BASE_NATIONAL_AVERAGE = 2.70;
-const COMPETITIVE_MARKET_MULTIPLIER = 0.92;
+const COMPETITIVE_MARKET_MULTIPLIER = 0.875;
 
 const REGION_LABELS = {
   NOR: "Northeast",
@@ -42,14 +42,14 @@ const REGION_LABELS = {
 
 const EQUIPMENT_PROFILES = {
   flatbed:  { label: "Flatbed", multiplier: 1.00, confidenceBoost: 0 },
-  stepdeck: { label: "Step deck", multiplier: 1.03, confidenceBoost: -1 },
-  conestoga:{ label: "Conestoga", multiplier: 1.08, confidenceBoost: -1 },
-  dryvan:   { label: "Dry van", multiplier: 0.72, confidenceBoost: -1 },
-  reefer:   { label: "Reefer", multiplier: 0.86, confidenceBoost: -1 },
-  hotshot:  { label: "Hotshot", multiplier: 0.82, confidenceBoost: -1 },
-  boxtruck: { label: "Box Truck / Sprinter", multiplier: 0.64, confidenceBoost: -2 },
-  poweronly:{ label: "Power Only", multiplier: 0.76, confidenceBoost: -2 },
-  rgn:      { label: "RGN / Specialized", multiplier: 1.32, confidenceBoost: -2 },
+  stepdeck: { label: "Step deck", multiplier: 1.05, confidenceBoost: -1 },
+  conestoga:{ label: "Conestoga", multiplier: 1.10, confidenceBoost: -1 },
+  dryvan:   { label: "Dry van", multiplier: 0.82, confidenceBoost: -1 },
+  reefer:   { label: "Reefer", multiplier: 0.94, confidenceBoost: -1 },
+  hotshot:  { label: "Hotshot", multiplier: 0.78, confidenceBoost: -1 },
+  boxtruck: { label: "Box Truck / Sprinter", multiplier: 0.68, confidenceBoost: -2 },
+  poweronly:{ label: "Power Only", multiplier: 0.80, confidenceBoost: -2 },
+  rgn:      { label: "RGN / Specialized", multiplier: 1.38, confidenceBoost: -2 },
 };
 
 const BASE_REGION_RATES = {
@@ -346,9 +346,9 @@ async function main() {
   await fs.writeFile(INDEX_PATH, patchIndexHtml(indexOriginal, competitiveDefaultCostPerMile, regionRates), "utf8");
 
   const data = {
-    schemaVersion: 2,
+    schemaVersion: 4,
     updatedAt: now,
-    model: "weekly-public-update-plus-abby-regional-matrix",
+    model: "weekly-public-update-plus-realistic-abby-market-discount-matrix",
     equipment: "flatbed-base-with-equipment-multipliers",
     rateType: "estimated competitive booking target per mile; not a guaranteed live lane average",
     defaultCostPerMile: competitiveDefaultCostPerMile,
@@ -366,7 +366,7 @@ async function main() {
     methodology: {
       baseNationalAverage: BASE_NATIONAL_AVERAGE,
       competitiveMarketMultiplier: COMPETITIVE_MARKET_MULTIPLIER,
-      note: "Weekly public freight-rate data is parsed when available, then discounted into a competitive Abby booking target. This is intentionally lower than a high-side market average because bid-board customers usually award to the lowest realistic quote. This is a semi-real estimating model, not a replacement for paid lane-level rate products.",
+      note: "Weekly public freight-rate data is parsed when available, then discounted into a competitive Abby booking target. This is discounted from public market anchors, but no longer uses the bargain-basement matrix reserved for Tycon Systems. This is a semi-real estimating model, not a replacement for paid lane-level rate products.",
     },
     sources: sources.map(s => ({ source: s.source, url: s.url, weight: s.weight, foundAt: s.foundAt, rates: s.rates })),
     failures,

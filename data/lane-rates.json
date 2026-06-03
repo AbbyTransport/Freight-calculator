@@ -1,15 +1,15 @@
 {
-  "schemaVersion": 3,
-  "updatedAt": "2026-06-03T03:26:43.290Z",
-  "model": "weekly-public-update-plus-competitive-abby-bid-matrix",
+  "schemaVersion": 4,
+  "updatedAt": "2026-06-03T04:05:00.000Z",
+  "model": "weekly-public-update-plus-realistic-abby-market-discount-matrix",
   "equipment": "flatbed-base-with-equipment-multipliers",
-  "rateType": "estimated competitive booking target per mile; not a guaranteed live lane average",
-  "defaultCostPerMile": 2.65,
-  "rawMarketNationalAverage": 2.88,
-  "competitiveMarketMultiplier": 0.92,
+  "rateType": "estimated realistic broker booking target per mile with a small discount; not a guaranteed live lane average",
+  "defaultCostPerMile": 3.15,
+  "rawMarketNationalAverage": 3.6,
+  "competitiveMarketMultiplier": 0.875,
   "regionalAnchors": {
-    "midwest": 2.69,
-    "west": 2.43
+    "midwest": 3.25,
+    "west": 2.78
   },
   "regionCodes": {
     "NOR": "Northeast",
@@ -23,84 +23,84 @@
   },
   "regionRates": {
     "NOR": {
-      "NOR": 2.58,
-      "SOU": 2.73,
-      "MID": 2.77,
-      "SPL": 2.87,
-      "TEX": 2.91,
-      "MTN": 2.96,
-      "SWE": 3.01,
-      "NWE": 3.06
+      "NOR": 2.99,
+      "SOU": 3.17,
+      "MID": 3.21,
+      "SPL": 3.33,
+      "TEX": 3.38,
+      "MTN": 3.43,
+      "SWE": 3.49,
+      "NWE": 3.55
     },
     "SOU": {
-      "NOR": 2.68,
-      "SOU": 2.54,
-      "MID": 2.63,
-      "SPL": 2.68,
-      "TEX": 2.59,
-      "MTN": 2.82,
-      "SWE": 2.87,
-      "NWE": 2.96
+      "NOR": 3.11,
+      "SOU": 2.95,
+      "MID": 3.05,
+      "SPL": 3.11,
+      "TEX": 3.0,
+      "MTN": 3.27,
+      "SWE": 3.33,
+      "NWE": 3.43
     },
     "MID": {
-      "NOR": 2.82,
-      "SOU": 2.73,
-      "MID": 2.63,
-      "SPL": 2.54,
-      "TEX": 2.68,
-      "MTN": 2.73,
-      "SWE": 2.82,
-      "NWE": 2.87
+      "NOR": 3.27,
+      "SOU": 3.17,
+      "MID": 3.05,
+      "SPL": 2.95,
+      "TEX": 3.11,
+      "MTN": 3.17,
+      "SWE": 3.27,
+      "NWE": 3.33
     },
     "SPL": {
-      "NOR": 2.82,
-      "SOU": 2.59,
-      "MID": 2.49,
-      "SPL": 2.4,
-      "TEX": 2.44,
-      "MTN": 2.54,
-      "SWE": 2.63,
-      "NWE": 2.73
+      "NOR": 3.27,
+      "SOU": 3.0,
+      "MID": 2.89,
+      "SPL": 2.78,
+      "TEX": 2.83,
+      "MTN": 2.95,
+      "SWE": 3.05,
+      "NWE": 3.17
     },
     "TEX": {
-      "NOR": 2.87,
-      "SOU": 2.49,
-      "MID": 2.54,
-      "SPL": 2.4,
-      "TEX": 2.3,
-      "MTN": 2.54,
-      "SWE": 2.49,
-      "NWE": 2.73
+      "NOR": 3.33,
+      "SOU": 2.89,
+      "MID": 2.95,
+      "SPL": 2.78,
+      "TEX": 2.67,
+      "MTN": 2.95,
+      "SWE": 2.89,
+      "NWE": 3.17
     },
     "MTN": {
-      "NOR": 2.91,
-      "SOU": 2.73,
-      "MID": 2.59,
-      "SPL": 2.49,
-      "TEX": 2.54,
-      "MTN": 2.3,
-      "SWE": 2.4,
-      "NWE": 2.4
+      "NOR": 3.38,
+      "SOU": 3.17,
+      "MID": 3.0,
+      "SPL": 2.89,
+      "TEX": 2.95,
+      "MTN": 2.67,
+      "SWE": 2.78,
+      "NWE": 2.78
     },
     "SWE": {
-      "NOR": 2.96,
-      "SOU": 2.82,
-      "MID": 2.68,
-      "SPL": 2.59,
-      "TEX": 2.49,
-      "MTN": 2.4,
-      "SWE": 2.26,
-      "NWE": 2.44
+      "NOR": 3.43,
+      "SOU": 3.27,
+      "MID": 3.11,
+      "SPL": 3.0,
+      "TEX": 2.89,
+      "MTN": 2.78,
+      "SWE": 2.62,
+      "NWE": 2.83
     },
     "NWE": {
-      "NOR": 3.06,
-      "SOU": 2.91,
-      "MID": 2.77,
-      "SPL": 2.73,
-      "TEX": 2.73,
-      "MTN": 2.44,
-      "SWE": 2.49,
-      "NWE": 2.35
+      "NOR": 3.55,
+      "SOU": 3.38,
+      "MID": 3.21,
+      "SPL": 3.17,
+      "TEX": 3.17,
+      "MTN": 2.83,
+      "SWE": 2.89,
+      "NWE": 2.73
     }
   },
   "equipmentProfiles": {
@@ -111,42 +111,42 @@
     },
     "stepdeck": {
       "label": "Step deck",
-      "multiplier": 1.03,
+      "multiplier": 1.05,
       "confidenceBoost": -1
     },
     "conestoga": {
       "label": "Conestoga",
-      "multiplier": 1.08,
+      "multiplier": 1.1,
       "confidenceBoost": -1
     },
     "dryvan": {
       "label": "Dry van",
-      "multiplier": 0.72,
+      "multiplier": 0.82,
       "confidenceBoost": -1
     },
     "reefer": {
       "label": "Reefer",
-      "multiplier": 0.86,
+      "multiplier": 0.94,
       "confidenceBoost": -1
     },
     "hotshot": {
       "label": "Hotshot",
-      "multiplier": 0.82,
+      "multiplier": 0.78,
       "confidenceBoost": -1
     },
     "boxtruck": {
       "label": "Box Truck / Sprinter",
-      "multiplier": 0.64,
+      "multiplier": 0.68,
       "confidenceBoost": -2
     },
     "poweronly": {
       "label": "Power Only",
-      "multiplier": 0.76,
+      "multiplier": 0.8,
       "confidenceBoost": -2
     },
     "rgn": {
       "label": "RGN / Specialized",
-      "multiplier": 1.32,
+      "multiplier": 1.38,
       "confidenceBoost": -2
     }
   },
@@ -156,8 +156,29 @@
     "customerPdfHidesMarketBasis": true
   },
   "methodology": {
-    "note": "This file intentionally stores a competitive broker booking target, not a retail/high-side market number. It is calibrated lower for quote competitiveness. Tycon Systems receives an additional customer-profile discount inside the calculator when Customer Name is Tycon Systems."
+    "note": "General customers now use a realistic market-minus-small-discount matrix. The anchor follows current public flatbed market reporting, then discounts to an Abby booking target. Tycon Systems is handled separately by Customer Name and keeps the stronger Win Mode discount.",
+    "generalCalibration": "Raised from the earlier bargain matrix by about 16% for non-Tycon customers.",
+    "tyconCalibration": "Tycon still receives a separate customer-profile multiplier so its aggressive win mode stays effectively where it was."
   },
-  "sources": [],
+  "sources": [
+    {
+      "source": "Scale Funding / DAT Trendlines summary",
+      "url": "https://getscalefunding.com/resources/current-freight-rates/",
+      "weight": 2.5,
+      "foundAt": "2026-06-03T04:05:00.000Z",
+      "rates": {
+        "national": 3.6,
+        "midwest": null,
+        "west": 3.03
+      }
+    },
+    {
+      "source": "DAT Trendlines flatbed page",
+      "url": "https://www.dat.com/trendlines/flatbed/national-rates",
+      "weight": 3.0,
+      "foundAt": "2026-06-03T04:05:00.000Z",
+      "rates": {}
+    }
+  ],
   "failures": []
 }
