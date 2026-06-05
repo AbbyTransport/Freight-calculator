@@ -1,15 +1,26 @@
 {
-  "schemaVersion": 4,
-  "updatedAt": "2026-06-03T04:05:00.000Z",
-  "model": "weekly-public-update-plus-realistic-abby-market-discount-matrix",
+  "schemaVersion": 5,
+  "updatedAt": "2026-06-05T18:30:00.000Z",
+  "updateCadence": "every-3-days",
+  "model": "three-day-public-update-plus-dat-regional-anchors-plus-realistic-abby-market-discount-matrix",
   "equipment": "flatbed-base-with-equipment-multipliers",
-  "rateType": "estimated realistic broker booking target per mile with a small discount; not a guaranteed live lane average",
-  "defaultCostPerMile": 3.15,
-  "rawMarketNationalAverage": 3.6,
+  "rateType": "estimated realistic broker booking target per mile with a small discount; updated every 3 days when GitHub Actions runs; not a guaranteed live lane average",
+  "defaultCostPerMile": 3.16,
+  "rawMarketNationalAverage": 3.61,
   "competitiveMarketMultiplier": 0.875,
   "regionalAnchors": {
-    "midwest": 3.25,
-    "west": 2.78
+    "midwest": 3.23,
+    "west": 2.72,
+    "southeast": 3.43,
+    "northeast": 2.92,
+    "southwest": 3.39
+  },
+  "rawRegionalAnchors": {
+    "midwest": 3.69,
+    "west": 3.11,
+    "southeast": 3.92,
+    "northeast": 3.34,
+    "southwest": 3.87
   },
   "regionCodes": {
     "NOR": "Northeast",
@@ -23,84 +34,84 @@
   },
   "regionRates": {
     "NOR": {
-      "NOR": 2.99,
-      "SOU": 3.17,
-      "MID": 3.21,
-      "SPL": 3.33,
-      "TEX": 3.38,
-      "MTN": 3.43,
-      "SWE": 3.49,
-      "NWE": 3.55
+      "NOR": 3.12,
+      "SOU": 3.4,
+      "MID": 3.41,
+      "SPL": 3.55,
+      "TEX": 3.6,
+      "MTN": 3.58,
+      "SWE": 3.74,
+      "NWE": 3.63
     },
     "SOU": {
-      "NOR": 3.11,
-      "SOU": 2.95,
-      "MID": 3.05,
-      "SPL": 3.11,
-      "TEX": 3.0,
-      "MTN": 3.27,
-      "SWE": 3.33,
-      "NWE": 3.43
+      "NOR": 3.34,
+      "SOU": 3.27,
+      "MID": 3.35,
+      "SPL": 3.43,
+      "TEX": 3.3,
+      "MTN": 3.52,
+      "SWE": 3.69,
+      "NWE": 3.63
     },
     "MID": {
-      "NOR": 3.27,
-      "SOU": 3.17,
-      "MID": 3.05,
-      "SPL": 2.95,
-      "TEX": 3.11,
-      "MTN": 3.17,
-      "SWE": 3.27,
-      "NWE": 3.33
+      "NOR": 3.47,
+      "SOU": 3.47,
+      "MID": 3.31,
+      "SPL": 3.21,
+      "TEX": 3.38,
+      "MTN": 3.36,
+      "SWE": 3.58,
+      "NWE": 3.48
     },
     "SPL": {
-      "NOR": 3.27,
-      "SOU": 3.0,
-      "MID": 2.89,
-      "SPL": 2.78,
-      "TEX": 2.83,
-      "MTN": 2.95,
-      "SWE": 3.05,
-      "NWE": 3.17
+      "NOR": 3.49,
+      "SOU": 3.31,
+      "MID": 3.15,
+      "SPL": 3.05,
+      "TEX": 3.1,
+      "MTN": 3.15,
+      "SWE": 3.36,
+      "NWE": 3.32
     },
     "TEX": {
-      "NOR": 3.33,
-      "SOU": 2.89,
-      "MID": 2.95,
-      "SPL": 2.78,
-      "TEX": 2.67,
-      "MTN": 2.95,
-      "SWE": 2.89,
-      "NWE": 3.17
+      "NOR": 3.54,
+      "SOU": 3.18,
+      "MID": 3.2,
+      "SPL": 3.04,
+      "TEX": 2.91,
+      "MTN": 3.14,
+      "SWE": 3.17,
+      "NWE": 3.32
     },
     "MTN": {
-      "NOR": 3.38,
-      "SOU": 3.17,
-      "MID": 3.0,
-      "SPL": 2.89,
-      "TEX": 2.95,
-      "MTN": 2.67,
-      "SWE": 2.78,
-      "NWE": 2.78
+      "NOR": 3.52,
+      "SOU": 3.41,
+      "MID": 3.19,
+      "SPL": 3.09,
+      "TEX": 3.14,
+      "MTN": 2.79,
+      "SWE": 2.99,
+      "NWE": 2.86
     },
     "SWE": {
-      "NOR": 3.43,
-      "SOU": 3.27,
-      "MID": 3.11,
-      "SPL": 3.0,
-      "TEX": 2.89,
-      "MTN": 2.78,
-      "SWE": 2.62,
-      "NWE": 2.83
+      "NOR": 3.68,
+      "SOU": 3.63,
+      "MID": 3.4,
+      "SPL": 3.3,
+      "TEX": 3.17,
+      "MTN": 2.99,
+      "SWE": 2.89,
+      "NWE": 2.99
     },
     "NWE": {
-      "NOR": 3.55,
-      "SOU": 3.38,
-      "MID": 3.21,
-      "SPL": 3.17,
-      "TEX": 3.17,
-      "MTN": 2.83,
-      "SWE": 2.89,
-      "NWE": 2.73
+      "NOR": 3.63,
+      "SOU": 3.58,
+      "MID": 3.36,
+      "SPL": 3.32,
+      "TEX": 3.32,
+      "MTN": 2.91,
+      "SWE": 3.05,
+      "NWE": 2.75
     }
   },
   "equipmentProfiles": {
@@ -156,28 +167,49 @@
     "customerPdfHidesMarketBasis": true
   },
   "methodology": {
-    "note": "General customers now use a realistic market-minus-small-discount matrix. The anchor follows current public flatbed market reporting, then discounts to an Abby booking target. Tycon Systems is handled separately by Customer Name and keeps the stronger Win Mode discount.",
-    "generalCalibration": "Raised from the earlier bargain matrix by about 16% for non-Tycon customers.",
-    "tyconCalibration": "Tycon still receives a separate customer-profile multiplier so its aggressive win mode stays effectively where it was."
+    "note": "The updater now refreshes about every 3 days and blends direct DAT regional flatbed anchors, Scale Funding public current freight rates, and ACT Research market condition signal. Numeric pages set the rate; ACT Research is used as a confidence/context source, not as a lane-level rate table.",
+    "generalCalibration": "General customers remain realistic with a small Abby discount. Tycon Systems remains governed by its separate customer-profile Win Mode in pricing-engine-config.json and index.html.",
+    "liveLaneLimit": "This is not live city-to-city DAT RateView. It is a semi-dynamic public-source regional estimate. Humans demanded free precision from paid data, so this is the least fictional version."
   },
   "sources": [
     {
-      "source": "Scale Funding / DAT Trendlines summary",
-      "url": "https://getscalefunding.com/resources/current-freight-rates/",
-      "weight": 2.5,
-      "foundAt": "2026-06-03T04:05:00.000Z",
+      "source": "DAT Trendlines Flatbed National Rates",
+      "url": "https://www.dat.com/trendlines/flatbed/national-rates",
+      "type": "direct-regional-rate-map",
+      "weight": 4.0,
+      "foundAt": "2026-06-05T18:30:00.000Z",
       "rates": {
-        "national": 3.6,
-        "midwest": null,
-        "west": 3.03
+        "national": 3.61,
+        "west": 3.17,
+        "southeast": 4.0,
+        "northeast": 3.34,
+        "midwest": 3.69,
+        "southwest": 3.87
       }
     },
     {
-      "source": "DAT Trendlines flatbed page",
-      "url": "https://www.dat.com/trendlines/flatbed/national-rates",
+      "source": "Scale Funding Current Freight Rates",
+      "url": "https://getscalefunding.com/resources/current-freight-rates/",
+      "type": "public-current-rate-summary",
       "weight": 3.0,
-      "foundAt": "2026-06-03T04:05:00.000Z",
-      "rates": {}
+      "foundAt": "2026-06-05T18:30:00.000Z",
+      "rates": {
+        "national": 3.6,
+        "west": 3.03,
+        "southeast": 3.81,
+        "northeast": null,
+        "midwest": null,
+        "southwest": null
+      }
+    },
+    {
+      "source": "ACT Research Flatbed Rates",
+      "url": "https://www.actresearch.net/resources/data-tracking/flatbed-rates",
+      "type": "market-condition-signal",
+      "weight": 0.75,
+      "foundAt": "2026-06-05T18:30:00.000Z",
+      "rates": {},
+      "trendSignal": "firmer/tighter flatbed market"
     }
   ],
   "failures": []

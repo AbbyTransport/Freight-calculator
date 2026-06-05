@@ -628,7 +628,7 @@ button:focus-visible {
 }
 
 /* ────────────────────────────────────────────────────────────────
-   Abby PortalAdmin visual skin + weekly lane-rate panel
+   Abby PortalAdmin visual skin + 3-day lane-rate panel
    Added for Abby Transport Freight Calculator.
    ──────────────────────────────────────────────────────────────── */
 :root {
@@ -1649,7 +1649,7 @@ button {
               <label for="costPerMile">Cost Per Mile ($)</label>
               <input type="number" id="costPerMile" name="costPerMile"
                      step="0.01" min="0" max="100"
-                     value="3.15"
+                     value="3.16"
                      aria-describedby="costPerMileError" />
               <span class="error-message" id="costPerMileError" aria-live="polite"></span>
               <small id="laneRateHint" class="lane-hint" aria-live="polite"></small>
@@ -1668,7 +1668,7 @@ button {
                 <option value="poweronly">Power Only</option>
                 <option value="rgn">RGN / Specialized</option>
               </select>
-              <p class="field-hint">Used for the weekly lane estimate. Manual override still wins.</p>
+              <p class="field-hint">Used for the 3-day lane estimate. Manual override still wins.</p>
             </div>
 
             <div class="input-group">
@@ -1764,7 +1764,7 @@ button {
             <div class="market-rate-panel" id="marketRatePanel" aria-live="polite">
               <div class="market-rate-header">
                 <div>
-                  <div class="market-rate-title">Weekly Lane Market Estimate</div>
+                  <div class="market-rate-title">3-Day Lane Market Estimate</div>
                   <div class="market-rate-subtitle" id="marketRateStatus">Waiting for origin and destination.</div>
                 </div>
                 <div class="market-rate-value" id="marketRateValue">—</div>
@@ -1776,7 +1776,7 @@ button {
                 </div>
                 <div class="market-rate-stat">
                   <span>Source</span>
-                  <strong id="marketRateSource">Weekly public update + Abby matrix</strong>
+                  <strong id="marketRateSource">3-day public update + Abby matrix</strong>
                 </div>
                 <div class="market-rate-stat">
                   <span>Confidence</span>
@@ -1788,7 +1788,7 @@ button {
                 </div>
               </div>
               <div class="market-rate-actions">
-                <button type="button" class="market-rate-button primary" id="useMarketRateButton">Use Weekly Lane Rate</button>
+                <button type="button" class="market-rate-button primary" id="useMarketRateButton">Use 3-Day Lane Rate</button>
                 <button type="button" class="market-rate-button secondary" id="refreshMarketRateButton">Refresh Market Data</button>
               </div>
             </div>
@@ -1832,8 +1832,8 @@ button {
 /*
  * FreightCalculator — Abby Transport
  *
- * Calibration: Auto-updated weekly via GitHub Actions
- * Source: Weekly public freight-rate update + Abby regional lane matrix
+ * Calibration: Auto-updated every 3 days via GitHub Actions
+ * Source: 3-day public freight-rate update + Abby regional lane matrix
  *   Flatbed national avg : $2.70 – $2.95/mi (all-in incl. FSC)
  *   Midwest flatbed      : $2.97/mi (highest region)
  *   West flatbed         : $2.31/mi linehaul / ~$2.45–2.55 all-in
@@ -1841,7 +1841,7 @@ button {
  * Key rules:
  *  – Quote Results updated ONLY on "Calculate" click.
  *  – refreshVisibleQuote() removed; no auto-recalculation.
- *  – costPerMile auto-populated from weekly JSON + region-pair lane table after distance
+ *  – costPerMile auto-populated from 3-day JSON + region-pair lane table after distance
  *    is resolved. User can override at any time.
  *  – PDF "Send to Customer" shows ONLY Quote Rate (no Carrier Rate / Profit).
  *  – Floor raised $500 → $600. Default rate 2.00 → 2.70.
@@ -1854,7 +1854,7 @@ const FreightCalculator = {
   API_KEY:              '5b3ce3597851110001cf6248b4d09a96abdf3939cbb99a2f87f1b6ee1a51234ab4f2892c31ec4051',
   METERS_PER_MILE:      1609.34,
   BASE_FACTOR_TYCON:    3800 / (40 * 2389),
-  DEFAULT_COST_PER_MILE: 3.15, // realistic general-market discount basis; weekly updater patches this value
+  DEFAULT_COST_PER_MILE: 3.16, // auto-updated about every 3 days; see data/lane-rates.json
   MINIMUM_CHARGE:        600,    // ← raised from $500
 
 
@@ -2015,14 +2015,14 @@ const FreightCalculator = {
    * ─────────────────────────────────────────────────────────── */
   REGION_RATES: {
     // NOR SOU MID SPL TEX MTN SWE NWE
-    NOR: { NOR:2.99, SOU:3.17, MID:3.21, SPL:3.33, TEX:3.38, MTN:3.43, SWE:3.49, NWE:3.55 },
-    SOU: { NOR:3.11, SOU:2.95, MID:3.05, SPL:3.11, TEX:3.00, MTN:3.27, SWE:3.33, NWE:3.43 },
-    MID: { NOR:3.27, SOU:3.17, MID:3.05, SPL:2.95, TEX:3.11, MTN:3.17, SWE:3.27, NWE:3.33 },
-    SPL: { NOR:3.27, SOU:3.00, MID:2.89, SPL:2.78, TEX:2.83, MTN:2.95, SWE:3.05, NWE:3.17 },
-    TEX: { NOR:3.33, SOU:2.89, MID:2.95, SPL:2.78, TEX:2.67, MTN:2.95, SWE:2.89, NWE:3.17 },
-    MTN: { NOR:3.38, SOU:3.17, MID:3.00, SPL:2.89, TEX:2.95, MTN:2.67, SWE:2.78, NWE:2.78 },
-    SWE: { NOR:3.43, SOU:3.27, MID:3.11, SPL:3.00, TEX:2.89, MTN:2.78, SWE:2.62, NWE:2.83 },
-    NWE: { NOR:3.55, SOU:3.38, MID:3.21, SPL:3.17, TEX:3.17, MTN:2.83, SWE:2.89, NWE:2.73 },
+    NOR: { NOR:3.12, SOU:3.40, MID:3.41, SPL:3.55, TEX:3.60, MTN:3.58, SWE:3.74, NWE:3.63 },
+    SOU: { NOR:3.34, SOU:3.27, MID:3.35, SPL:3.43, TEX:3.30, MTN:3.52, SWE:3.69, NWE:3.63 },
+    MID: { NOR:3.47, SOU:3.47, MID:3.31, SPL:3.21, TEX:3.38, MTN:3.36, SWE:3.58, NWE:3.48 },
+    SPL: { NOR:3.49, SOU:3.31, MID:3.15, SPL:3.05, TEX:3.10, MTN:3.15, SWE:3.36, NWE:3.32 },
+    TEX: { NOR:3.54, SOU:3.18, MID:3.20, SPL:3.04, TEX:2.91, MTN:3.14, SWE:3.17, NWE:3.32 },
+    MTN: { NOR:3.52, SOU:3.41, MID:3.19, SPL:3.09, TEX:3.14, MTN:2.79, SWE:2.99, NWE:2.86 },
+    SWE: { NOR:3.68, SOU:3.63, MID:3.40, SPL:3.30, TEX:3.17, MTN:2.99, SWE:2.89, NWE:2.99 },
+    NWE: { NOR:3.63, SOU:3.58, MID:3.36, SPL:3.32, TEX:3.32, MTN:2.91, SWE:3.05, NWE:2.75 },
   },
 
   REGION_LABELS: {
@@ -2196,10 +2196,10 @@ const FreightCalculator = {
   async loadLaneRates(force = false) {
     if (this.laneRateData && !force) return this.laneRateData;
 
-    this.updateMarketRatePanel(null, force ? 'Refreshing weekly market data…' : 'Loading weekly market data…');
+    this.updateMarketRatePanel(null, force ? 'Refreshing 3-day market data…' : 'Loading 3-day market data…');
 
     try {
-      const cacheKey = force ? Date.now() : 'weekly';
+      const cacheKey = force ? Date.now() : '3day';
       const res = await fetch(`data/lane-rates.json?v=${cacheKey}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
@@ -2213,12 +2213,12 @@ const FreightCalculator = {
 
       this.laneRateData = data;
       this.laneRateLoadedAt = new Date();
-      this.updateMarketRatePanel(null, 'Weekly market data loaded. Enter origin and destination.');
+      this.updateMarketRatePanel(null, '3-day market data loaded. Enter origin and destination.');
       this.applyLaneRate(false);
       return data;
     } catch (err) {
       console.warn('loadLaneRates:', err);
-      this.updateMarketRatePanel(null, 'Using embedded fallback rates. Weekly JSON could not be loaded.');
+      this.updateMarketRatePanel(null, 'Using embedded fallback rates. 3-day JSON could not be loaded.');
       return null;
     }
   },
@@ -2273,7 +2273,7 @@ const FreightCalculator = {
     const sources = this.laneRateData?.sources || [];
     if (!sources.length) return 'Embedded Abby matrix';
     const names = sources.map(s => s.source).filter(Boolean);
-    return names.length ? `${names.slice(0, 2).join(' + ')}${names.length > 2 ? ' +' : ''}` : 'Weekly public update';
+    return names.length ? `${names.slice(0, 3).join(' + ')}${names.length > 3 ? ' +' : ''}` : 'Weekly public update';
   },
 
   computeMarketLaneRate() {
@@ -2335,7 +2335,7 @@ const FreightCalculator = {
 
     if (els.marketRateValue) els.marketRateValue.textContent = `${this.formatCurrency(context.rate)} / mile`;
     const customerSuffix = context.customerProfileLabel ? ` • ${context.customerProfileLabel} applied` : '';
-    if (els.marketRateStatus) els.marketRateStatus.textContent = `${context.equipmentLabel} estimate applied from weekly data${customerSuffix}.`;
+    if (els.marketRateStatus) els.marketRateStatus.textContent = `${context.equipmentLabel} estimate applied from 3-day data${customerSuffix}.`;
     if (els.marketRateLane) els.marketRateLane.textContent = `${context.oState} → ${context.dState} (${context.originRegionLabel} → ${context.destinationRegionLabel})`;
     if (els.marketRateSource) els.marketRateSource.textContent = context.source;
     if (els.marketRateUpdated) els.marketRateUpdated.textContent = this.formatUpdatedAt(context.updatedAt);
@@ -2348,7 +2348,7 @@ const FreightCalculator = {
   /**
    * Look up the region-pair rate for the current origin→destination
    * and populate the Cost Per Mile field. This is intentionally a
-   * semi-real estimate: weekly public market update + Abby matrix +
+   * semi-real estimate: 3-day public market update + Abby matrix +
    * equipment multiplier. User can override at any time.
    */
   applyLaneRate(forceUpdatePanel = true) {
@@ -2363,7 +2363,7 @@ const FreightCalculator = {
 
     const hint = document.getElementById('laneRateHint');
     if (hint) {
-      hint.textContent = `Weekly lane avg auto-set: ${context.oState} → ${context.dState} | ${context.equipmentLabel} | ${context.confidence} confidence${context.customerProfileLabel ? ' | ' + context.customerProfileLabel : ''}`;
+      hint.textContent = `3-day lane avg auto-set: ${context.oState} → ${context.dState} | ${context.equipmentLabel} | ${context.confidence} confidence${context.customerProfileLabel ? ' | ' + context.customerProfileLabel : ''}`;
       hint.style.display = 'block';
     }
 
@@ -2650,9 +2650,9 @@ const FreightCalculator = {
     else if (laneConfidence === 'Medium') marketScore = 12;
     else if (laneConfidence === 'Low') marketScore = 7;
     if (lane?.oState && lane?.dState) { marketScore += 2; addReason(positives, `Lane resolved as ${lane.oState} → ${lane.dState}.`); }
-    if (laneAgeDays !== null && laneAgeDays <= 14) { marketScore += 2; addReason(positives, 'Weekly rate data is fresh.'); }
+    if (laneAgeDays !== null && laneAgeDays <= 14) { marketScore += 2; addReason(positives, '3-day rate data is fresh.'); }
     else if (laneAgeDays !== null && laneAgeDays <= 45) marketScore += 1;
-    else if (laneAgeDays !== null && laneAgeDays > 60) { marketScore -= 2; addReason(negatives, 'Weekly rate data is getting stale.'); }
+    else if (laneAgeDays !== null && laneAgeDays > 60) { marketScore -= 2; addReason(negatives, '3-day rate data is getting stale.'); }
     if (this.laneRateData?.sources?.length) marketScore += 1;
     if (!lane) addReason(negatives, 'No lane-market snapshot was available; score relies more on local math.');
     marketScore = clamp(Math.round(marketScore), 0, 20);
