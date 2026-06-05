@@ -21,25 +21,19 @@
     "failures": 0
   },
   {
-    "updatedAt": "2026-06-05T18:30:00.000Z",
-    "updateCadence": "every-3-days",
-    "defaultCostPerMile": 3.16,
-    "rawMarketNationalAverage": 3.61,
+    "updatedAt": "2026-06-05T18:45:00.000Z",
+    "defaultCostPerMile": 3.15,
+    "rawMarketNationalAverage": 3.6,
+    "modelNationalAverage": 3.6,
+    "marketDirection": "Slightly rising",
+    "marketPressurePercent": 1.2,
+    "dieselAdjustmentPercent": 0.0,
     "regionalAnchors": {
-      "midwest": 3.23,
-      "west": 2.72,
-      "southeast": 3.43,
-      "northeast": 2.92,
-      "southwest": 3.39
+      "midwest": 3.25,
+      "west": 2.78
     },
-    "rawRegionalAnchors": {
-      "midwest": 3.69,
-      "west": 3.11,
-      "southeast": 3.92,
-      "northeast": 3.34,
-      "southwest": 3.87
-    },
-    "sourceSummary": "DAT Trendlines Flatbed National Rates + Scale Funding Current Freight Rates + ACT Research Flatbed Rates",
+    "sourceSummary": "DAT Trendlines + Scale Funding + FTR/Truckstop + EIA Diesel + C.H. Robinson + ACT Research",
+    "sourceCount": 7,
     "failures": 0
   }
 ]

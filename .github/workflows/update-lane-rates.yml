@@ -2,9 +2,9 @@ name: Update Freight Calculator Lane Rates
 
 on:
   schedule:
-    # About every 3 days at 13:15 UTC.
-    # GitHub schedules use UTC and day-of-month stepping, so this is not exact 72-hour timing across month boundaries.
-    - cron: "15 13 */3 * *"
+    # Runs daily, but the updater only writes a new market snapshot every 72 hours.
+    # GitHub cron is UTC; 13:15 UTC is usually morning in Utah.
+    - cron: "15 13 * * *"
   workflow_dispatch:
 
 permissions:
@@ -23,8 +23,10 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Update 3-day semi-dynamic lane rates
+      - name: Update 3-day multi-source lane rates
         env:
+          UPDATE_INTERVAL_HOURS: "72"
+          FORCE_RATE_UPDATE: ${{ github.event_name == 'workflow_dispatch' }}
           # Optional: comma-separated public pages you want the parser to try in addition to the defaults.
           EXTRA_RATE_SOURCE_URLS: ${{ vars.EXTRA_RATE_SOURCE_URLS }}
         run: node scripts/update-lane-rates.mjs
@@ -37,6 +39,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No lane-rate changes to commit."
           else
-            git commit -m "Update 3-day freight lane rates"
+            git commit -m "Update 3-day multi-source freight lane rates"
             git push
           fi

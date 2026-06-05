@@ -3,7 +3,7 @@
   Freight Quote Calculator — Abby Transport
   Self-contained single-file build for GitHub Pages.
   Logo embedded as base64. All CSS/JS inline.
-  Portal-styled build with weekly semi-dynamic lane rates
+  Portal-styled build with 3-day multi-source semi-dynamic lane rates
 -->
 <html lang="en">
 <head>
@@ -628,7 +628,7 @@ button:focus-visible {
 }
 
 /* ────────────────────────────────────────────────────────────────
-   Abby PortalAdmin visual skin + 3-day lane-rate panel
+   Abby PortalAdmin visual skin + 3-day multi-source lane-rate panel
    Added for Abby Transport Freight Calculator.
    ──────────────────────────────────────────────────────────────── */
 :root {
@@ -1649,7 +1649,7 @@ button {
               <label for="costPerMile">Cost Per Mile ($)</label>
               <input type="number" id="costPerMile" name="costPerMile"
                      step="0.01" min="0" max="100"
-                     value="3.16"
+                     value="3.15"
                      aria-describedby="costPerMileError" />
               <span class="error-message" id="costPerMileError" aria-live="polite"></span>
               <small id="laneRateHint" class="lane-hint" aria-live="polite"></small>
@@ -1668,7 +1668,7 @@ button {
                 <option value="poweronly">Power Only</option>
                 <option value="rgn">RGN / Specialized</option>
               </select>
-              <p class="field-hint">Used for the 3-day lane estimate. Manual override still wins.</p>
+              <p class="field-hint">Used for the 3-day multi-source lane estimate. Manual override still wins.</p>
             </div>
 
             <div class="input-group">
@@ -1764,7 +1764,7 @@ button {
             <div class="market-rate-panel" id="marketRatePanel" aria-live="polite">
               <div class="market-rate-header">
                 <div>
-                  <div class="market-rate-title">3-Day Lane Market Estimate</div>
+                  <div class="market-rate-title">3-Day Multi-Source Lane Market Estimate</div>
                   <div class="market-rate-subtitle" id="marketRateStatus">Waiting for origin and destination.</div>
                 </div>
                 <div class="market-rate-value" id="marketRateValue">—</div>
@@ -1776,7 +1776,7 @@ button {
                 </div>
                 <div class="market-rate-stat">
                   <span>Source</span>
-                  <strong id="marketRateSource">3-day public update + Abby matrix</strong>
+                  <strong id="marketRateSource">DAT + Scale + FTR/Truckstop + EIA + market updates</strong>
                 </div>
                 <div class="market-rate-stat">
                   <span>Confidence</span>
@@ -1785,6 +1785,18 @@ button {
                 <div class="market-rate-stat">
                   <span>Last Updated</span>
                   <strong id="marketRateUpdated">—</strong>
+                </div>
+                <div class="market-rate-stat">
+                  <span>Market Direction</span>
+                  <strong id="marketRateDirection">—</strong>
+                </div>
+                <div class="market-rate-stat">
+                  <span>Diesel Adj.</span>
+                  <strong id="marketRateDiesel">—</strong>
+                </div>
+                <div class="market-rate-stat">
+                  <span>Source Count</span>
+                  <strong id="marketRateSourceCount">—</strong>
                 </div>
               </div>
               <div class="market-rate-actions">
@@ -1833,7 +1845,7 @@ button {
  * FreightCalculator — Abby Transport
  *
  * Calibration: Auto-updated every 3 days via GitHub Actions
- * Source: 3-day public freight-rate update + Abby regional lane matrix
+ * Source: 3-day public freight-rate consensus + Abby regional lane matrix
  *   Flatbed national avg : $2.70 – $2.95/mi (all-in incl. FSC)
  *   Midwest flatbed      : $2.97/mi (highest region)
  *   West flatbed         : $2.31/mi linehaul / ~$2.45–2.55 all-in
@@ -1854,7 +1866,7 @@ const FreightCalculator = {
   API_KEY:              '5b3ce3597851110001cf6248b4d09a96abdf3939cbb99a2f87f1b6ee1a51234ab4f2892c31ec4051',
   METERS_PER_MILE:      1609.34,
   BASE_FACTOR_TYCON:    3800 / (40 * 2389),
-  DEFAULT_COST_PER_MILE: 3.16, // auto-updated about every 3 days; see data/lane-rates.json
+  DEFAULT_COST_PER_MILE: 3.15, // realistic general-market discount basis; 3-day multi-source updater patches this value
   MINIMUM_CHARGE:        600,    // ← raised from $500
 
 
@@ -2015,14 +2027,14 @@ const FreightCalculator = {
    * ─────────────────────────────────────────────────────────── */
   REGION_RATES: {
     // NOR SOU MID SPL TEX MTN SWE NWE
-    NOR: { NOR:3.12, SOU:3.40, MID:3.41, SPL:3.55, TEX:3.60, MTN:3.58, SWE:3.74, NWE:3.63 },
-    SOU: { NOR:3.34, SOU:3.27, MID:3.35, SPL:3.43, TEX:3.30, MTN:3.52, SWE:3.69, NWE:3.63 },
-    MID: { NOR:3.47, SOU:3.47, MID:3.31, SPL:3.21, TEX:3.38, MTN:3.36, SWE:3.58, NWE:3.48 },
-    SPL: { NOR:3.49, SOU:3.31, MID:3.15, SPL:3.05, TEX:3.10, MTN:3.15, SWE:3.36, NWE:3.32 },
-    TEX: { NOR:3.54, SOU:3.18, MID:3.20, SPL:3.04, TEX:2.91, MTN:3.14, SWE:3.17, NWE:3.32 },
-    MTN: { NOR:3.52, SOU:3.41, MID:3.19, SPL:3.09, TEX:3.14, MTN:2.79, SWE:2.99, NWE:2.86 },
-    SWE: { NOR:3.68, SOU:3.63, MID:3.40, SPL:3.30, TEX:3.17, MTN:2.99, SWE:2.89, NWE:2.99 },
-    NWE: { NOR:3.63, SOU:3.58, MID:3.36, SPL:3.32, TEX:3.32, MTN:2.91, SWE:3.05, NWE:2.75 },
+    NOR: { NOR:2.99, SOU:3.17, MID:3.21, SPL:3.33, TEX:3.38, MTN:3.43, SWE:3.49, NWE:3.55 },
+    SOU: { NOR:3.11, SOU:2.95, MID:3.05, SPL:3.11, TEX:3.00, MTN:3.27, SWE:3.33, NWE:3.43 },
+    MID: { NOR:3.27, SOU:3.17, MID:3.05, SPL:2.95, TEX:3.11, MTN:3.17, SWE:3.27, NWE:3.33 },
+    SPL: { NOR:3.27, SOU:3.00, MID:2.89, SPL:2.78, TEX:2.83, MTN:2.95, SWE:3.05, NWE:3.17 },
+    TEX: { NOR:3.33, SOU:2.89, MID:2.95, SPL:2.78, TEX:2.67, MTN:2.95, SWE:2.89, NWE:3.17 },
+    MTN: { NOR:3.38, SOU:3.17, MID:3.00, SPL:2.89, TEX:2.95, MTN:2.67, SWE:2.78, NWE:2.78 },
+    SWE: { NOR:3.43, SOU:3.27, MID:3.11, SPL:3.00, TEX:2.89, MTN:2.78, SWE:2.62, NWE:2.83 },
+    NWE: { NOR:3.55, SOU:3.38, MID:3.21, SPL:3.17, TEX:3.17, MTN:2.83, SWE:2.89, NWE:2.73 },
   },
 
   REGION_LABELS: {
@@ -2084,6 +2096,9 @@ const FreightCalculator = {
     marketRateSource:      document.getElementById('marketRateSource'),
     marketRateConfidence:  document.getElementById('marketRateConfidence'),
     marketRateUpdated:     document.getElementById('marketRateUpdated'),
+    marketRateDirection:   document.getElementById('marketRateDirection'),
+    marketRateDiesel:      document.getElementById('marketRateDiesel'),
+    marketRateSourceCount: document.getElementById('marketRateSourceCount'),
     errorElements: {
       origin:      document.getElementById('originError'),
       destination: document.getElementById('destError'),
@@ -2191,15 +2206,15 @@ const FreightCalculator = {
     };
   },
 
-  /* ─── Weekly lane-rate data + auto-population ─────────────────── */
+  /* ─── 3-day multi-source lane-rate data + auto-population ─────────── */
 
   async loadLaneRates(force = false) {
     if (this.laneRateData && !force) return this.laneRateData;
 
-    this.updateMarketRatePanel(null, force ? 'Refreshing 3-day market data…' : 'Loading 3-day market data…');
+    this.updateMarketRatePanel(null, force ? 'Refreshing 3-day multi-source market data…' : 'Loading 3-day multi-source market data…');
 
     try {
-      const cacheKey = force ? Date.now() : '3day';
+      const cacheKey = force ? Date.now() : '3day-consensus';
       const res = await fetch(`data/lane-rates.json?v=${cacheKey}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
@@ -2213,12 +2228,12 @@ const FreightCalculator = {
 
       this.laneRateData = data;
       this.laneRateLoadedAt = new Date();
-      this.updateMarketRatePanel(null, '3-day market data loaded. Enter origin and destination.');
+      this.updateMarketRatePanel(null, '3-day multi-source market data loaded. Enter origin and destination.');
       this.applyLaneRate(false);
       return data;
     } catch (err) {
       console.warn('loadLaneRates:', err);
-      this.updateMarketRatePanel(null, 'Using embedded fallback rates. 3-day JSON could not be loaded.');
+      this.updateMarketRatePanel(null, 'Using embedded fallback rates. Multi-source JSON could not be loaded.');
       return null;
     }
   },
@@ -2254,11 +2269,17 @@ const FreightCalculator = {
 
   confidenceFromContext(oRegion, dRegion, profile) {
     let score = 2;
+    const sourceCount = Number(this.laneRateData?.marketConsensus?.sourceCount || this.laneRateData?.sources?.length || 0);
+    const numericCount = Number(this.laneRateData?.marketConsensus?.numericSourceCount || 0);
+    const dieselAvailable = Boolean(this.laneRateData?.marketConsensus?.diesel?.nationalAverage);
     if (oRegion && dRegion) score += 1;
-    if (this.laneRateData?.sources?.length) score += 1;
+    if (sourceCount >= 5) score += 2;
+    else if (sourceCount >= 3) score += 1;
+    if (numericCount >= 2) score += 1;
+    if (dieselAvailable) score += 1;
     score += Number(profile.confidenceBoost || 0);
-    if (score >= 4) return 'High';
-    if (score >= 2) return 'Medium';
+    if (score >= 6) return 'High';
+    if (score >= 3) return 'Medium';
     return 'Low';
   },
 
@@ -2273,7 +2294,9 @@ const FreightCalculator = {
     const sources = this.laneRateData?.sources || [];
     if (!sources.length) return 'Embedded Abby matrix';
     const names = sources.map(s => s.source).filter(Boolean);
-    return names.length ? `${names.slice(0, 3).join(' + ')}${names.length > 3 ? ' +' : ''}` : 'Weekly public update';
+    const count = Number(this.laneRateData?.marketConsensus?.sourceCount || sources.length || 0);
+    const label = names.length ? `${names.slice(0, 2).join(' + ')}${names.length > 2 ? ' +' : ''}` : '3-day public update';
+    return count > 2 ? `${label} (${count} sources)` : label;
   },
 
   computeMarketLaneRate() {
@@ -2314,7 +2337,29 @@ const FreightCalculator = {
       source: this.summarizeRateSource(),
       updatedAt: this.laneRateData?.updatedAt || null,
       basis: this.laneRateData?.rateType || 'estimated all-in spot rate per mile',
+      marketDirection: this.laneRateData?.marketConsensus?.marketDirection || 'Stable / fallback',
+      marketPressurePercent: this.laneRateData?.marketConsensus?.marketPressurePercent ?? null,
+      dieselAdjustmentPercent: this.laneRateData?.marketConsensus?.diesel?.adjustmentPercent ?? null,
+      dieselNationalAverage: this.laneRateData?.marketConsensus?.diesel?.nationalAverage ?? null,
+      sourceCount: this.laneRateData?.marketConsensus?.sourceCount || (this.laneRateData?.sources || []).length || 0,
+      numericSourceCount: this.laneRateData?.marketConsensus?.numericSourceCount || 0,
     };
+  },
+
+
+  formatSignedPercent(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return '—';
+    const sign = number > 0 ? '+' : '';
+    return `${sign}${number.toFixed(1)}%`;
+  },
+
+  formatDieselAdjustment(context) {
+    if (!context) return '—';
+    const percent = this.formatSignedPercent(context.dieselAdjustmentPercent);
+    const diesel = Number(context.dieselNationalAverage);
+    if (Number.isFinite(diesel) && diesel > 0 && percent !== '—') return `${percent} @ $${diesel.toFixed(3)}/gal`;
+    return percent;
   },
 
   updateMarketRatePanel(context, statusText) {
@@ -2330,15 +2375,25 @@ const FreightCalculator = {
       }
       if (els.marketRateUpdated) els.marketRateUpdated.textContent = this.formatUpdatedAt(this.laneRateData?.updatedAt);
       if (els.marketRateSource) els.marketRateSource.textContent = this.summarizeRateSource();
+      if (els.marketRateDirection) els.marketRateDirection.textContent = this.laneRateData?.marketConsensus?.marketDirection || '—';
+      if (els.marketRateDiesel) {
+        const diesel = this.laneRateData?.marketConsensus?.diesel || {};
+        const pct = Number(diesel.adjustmentPercent);
+        els.marketRateDiesel.textContent = Number.isFinite(pct) ? this.formatSignedPercent(pct) : '—';
+      }
+      if (els.marketRateSourceCount) els.marketRateSourceCount.textContent = String(this.laneRateData?.marketConsensus?.sourceCount || (this.laneRateData?.sources || []).length || '—');
       return;
     }
 
     if (els.marketRateValue) els.marketRateValue.textContent = `${this.formatCurrency(context.rate)} / mile`;
     const customerSuffix = context.customerProfileLabel ? ` • ${context.customerProfileLabel} applied` : '';
-    if (els.marketRateStatus) els.marketRateStatus.textContent = `${context.equipmentLabel} estimate applied from 3-day data${customerSuffix}.`;
+    if (els.marketRateStatus) els.marketRateStatus.textContent = `${context.equipmentLabel} estimate applied from 3-day multi-source data${customerSuffix}.`;
     if (els.marketRateLane) els.marketRateLane.textContent = `${context.oState} → ${context.dState} (${context.originRegionLabel} → ${context.destinationRegionLabel})`;
     if (els.marketRateSource) els.marketRateSource.textContent = context.source;
     if (els.marketRateUpdated) els.marketRateUpdated.textContent = this.formatUpdatedAt(context.updatedAt);
+    if (els.marketRateDirection) els.marketRateDirection.textContent = `${context.marketDirection || 'Stable'}${context.marketPressurePercent !== null ? ' • ' + this.formatSignedPercent(context.marketPressurePercent) : ''}`;
+    if (els.marketRateDiesel) els.marketRateDiesel.textContent = this.formatDieselAdjustment(context);
+    if (els.marketRateSourceCount) els.marketRateSourceCount.textContent = `${context.sourceCount || 0} total / ${context.numericSourceCount || 0} numeric`;
     if (els.marketRateConfidence) {
       els.marketRateConfidence.textContent = context.confidence;
       els.marketRateConfidence.className = `confidence-${String(context.confidence).toLowerCase()}`;
@@ -2348,7 +2403,7 @@ const FreightCalculator = {
   /**
    * Look up the region-pair rate for the current origin→destination
    * and populate the Cost Per Mile field. This is intentionally a
-   * semi-real estimate: 3-day public market update + Abby matrix +
+   * semi-real estimate: 3-day public market consensus + Abby matrix +
    * equipment multiplier. User can override at any time.
    */
   applyLaneRate(forceUpdatePanel = true) {
@@ -2363,7 +2418,7 @@ const FreightCalculator = {
 
     const hint = document.getElementById('laneRateHint');
     if (hint) {
-      hint.textContent = `3-day lane avg auto-set: ${context.oState} → ${context.dState} | ${context.equipmentLabel} | ${context.confidence} confidence${context.customerProfileLabel ? ' | ' + context.customerProfileLabel : ''}`;
+      hint.textContent = `3-day lane estimate auto-set: ${context.oState} → ${context.dState} | ${context.equipmentLabel} | ${context.confidence} confidence${context.customerProfileLabel ? ' | ' + context.customerProfileLabel : ''}`;
       hint.style.display = 'block';
     }
 

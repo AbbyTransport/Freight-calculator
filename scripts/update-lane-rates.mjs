@@ -1,20 +1,17 @@
 #!/usr/bin/env node
 /**
- * Abby Transport Freight Calculator — 3-day semi-dynamic lane-rate updater
+ * Abby Transport Freight Calculator — 3-day multi-source consensus updater.
  *
- * No paid API required.
+ * No paid API required. This is designed to get closer to paid-lane-rate logic
+ * by combining several public signals:
+ *  - DAT Trendlines / DAT flatbed public pages: numeric flatbed anchors when parseable.
+ *  - Scale Funding Current Freight Rates: numeric national/regional flatbed anchors.
+ *  - FTR / Truckstop public Spot Market Insights: spot-market pressure signal.
+ *  - EIA weekly diesel data: fuel pressure adjustment.
+ *  - C.H. Robinson market updates and ACT Research pages: macro trend modifiers.
  *
- * What this does through GitHub Actions about every 3 days:
- *  1. Reads parseable public freight-rate pages when possible.
- *  2. Blends numeric sources using weights instead of trusting one webpage like it came down from Sinai.
- *  3. Uses previous good values if public pages fail.
- *  4. Rebuilds the Abby regional lane matrix.
- *  5. Writes data/lane-rates.json and data/lane-rates-history.json.
- *  6. Patches index.html fallback constants, so the calculator still works
- *     even if the JSON file cannot be loaded by the browser.
- *
- * This is an estimating model. It is not DAT RateView, Truckstop Rate Insights,
- * SONAR, or any paid lane-level product. It is a public-source regional model.
+ * It is still not DAT RateView, Truckstop Rate Insights, SONAR TRAC, or any
+ * paid transactional lane API. It is a public-data consensus model with audit trail.
  */
 
 import fs from "node:fs/promises";
@@ -26,9 +23,14 @@ const DATA_DIR = path.join(ROOT, "data");
 const RATE_JSON_PATH = path.join(DATA_DIR, "lane-rates.json");
 const HISTORY_JSON_PATH = path.join(DATA_DIR, "lane-rates-history.json");
 
+const UPDATE_INTERVAL_HOURS = Number(process.env.UPDATE_INTERVAL_HOURS || 72);
+const FORCE_RATE_UPDATE = /^(1|true|yes)$/i.test(String(process.env.FORCE_RATE_UPDATE || "")) || process.argv.includes("--force");
+const OFFLINE_MODE = /^(1|true|yes)$/i.test(String(process.env.OFFLINE_MODE || ""));
+
 const REGION_CODES = ["NOR", "SOU", "MID", "SPL", "TEX", "MTN", "SWE", "NWE"];
 const BASE_NATIONAL_AVERAGE = 2.70;
 const COMPETITIVE_MARKET_MULTIPLIER = 0.875;
+const DIESEL_BENCHMARK = 3.80;
 
 const REGION_LABELS = {
   NOR: "Northeast",
@@ -66,38 +68,62 @@ const BASE_REGION_RATES = {
 
 const DEFAULT_PUBLIC_SOURCES = [
   {
+    id: "dat-flatbed-national",
     name: "DAT Trendlines Flatbed National Rates",
     url: "https://www.dat.com/trendlines/flatbed/national-rates",
-    parser: "dat-regional-map",
-    weight: 4.0,
+    type: "freight-rate",
+    weight: 3.5,
   },
   {
+    id: "dat-trendlines",
+    name: "DAT Trendlines",
+    url: "https://www.dat.com/trendlines",
+    type: "freight-rate",
+    weight: 2.0,
+  },
+  {
+    id: "scale-current-freight-rates",
     name: "Scale Funding Current Freight Rates",
     url: "https://getscalefunding.com/resources/current-freight-rates/",
-    parser: "generic-flatbed-rates",
+    type: "freight-rate",
     weight: 3.0,
   },
   {
-    name: "DAT Trendlines",
-    url: "https://www.dat.com/trendlines",
-    parser: "generic-flatbed-rates",
-    weight: 1.25,
+    id: "ftr-truckstop-current",
+    name: "FTR / Truckstop Spot Market Insights",
+    url: "https://spot.ftrintel.com/current",
+    type: "market-pressure",
+    weight: 2.5,
   },
   {
-    name: "ACT Research Flatbed Rates",
-    url: "https://www.actresearch.net/resources/data-tracking/flatbed-rates",
-    parser: "market-signal",
-    weight: 0.75,
+    id: "eia-diesel",
+    name: "EIA Weekly Diesel Fuel Update",
+    url: "https://www.eia.gov/petroleum/gasdiesel/",
+    type: "diesel",
+    weight: 2.5,
+  },
+  {
+    id: "ch-robinson-market-update",
+    name: "C.H. Robinson Freight Market Update",
+    url: "https://www.chrobinson.com/en-us/resources/insights-and-advisories/north-america-freight-insights/",
+    type: "market-pressure",
+    weight: 1.0,
+  },
+  {
+    id: "act-freight-rates",
+    name: "ACT Research Freight Trucking Rates",
+    url: "https://www.actresearch.net/resources/data-tracking/freight-trucking-rates",
+    type: "market-pressure",
+    weight: 1.0,
   },
 ];
 
-function round2(value) {
-  return Number(Number(value).toFixed(2));
-}
-
-function isUsableRate(value) {
-  return Number.isFinite(Number(value)) && Number(value) >= 1.5 && Number(value) <= 8;
-}
+function round2(value) { return Number(Number(value).toFixed(2)); }
+function round3(value) { return Number(Number(value).toFixed(3)); }
+function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+function isUsableRate(value) { return Number.isFinite(Number(value)) && Number(value) >= 1.5 && Number(value) <= 8; }
+function isUsableDiesel(value) { return Number.isFinite(Number(value)) && Number(value) >= 2.0 && Number(value) <= 8.5; }
+function percent(value) { return round2(Number(value) * 100); }
 
 function htmlToText(html) {
   return String(html)
@@ -121,117 +147,136 @@ function firstRate(text, patterns) {
   return null;
 }
 
-function findRawRegionRate(rawHtml, text, regionName) {
-  const compact = String(rawHtml).replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'");
-  const key = regionName.toLowerCase();
-  const rawPatterns = [
-    new RegExp(`['\"]${key}['\"]\\s*:\\s*([0-9]+(?:\\.[0-9]+)?)`, "i"),
-    new RegExp(`\\b${key}\\b[^$0-9]{0,80}\\$?\\s*([0-9]+(?:\\.[0-9]+)?)`, "i"),
-  ];
-  const valueFromRaw = firstRate(compact, rawPatterns);
-  if (isUsableRate(valueFromRaw)) return valueFromRaw;
-
-  const label = regionName.replace(/([a-z])([A-Z])/g, "$1 $2");
-  return firstRate(text, [new RegExp(`${label}[^$0-9]{0,120}\\$?\\s*([0-9]+(?:\\.[0-9]+)?)`, "i")]);
+function firstDiesel(text, patterns) {
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (!match) continue;
+    const value = Number.parseFloat(String(match[1]).replace(/,/g, ""));
+    if (isUsableDiesel(value)) return value;
+  }
+  return null;
 }
 
-function parseDatRegionalMap(html, sourceName, url, weight = 1) {
+function parsePublicFreightRates(html, source) {
   const text = htmlToText(html);
-  const rates = {
-    west: findRawRegionRate(html, text, "west"),
-    southeast: findRawRegionRate(html, text, "southeast"),
-    northeast: findRawRegionRate(html, text, "northeast"),
-    midwest: findRawRegionRate(html, text, "midwest"),
-    southwest: findRawRegionRate(html, text, "southwest"),
-  };
 
-  const regionalValues = Object.values(rates).filter(isUsableRate).map(Number);
-  const nationalFromText = firstRate(text, [
-    /national\s+(?:average\s+)?flatbed\s+(?:spot\s+)?(?:rate|rates|average)[^$0-9]{0,140}\$?\s*([0-9]+(?:\.[0-9]+)?)/i,
-    /flatbed\s+(?:spot\s+)?(?:rates?|average)[^$0-9]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+  const national = firstRate(text, [
+    /national\s+average\s+flatbed\s+rates?\s+(?:are|is|at|averaged?)\s+\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /flatbed\s+freight\s+rates?[^$]{0,240}national\s+average[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /national\s+flatbed\s+(?:spot\s+)?(?:rate|rates|average)[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /flatbed\s*[:\-]\s*\$\s*([0-9]+(?:\.[0-9]+)?)\s*(?:per\s+mile|\/mi|a\s+mile)/i,
+    /flatbed\s+spot\s+rates?[^.]{0,220}(?:national\s+averages?\s+)?(?:exceeding|above|around|at|near)\s+\$\s*([0-9]+(?:\.[0-9]+)?)/i,
   ]);
 
-  const national = isUsableRate(nationalFromText)
-    ? nationalFromText
-    : regionalValues.length >= 3
-      ? round2(regionalValues.reduce((sum, value) => sum + value, 0) / regionalValues.length)
-      : null;
+  const midwest = firstRate(text, [
+    /Midwest[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+  ]);
 
-  if (!isUsableRate(national) && !regionalValues.length) return null;
-  return {
-    source: sourceName,
-    url,
-    type: "direct-regional-rate-map",
-    weight,
-    foundAt: new Date().toISOString(),
-    rates: { national, ...rates },
-  };
-}
+  const west = firstRate(text, [
+    /lowest\s+rates?\s+are\s+in\s+the\s+West[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /West\s+flatbed[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /West[^$]{0,120}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+  ]);
 
-function parseGenericFlatbedRates(html, sourceName, url, weight = 1) {
-  const text = htmlToText(html);
+  const southeast = firstRate(text, [
+    /South\s*East[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /Southeast[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+  ]);
 
-  const rates = {
-    national: firstRate(text, [
-      /national\s+average\s+flatbed\s+rates?\s+(?:are|is|at|averaged?)\s+\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-      /flatbed\s+freight\s+rates?[^$]{0,220}national\s+average[^$]{0,120}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-      /flatbed\s*[:\-]\s*\$\s*([0-9]+(?:\.[0-9]+)?)\s*(?:per\s+mile|\/mi|a\s+mile)/i,
-      /national\s+flatbed\s+(?:spot\s+)?(?:rate|rates|average)[^$]{0,140}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-      /flatbed\s+spot\s+rates?[^.]{0,200}(?:national\s+averages?\s+)?(?:exceeding|above|around|at|to)\s+\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-    ]),
-    midwest: firstRate(text, [/Midwest[^$0-9]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i]),
-    west: firstRate(text, [
-      /lowest\s+rates?\s+are\s+in\s+the\s+West[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-      /West\s+flatbed[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-      /West[^$]{0,120}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-    ]),
-    southeast: firstRate(text, [
-      /South\s*East[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-      /Southeast[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i,
-    ]),
-    northeast: firstRate(text, [/Northeast[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i]),
-    southwest: firstRate(text, [/Southwest[^$]{0,160}\$\s*([0-9]+(?:\.[0-9]+)?)/i]),
-  };
+  const dryvan = firstRate(text, [
+    /national\s+average\s+(?:dry\s+)?van\s+rates?\s+(?:are|is|at|averaged?)\s+\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /(?:dry\s+)?van\s*[:\-]\s*\$\s*([0-9]+(?:\.[0-9]+)?)\s*(?:per\s+mile|\/mi|a\s+mile)/i,
+  ]);
 
-  const hasAny = Object.values(rates).some(isUsableRate);
+  const reefer = firstRate(text, [
+    /national\s+average\s+reefer\s+rates?\s+(?:are|is|at|averaged?)\s+\$\s*([0-9]+(?:\.[0-9]+)?)/i,
+    /reefer\s*[:\-]\s*\$\s*([0-9]+(?:\.[0-9]+)?)\s*(?:per\s+mile|\/mi|a\s+mile)/i,
+  ]);
+
+  const rates = { national, midwest, west, southeast, dryvan, reefer };
+  const hasAny = Object.values(rates).some(v => isUsableRate(v));
   if (!hasAny) return null;
 
-  return { source: sourceName, url, type: "public-current-rate-summary", weight, foundAt: new Date().toISOString(), rates };
+  return { source: source.name, id: source.id, url: source.url, type: source.type, weight: source.weight, foundAt: new Date().toISOString(), rates };
 }
 
-function parseMarketSignal(html, sourceName, url, weight = 1) {
+function parseDiesel(html, source) {
   const text = htmlToText(html);
-  const lower = text.toLowerCase();
-  const hasFlatbed = lower.includes("flatbed");
-  const stronger = /(strengthened|tighter|moved higher|rate momentum|firmer|improved pricing|capacity reductions|supporting higher)/i.test(text);
-  const softer = /(softened|weaker|rate relief|declined|looser|excess capacity)/i.test(text);
-  if (!hasFlatbed || (!stronger && !softer)) return null;
+  const national = firstDiesel(text, [
+    /U\.?S\.?\s+(?:No\.?\s*)?2\s+Diesel[^$0-9]{0,160}\$?\s*([0-9]+\.[0-9]{2,3})/i,
+    /On-Highway\s+Diesel[^$0-9]{0,160}\$?\s*([0-9]+\.[0-9]{2,3})/i,
+    /Diesel\s+Fuel[^$0-9]{0,160}\$?\s*([0-9]+\.[0-9]{2,3})/i,
+    /U\.?S\.?\s+National\s+Average[^$0-9]{0,160}\$?\s*([0-9]+\.[0-9]{2,3})/i,
+  ]);
+
+  const eastCoast = firstDiesel(text, [/East\s+Coast[^$0-9]{0,120}\$?\s*([0-9]+\.[0-9]{2,3})/i]);
+  const midwest = firstDiesel(text, [/Midwest[^$0-9]{0,120}\$?\s*([0-9]+\.[0-9]{2,3})/i]);
+  const gulfCoast = firstDiesel(text, [/Gulf\s+Coast[^$0-9]{0,120}\$?\s*([0-9]+\.[0-9]{2,3})/i]);
+  const rockyMountain = firstDiesel(text, [/Rocky\s+Mountain[^$0-9]{0,120}\$?\s*([0-9]+\.[0-9]{2,3})/i]);
+  const westCoast = firstDiesel(text, [/West\s+Coast[^$0-9]{0,120}\$?\s*([0-9]+\.[0-9]{2,3})/i]);
+
+  if (!isUsableDiesel(national) && ![eastCoast, midwest, gulfCoast, rockyMountain, westCoast].some(isUsableDiesel)) return null;
+
   return {
-    source: sourceName,
-    url,
-    type: "market-condition-signal",
-    weight,
+    source: source.name,
+    id: source.id,
+    url: source.url,
+    type: source.type,
+    weight: source.weight,
     foundAt: new Date().toISOString(),
-    rates: {},
-    trendSignal: stronger && !softer ? "firmer/tighter flatbed market" : softer && !stronger ? "softer flatbed market" : "mixed flatbed market",
+    diesel: { national, eastCoast, midwest, gulfCoast, rockyMountain, westCoast },
   };
 }
 
-function parseSourceByType(html, source) {
-  if (source.parser === "dat-regional-map") return parseDatRegionalMap(html, source.name, source.url, source.weight);
-  if (source.parser === "market-signal") return parseMarketSignal(html, source.name, source.url, source.weight);
-  return parseGenericFlatbedRates(html, source.name, source.url, source.weight);
+function scoreTextPressure(text) {
+  const lower = String(text).toLowerCase();
+  let score = 0;
+  const positives = [
+    [/record\s+high|near[- ]record|all[- ]time\s+high/g, 0.035],
+    [/strongest\s+(?:week|increase|gain)|largest\s+(?:increase|gain)/g, 0.025],
+    [/tight(?:en|ening)?\s+(?:capacity|market)|capacity\s+tight|carrier\s+attrition/g, 0.022],
+    [/rates?\s+(?:are\s+)?(?:rising|rose|up|increased|higher)|rate\s+pressure|costs?\s+climb/g, 0.015],
+    [/load[- ]to[- ]truck\s+ratio\s+(?:up|increased|higher)|demand\s+(?:up|strong)/g, 0.012],
+  ];
+  const negatives = [
+    [/rates?\s+(?:are\s+)?(?:falling|fell|down|declined|lower)|retreated|soft(?:en|ening)?/g, 0.015],
+    [/load\s+activity\s+declines|spot\s+volume\s+fell|volume\s+fell|postings\s+declined/g, 0.012],
+    [/capacity\s+(?:loose|easing)|truck\s+postings\s+(?:rose|increased)|market\s+soft/g, 0.015],
+  ];
+  for (const [pattern, amount] of positives) {
+    const count = lower.match(pattern)?.length || 0;
+    score += amount * Math.min(count, 3);
+  }
+  for (const [pattern, amount] of negatives) {
+    const count = lower.match(pattern)?.length || 0;
+    score -= amount * Math.min(count, 3);
+  }
+  return clamp(score, -0.06, 0.08);
+}
+
+function parseMarketPressure(html, source) {
+  const text = htmlToText(html);
+  const pressure = scoreTextPressure(text);
+  const direction = pressure > 0.015 ? "Rising" : pressure < -0.015 ? "Softening" : "Stable";
+  return { source: source.name, id: source.id, url: source.url, type: source.type, weight: source.weight, foundAt: new Date().toISOString(), pressure, direction };
 }
 
 async function fetchText(url) {
-  const response = await fetch(url, {
-    headers: {
-      "user-agent": "AbbyTransportRateUpdater/3.0 (+https://www.abbytransport.com)",
-      "accept": "text/html,application/json;q=0.9,*/*;q=0.8",
-    },
-  });
-  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-  return response.text();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "user-agent": "AbbyTransportRateUpdater/3.0 (+https://www.abbytransport.com)",
+        "accept": "text/html,application/json;q=0.9,*/*;q=0.8",
+      },
+    });
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    return await response.text();
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function collectSources() {
@@ -241,88 +286,150 @@ async function collectSources() {
     .split(",")
     .map(s => s.trim())
     .filter(Boolean)
-    .map((url, i) => ({ name: `Extra public source ${i + 1}`, url, parser: "generic-flatbed-rates", weight: 1.0 }));
+    .map((url, i) => ({ id: `extra-public-source-${i + 1}`, name: `Extra public source ${i + 1}`, url, type: "freight-rate", weight: 1.0 }));
+
+  if (OFFLINE_MODE) return { sources, failures: [{ source: "OFFLINE_MODE", error: "Fetch skipped by OFFLINE_MODE" }] };
 
   for (const source of [...DEFAULT_PUBLIC_SOURCES, ...extraUrls]) {
     try {
       const html = await fetchText(source.url);
-      const parsed = parseSourceByType(html, source);
+      let parsed = null;
+      if (source.type === "diesel") parsed = parseDiesel(html, source);
+      else if (source.type === "market-pressure") parsed = parseMarketPressure(html, source);
+      else parsed = parsePublicFreightRates(html, source);
+
       if (parsed) sources.push(parsed);
-      else failures.push({ source: source.name, error: "No parseable numeric rate or market signal found" });
+      else failures.push({ source: source.name, url: source.url, error: "No parseable freight, diesel, or trend signal found" });
     } catch (error) {
-      failures.push({ source: source.name, error: error.message });
+      failures.push({ source: source.name, url: source.url, error: error.message });
     }
   }
   return { sources, failures };
 }
 
-function weightedAverage(items, key) {
-  let numerator = 0;
-  let denominator = 0;
+function weightedAverageRate(items, key) {
+  const values = [];
   for (const item of items) {
     const value = item.rates?.[key];
     const weight = item.weight || 1;
-    if (!isUsableRate(value)) continue;
-    numerator += Number(value) * weight;
-    denominator += weight;
+    if (isUsableRate(value)) values.push({ value: Number(value), weight, source: item.source });
   }
+  if (!values.length) return null;
+  if (values.length === 1) return round2(values[0].value);
+  const sorted = values.map(v => v.value).sort((a, b) => a - b);
+  const median = sorted[Math.floor(sorted.length / 2)];
+  const filtered = values.filter(v => Math.abs(v.value - median) / median <= 0.28);
+  const usable = filtered.length ? filtered : values;
+  const numerator = usable.reduce((sum, v) => sum + v.value * v.weight, 0);
+  const denominator = usable.reduce((sum, v) => sum + v.weight, 0);
   return denominator ? round2(numerator / denominator) : null;
 }
 
-function nationalFromRegionalAnchors(rates) {
-  const values = [rates.midwest, rates.west, rates.southeast, rates.northeast, rates.southwest]
-    .filter(isUsableRate)
-    .map(Number);
-  return values.length >= 3 ? round2(values.reduce((sum, value) => sum + value, 0) / values.length) : null;
+function weightedAveragePressure(items) {
+  const trends = items.filter(item => Number.isFinite(Number(item.pressure)));
+  if (!trends.length) return 0;
+  const numerator = trends.reduce((sum, item) => sum + Number(item.pressure) * (item.weight || 1), 0);
+  const denominator = trends.reduce((sum, item) => sum + (item.weight || 1), 0);
+  return clamp(numerator / denominator, -0.055, 0.065);
+}
+
+function getMarketDirection(pressure) {
+  if (pressure >= 0.025) return "Rising";
+  if (pressure >= 0.008) return "Slightly rising";
+  if (pressure <= -0.025) return "Softening";
+  if (pressure <= -0.008) return "Slightly softening";
+  return "Stable";
+}
+
+function buildDieselModel(dieselSources, existing) {
+  const first = dieselSources.find(s => s.diesel);
+  const existingDiesel = existing?.marketConsensus?.diesel || {};
+  const national = isUsableDiesel(first?.diesel?.national) ? Number(first.diesel.national) : (isUsableDiesel(existingDiesel.nationalAverage) ? Number(existingDiesel.nationalAverage) : null);
+  const benchmark = isUsableDiesel(existingDiesel.benchmark) ? Number(existingDiesel.benchmark) : DIESEL_BENCHMARK;
+  const rawAdjustment = national ? (national - benchmark) * 0.018 : 0;
+  const adjustment = clamp(rawAdjustment, -0.025, 0.055);
+
+  const regionDiesel = first?.diesel || {};
+  const regionFactors = Object.fromEntries(REGION_CODES.map(code => [code, 1]));
+  if (national) {
+    const regionMap = {
+      NOR: regionDiesel.eastCoast,
+      SOU: regionDiesel.eastCoast || regionDiesel.gulfCoast,
+      MID: regionDiesel.midwest,
+      SPL: regionDiesel.gulfCoast || regionDiesel.midwest,
+      TEX: regionDiesel.gulfCoast,
+      MTN: regionDiesel.rockyMountain,
+      SWE: regionDiesel.westCoast || regionDiesel.rockyMountain,
+      NWE: regionDiesel.westCoast,
+    };
+    for (const code of REGION_CODES) {
+      const value = regionMap[code];
+      if (isUsableDiesel(value)) {
+        regionFactors[code] = clamp(1 + ((Number(value) - national) * 0.012), 0.965, 1.045);
+      }
+    }
+  }
+
+  return {
+    nationalAverage: national ? round3(national) : null,
+    benchmark: round3(benchmark),
+    adjustmentMultiplier: round3(1 + adjustment),
+    adjustmentPercent: percent(adjustment),
+    regionFactors,
+    source: first?.source || existingDiesel.source || null,
+  };
 }
 
 async function readExistingData() {
-  try {
-    return JSON.parse(await fs.readFile(RATE_JSON_PATH, "utf8"));
-  } catch {
-    return null;
-  }
+  try { return JSON.parse(await fs.readFile(RATE_JSON_PATH, "utf8")); }
+  catch { return null; }
 }
 
-function buildRegionFactors(rates) {
-  const national = rates.national;
+function shouldSkipUpdate(existing) {
+  if (FORCE_RATE_UPDATE) return false;
+  const last = existing?.updatedAt ? new Date(existing.updatedAt) : null;
+  if (!last || Number.isNaN(last.getTime())) return false;
+  const ageHours = (Date.now() - last.getTime()) / 36e5;
+  return ageHours < UPDATE_INTERVAL_HOURS;
+}
+
+function buildRegionFactors(rates, dieselModel) {
+  const national = rates.modelNationalAverage || rates.national;
   const factors = Object.fromEntries(REGION_CODES.map(code => [code, 1]));
 
-  if (isUsableRate(rates.midwest)) factors.MID = rates.midwest / national;
-  if (isUsableRate(rates.southeast)) factors.SOU = rates.southeast / national;
-  if (isUsableRate(rates.northeast)) factors.NOR = rates.northeast / national;
-
-  if (isUsableRate(rates.southwest)) {
-    const southwestFactor = rates.southwest / national;
-    factors.SWE = southwestFactor;
-    factors.TEX = 1 + (southwestFactor - 1) * 0.55;
-    factors.SPL = 1 + (southwestFactor - 1) * 0.30;
+  if (isUsableRate(rates.midwest) && isUsableRate(national)) {
+    const midwestFactor = rates.midwest / national;
+    factors.MID = midwestFactor;
+    factors.SPL = 1 + (midwestFactor - 1) * 0.45;
   }
 
-  if (isUsableRate(rates.west)) {
+  if (isUsableRate(rates.west) && isUsableRate(national)) {
     const westFactor = rates.west / national;
+    factors.SWE = westFactor;
     factors.NWE = westFactor;
-    factors.MTN = 1 + (westFactor - 1) * 0.45;
-    if (!isUsableRate(rates.southwest)) factors.SWE = westFactor;
+    factors.MTN = 1 + (westFactor - 1) * 0.40;
   }
 
-  if (isUsableRate(rates.midwest) && isUsableRate(rates.southwest)) {
-    factors.SPL = factors.MID * 0.45 + factors.SWE * 0.55;
-  } else if (isUsableRate(rates.midwest)) {
-    factors.SPL = 1 + (factors.MID - 1) * 0.45;
+  if (isUsableRate(rates.southeast) && isUsableRate(national)) {
+    const southeastFactor = rates.southeast / national;
+    factors.SOU = southeastFactor;
+    factors.NOR = 1 + (southeastFactor - 1) * 0.35;
+  }
+
+  const dieselFactors = dieselModel?.regionFactors || {};
+  for (const code of REGION_CODES) {
+    if (Number.isFinite(Number(dieselFactors[code]))) {
+      factors[code] *= Number(dieselFactors[code]);
+    }
   }
 
   return factors;
 }
 
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-function generateRegionRates(rates) {
-  const national = rates.national;
+function generateRegionRates(rates, dieselModel) {
+  const national = rates.modelNationalAverage;
   const nationalScale = national / BASE_NATIONAL_AVERAGE;
-  const regionFactors = buildRegionFactors(rates);
+  const regionFactors = buildRegionFactors(rates, dieselModel);
   const anchorStrength = 0.42;
 
   const output = {};
@@ -333,15 +440,26 @@ function generateRegionRates(rates) {
       const rawRegionFactor = Math.sqrt(regionFactors[origin] * regionFactors[destination]);
       const blendedFactor = 1 + (rawRegionFactor - 1) * anchorStrength;
       const adjusted = baseRate * nationalScale * blendedFactor * COMPETITIVE_MARKET_MULTIPLIER;
-      output[origin][destination] = round2(clamp(adjusted, national * 0.72, national * 1.42));
+      output[origin][destination] = round2(clamp(adjusted, national * 0.69, national * 1.45));
     }
   }
   return output;
 }
 
+function maybeDeriveEquipmentProfiles(rates) {
+  const profiles = JSON.parse(JSON.stringify(EQUIPMENT_PROFILES));
+  if (isUsableRate(rates.dryvan) && isUsableRate(rates.national)) {
+    profiles.dryvan.multiplier = round2(clamp(rates.dryvan / rates.national, 0.68, 1.02));
+  }
+  if (isUsableRate(rates.reefer) && isUsableRate(rates.national)) {
+    profiles.reefer.multiplier = round2(clamp(rates.reefer / rates.national, 0.78, 1.18));
+  }
+  return profiles;
+}
+
 function formatObjectForIndex(obj, indent = 2) {
   return JSON.stringify(obj, null, indent)
-    .replace(/"([A-Z]{3}|flatbed|stepdeck|conestoga|dryvan|reefer|hotshot|boxtruck|poweronly|rgn)":/g, "$1:");
+    .replace(/"([A-Za-z0-9_]+)":/g, "$1:");
 }
 
 function formatRegionRatesForIndex(regionRates) {
@@ -397,12 +515,12 @@ function replaceObjectLiteral(source, propertyName, replacementObjectLiteral) {
   return source.slice(0, propertyIndex) + `${propertyName}: ${replacementObjectLiteral}` + source.slice(closeIndex + 1);
 }
 
-function patchIndexHtml(original, defaultCostPerMile, regionRates) {
+function patchIndexHtml(original, defaultCostPerMile, regionRates, equipmentProfiles) {
   let html = original;
 
   html = html.replace(
     /DEFAULT_COST_PER_MILE:\s*[0-9]+(?:\.[0-9]+)?\s*,[^\n\r]*/,
-    `DEFAULT_COST_PER_MILE: ${defaultCostPerMile.toFixed(2)}, // auto-updated about every 3 days; see data/lane-rates.json`
+    `DEFAULT_COST_PER_MILE: ${defaultCostPerMile.toFixed(2)}, // auto-updated every 3 days; see data/lane-rates.json`
   );
 
   html = html.replace(
@@ -411,7 +529,7 @@ function patchIndexHtml(original, defaultCostPerMile, regionRates) {
   );
 
   html = replaceObjectLiteral(html, "REGION_RATES", formatRegionRatesForIndex(regionRates));
-  html = replaceObjectLiteral(html, "EQUIPMENT_PROFILES", formatObjectForIndex(EQUIPMENT_PROFILES, 4));
+  html = replaceObjectLiteral(html, "EQUIPMENT_PROFILES", formatObjectForIndex(equipmentProfiles, 4));
 
   return html;
 }
@@ -426,75 +544,138 @@ async function writeJson(filePath, data) {
   await fs.writeFile(filePath, JSON.stringify(data, null, 2) + "\n", "utf8");
 }
 
-function fallbackRate(existing, key) {
-  if (isUsableRate(existing?.rawRegionalAnchors?.[key])) return Number(existing.rawRegionalAnchors[key]);
-  if (isUsableRate(existing?.regionalAnchors?.[key])) return Number(existing.regionalAnchors[key]) / COMPETITIVE_MARKET_MULTIPLIER;
-  return null;
-}
-
 async function main() {
   const now = new Date().toISOString();
   const existing = await readExistingData();
-  const { sources, failures } = await collectSources();
-  const effectiveSources = sources.length
-    ? sources
-    : Array.isArray(existing?.sources)
-      ? existing.sources.map(s => ({ ...s, reusedFromPreviousUpdate: true }))
-      : [];
 
-  let rates = {
-    national: weightedAverage(sources, "national"),
-    midwest: weightedAverage(sources, "midwest"),
-    west: weightedAverage(sources, "west"),
-    southeast: weightedAverage(sources, "southeast"),
-    northeast: weightedAverage(sources, "northeast"),
-    southwest: weightedAverage(sources, "southwest"),
+  if (shouldSkipUpdate(existing)) {
+    const last = new Date(existing.updatedAt);
+    const ageHours = (Date.now() - last.getTime()) / 36e5;
+    console.log(`Last valid update is ${ageHours.toFixed(1)} hours old. Target interval is ${UPDATE_INTERVAL_HOURS} hours. Skipping.`);
+    return;
+  }
+
+  const collected = await collectSources();
+  let sources = collected.sources;
+  const failures = collected.failures;
+
+  // If every public page fails or blocks parsing, keep the previous good source
+  // metadata and last consensus. This prevents the calculator from looking
+  // less confident simply because a public webpage changed its HTML again,
+  // a deeply human contribution to software entropy.
+  if (!sources.length && Array.isArray(existing?.sources) && existing.sources.length) {
+    sources = existing.sources.map(source => ({ ...source, reusedFromPreviousSnapshot: true }));
+    failures.push({ source: "Previous source snapshot", error: "All live public sources failed; reused previous good source metadata and consensus inputs" });
+  }
+
+  const freightSources = sources.filter(s => s.type === "freight-rate");
+  const pressureSources = sources.filter(s => s.type === "market-pressure");
+  const dieselSources = sources.filter(s => s.type === "diesel");
+
+  let national = weightedAverageRate(freightSources, "national");
+  let midwest = weightedAverageRate(freightSources, "midwest");
+  let west = weightedAverageRate(freightSources, "west");
+  let southeast = weightedAverageRate(freightSources, "southeast");
+  let dryvan = weightedAverageRate(freightSources, "dryvan");
+  let reefer = weightedAverageRate(freightSources, "reefer");
+
+  if (!isUsableRate(national) && existing?.rawMarketNationalAverage) national = Number(existing.rawMarketNationalAverage);
+  if (!isUsableRate(national) && existing?.marketConsensus?.rawMarketNationalAverage) national = Number(existing.marketConsensus.rawMarketNationalAverage);
+  if (!isUsableRate(national) && existing?.defaultCostPerMile) national = Number(existing.defaultCostPerMile) / COMPETITIVE_MARKET_MULTIPLIER;
+  if (!isUsableRate(midwest) && existing?.regionalAnchors?.midwest) midwest = Number(existing.regionalAnchors.midwest) / COMPETITIVE_MARKET_MULTIPLIER;
+  if (!isUsableRate(west) && existing?.regionalAnchors?.west) west = Number(existing.regionalAnchors.west) / COMPETITIVE_MARKET_MULTIPLIER;
+  if (!isUsableRate(southeast) && existing?.regionalAnchors?.southeast) southeast = Number(existing.regionalAnchors.southeast) / COMPETITIVE_MARKET_MULTIPLIER;
+  if (!isUsableRate(national)) national = BASE_NATIONAL_AVERAGE;
+
+  const dieselModel = buildDieselModel(dieselSources, existing);
+  let marketPressure = weightedAveragePressure(pressureSources);
+  if (!pressureSources.length && Number.isFinite(Number(existing?.marketConsensus?.marketPressure))) {
+    marketPressure = Number(existing.marketConsensus.marketPressure);
+  }
+  marketPressure = clamp(marketPressure, -0.055, 0.065);
+
+  const dieselMultiplier = Number(dieselModel.adjustmentMultiplier || 1);
+  const pressureMultiplier = 1 + marketPressure;
+  const modelNationalAverage = round2(Number(national) * pressureMultiplier * dieselMultiplier);
+  const rates = {
+    national: round2(national),
+    modelNationalAverage,
+    midwest: isUsableRate(midwest) ? round2(Number(midwest) * pressureMultiplier * dieselMultiplier) : null,
+    west: isUsableRate(west) ? round2(Number(west) * pressureMultiplier * dieselMultiplier) : null,
+    southeast: isUsableRate(southeast) ? round2(Number(southeast) * pressureMultiplier * dieselMultiplier) : null,
+    dryvan: isUsableRate(dryvan) ? round2(dryvan) : null,
+    reefer: isUsableRate(reefer) ? round2(reefer) : null,
   };
 
-  if (!isUsableRate(rates.national)) rates.national = nationalFromRegionalAnchors(rates);
-  if (!isUsableRate(rates.national) && existing?.rawMarketNationalAverage) rates.national = Number(existing.rawMarketNationalAverage);
-  if (!isUsableRate(rates.national) && existing?.defaultCostPerMile) rates.national = Number(existing.defaultCostPerMile) / COMPETITIVE_MARKET_MULTIPLIER;
+  const equipmentProfiles = maybeDeriveEquipmentProfiles({ ...rates, national: rates.national });
+  const competitiveDefaultCostPerMile = round2(modelNationalAverage * COMPETITIVE_MARKET_MULTIPLIER);
+  const regionRates = generateRegionRates(rates, dieselModel);
 
-  for (const key of ["midwest", "west", "southeast", "northeast", "southwest"]) {
-    if (!isUsableRate(rates[key])) rates[key] = fallbackRate(existing, key);
-  }
-  if (!isUsableRate(rates.national)) rates.national = BASE_NATIONAL_AVERAGE;
-
-  rates = Object.fromEntries(Object.entries(rates).map(([key, value]) => [key, isUsableRate(value) ? round2(value) : null]));
-
-  const competitiveDefaultCostPerMile = round2(rates.national * COMPETITIVE_MARKET_MULTIPLIER);
-  const regionRates = generateRegionRates(rates);
   const indexOriginal = await fs.readFile(INDEX_PATH, "utf8");
-  await fs.writeFile(INDEX_PATH, patchIndexHtml(indexOriginal, competitiveDefaultCostPerMile, regionRates), "utf8");
+  await fs.writeFile(INDEX_PATH, patchIndexHtml(indexOriginal, competitiveDefaultCostPerMile, regionRates, equipmentProfiles), "utf8");
 
   const data = {
     schemaVersion: 5,
     updatedAt: now,
-    updateCadence: "every-3-days",
-    model: "three-day-public-update-plus-dat-regional-anchors-plus-realistic-abby-market-discount-matrix",
+    updateCadence: "every-72-hours-when-public-sources-are-available",
+    model: "3-day-multi-source-public-consensus-plus-realistic-abby-market-discount-matrix",
     equipment: "flatbed-base-with-equipment-multipliers",
-    rateType: "estimated realistic broker booking target per mile with a small discount; updated every 3 days when GitHub Actions runs; not a guaranteed live lane average",
+    rateType: "estimated competitive broker booking target per mile based on public multi-source consensus; not a guaranteed live city-to-city lane average",
     defaultCostPerMile: competitiveDefaultCostPerMile,
     rawMarketNationalAverage: rates.national,
+    modelNationalAverage,
     competitiveMarketMultiplier: COMPETITIVE_MARKET_MULTIPLIER,
-    regionalAnchors: Object.fromEntries(Object.entries(rates).filter(([key]) => key !== "national").map(([key, value]) => [key, isUsableRate(value) ? round2(value * COMPETITIVE_MARKET_MULTIPLIER) : null])),
-    rawRegionalAnchors: Object.fromEntries(Object.entries(rates).filter(([key]) => key !== "national")),
+    regionalAnchors: {
+      midwest: rates.midwest ? round2(rates.midwest * COMPETITIVE_MARKET_MULTIPLIER) : null,
+      west: rates.west ? round2(rates.west * COMPETITIVE_MARKET_MULTIPLIER) : null,
+      southeast: rates.southeast ? round2(rates.southeast * COMPETITIVE_MARKET_MULTIPLIER) : null,
+    },
+    marketConsensus: {
+      sourceCount: sources.length,
+      numericSourceCount: freightSources.filter(s => Object.values(s.rates || {}).some(isUsableRate)).length,
+      trendSourceCount: pressureSources.length,
+      dieselSourceCount: dieselSources.length,
+      rawMarketNationalAverage: rates.national,
+      modelNationalAverage,
+      marketPressure,
+      marketPressurePercent: percent(marketPressure),
+      marketDirection: getMarketDirection(marketPressure),
+      diesel: dieselModel,
+      weights: {
+        numericRates: "DAT/Scale numeric anchors dominate when parseable; extreme outliers are filtered before averaging.",
+        marketPressure: "FTR/Truckstop, C.H. Robinson, and ACT public text are used as small directional modifiers, not raw rate sources.",
+        diesel: "EIA weekly diesel is used as a mild fuel-cost pressure adjustment, capped to avoid overreacting.",
+      },
+    },
     regionCodes: REGION_LABELS,
     regionRates,
-    equipmentProfiles: EQUIPMENT_PROFILES,
+    equipmentProfiles,
     display: {
       showConfidence: true,
       showLastUpdated: true,
+      showMarketDirection: true,
+      showDieselAdjustment: true,
       customerPdfHidesMarketBasis: true,
     },
     methodology: {
       baseNationalAverage: BASE_NATIONAL_AVERAGE,
       competitiveMarketMultiplier: COMPETITIVE_MARKET_MULTIPLIER,
-      note: "About every 3 days, public freight-rate data is parsed when available, blended by source weight, and discounted into a competitive Abby booking target. DAT direct regional anchors now influence the regional matrix more precisely than a single national average.",
-      generalCalibration: "General customers remain realistic with a small Abby discount. Tycon Systems remains governed by its separate customer-profile Win Mode in pricing-engine-config.json and index.html.",
-      liveLaneLimit: "This remains a semi-real public-source regional estimate, not live city-to-city DAT RateView or Truckstop Rate Insights.",
+      updateIntervalHours: UPDATE_INTERVAL_HOURS,
+      note: "The updater now uses multiple public sources and a weighted consensus: numeric public freight-rate anchors, market-pressure text signals, and EIA diesel adjustment. It updates every 72 hours when scheduled by GitHub Actions. Tycon Systems remains handled separately by Customer Name in the calculator's pricing engine.",
     },
-    sources: effectiveSources.map(s => ({ source: s.source, url: s.url, type: s.type, weight: s.weight, foundAt: s.foundAt, rates: s.rates, trendSignal: s.trendSignal || undefined, reusedFromPreviousUpdate: s.reusedFromPreviousUpdate || undefined })),
+    sources: sources.map(s => ({
+      source: s.source,
+      id: s.id,
+      url: s.url,
+      type: s.type,
+      weight: s.weight,
+      foundAt: s.foundAt,
+      rates: s.rates,
+      diesel: s.diesel,
+      pressure: Number.isFinite(Number(s.pressure)) ? round3(s.pressure) : undefined,
+      direction: s.direction,
+      reusedFromPreviousSnapshot: Boolean(s.reusedFromPreviousSnapshot),
+    })),
     failures,
   };
   await writeJson(RATE_JSON_PATH, data);
@@ -507,19 +688,24 @@ async function main() {
 
   history.push({
     updatedAt: now,
-    updateCadence: "every-3-days",
     defaultCostPerMile: competitiveDefaultCostPerMile,
     rawMarketNationalAverage: rates.national,
+    modelNationalAverage,
+    marketDirection: data.marketConsensus.marketDirection,
+    marketPressurePercent: data.marketConsensus.marketPressurePercent,
+    dieselAdjustmentPercent: data.marketConsensus.diesel.adjustmentPercent,
     regionalAnchors: data.regionalAnchors,
-    rawRegionalAnchors: data.rawRegionalAnchors,
-    sourceSummary: summarizeSources(effectiveSources),
+    sourceSummary: summarizeSources(sources),
+    sourceCount: sources.length,
     failures: failures.length,
   });
-  history = history.slice(-180);
+  history = history.slice(-160);
   await writeJson(HISTORY_JSON_PATH, history);
 
-  console.log(`Updated 3-day competitive flatbed bid rate: $${competitiveDefaultCostPerMile.toFixed(2)}/mi (raw market anchor $${rates.national.toFixed(2)}/mi)`);
-  console.log(`Sources: ${summarizeSources(effectiveSources)}`);
+  console.log(`Updated 3-day consensus flatbed bid rate: $${competitiveDefaultCostPerMile.toFixed(2)}/mi`);
+  console.log(`Raw numeric anchor: $${rates.national.toFixed(2)}/mi | model national: $${modelNationalAverage.toFixed(2)}/mi`);
+  console.log(`Market direction: ${data.marketConsensus.marketDirection} (${data.marketConsensus.marketPressurePercent}%) | diesel adj: ${data.marketConsensus.diesel.adjustmentPercent}%`);
+  console.log(`Sources: ${summarizeSources(sources)}`);
   if (failures.length) console.log(`Source failures: ${JSON.stringify(failures)}`);
 }
 
