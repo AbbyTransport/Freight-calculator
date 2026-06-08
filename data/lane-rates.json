@@ -1,15 +1,51 @@
 {
   "schemaVersion": 5,
-  "updatedAt": "2026-06-05T18:45:00.000Z",
+  "updatedAt": "2026-06-08T21:17:08.949Z",
+  "updateCadence": "every-72-hours-when-public-sources-are-available",
   "model": "3-day-multi-source-public-consensus-plus-realistic-abby-market-discount-matrix",
   "equipment": "flatbed-base-with-equipment-multipliers",
   "rateType": "estimated competitive broker booking target per mile based on public multi-source consensus; not a guaranteed live city-to-city lane average",
-  "defaultCostPerMile": 3.15,
+  "defaultCostPerMile": 3.32,
   "rawMarketNationalAverage": 3.6,
+  "modelNationalAverage": 3.79,
   "competitiveMarketMultiplier": 0.875,
   "regionalAnchors": {
-    "midwest": 3.25,
-    "west": 2.78
+    "midwest": 2.63,
+    "west": 2.79,
+    "southeast": 3.51
+  },
+  "marketConsensus": {
+    "sourceCount": 5,
+    "numericSourceCount": 1,
+    "trendSourceCount": 3,
+    "dieselSourceCount": 1,
+    "rawMarketNationalAverage": 3.6,
+    "modelNationalAverage": 3.79,
+    "marketPressure": 0.05155555555555557,
+    "marketPressurePercent": 5.16,
+    "marketDirection": "Rising",
+    "diesel": {
+      "nationalAverage": null,
+      "benchmark": 3.8,
+      "adjustmentMultiplier": 1,
+      "adjustmentPercent": 0,
+      "regionFactors": {
+        "NOR": 1,
+        "SOU": 1,
+        "MID": 1,
+        "SPL": 1,
+        "TEX": 1,
+        "MTN": 1,
+        "SWE": 1,
+        "NWE": 1
+      },
+      "source": "EIA Weekly Diesel Fuel Update"
+    },
+    "weights": {
+      "numericRates": "DAT/Scale numeric anchors dominate when parseable; extreme outliers are filtered before averaging.",
+      "marketPressure": "FTR/Truckstop, C.H. Robinson, and ACT public text are used as small directional modifiers, not raw rate sources.",
+      "diesel": "EIA weekly diesel is used as a mild fuel-cost pressure adjustment, capped to avoid overreacting."
+    }
   },
   "regionCodes": {
     "NOR": "Northeast",
@@ -23,90 +59,90 @@
   },
   "regionRates": {
     "NOR": {
-      "NOR": 2.99,
-      "SOU": 3.17,
-      "MID": 3.21,
-      "SPL": 3.33,
-      "TEX": 3.38,
-      "MTN": 3.43,
-      "SWE": 3.49,
-      "NWE": 3.55
+      "NOR": 3.41,
+      "SOU": 3.62,
+      "MID": 3.47,
+      "SPL": 3.69,
+      "TEX": 3.82,
+      "MTN": 3.83,
+      "SWE": 3.81,
+      "NWE": 3.87
     },
     "SOU": {
-      "NOR": 3.11,
-      "SOU": 2.95,
-      "MID": 3.05,
-      "SPL": 3.11,
-      "TEX": 3.0,
-      "MTN": 3.27,
-      "SWE": 3.33,
-      "NWE": 3.43
+      "NOR": 3.56,
+      "SOU": 3.4,
+      "MID": 3.32,
+      "SPL": 3.47,
+      "TEX": 3.42,
+      "MTN": 3.68,
+      "SWE": 3.66,
+      "NWE": 3.78
     },
     "MID": {
-      "NOR": 3.27,
-      "SOU": 3.17,
-      "MID": 3.05,
-      "SPL": 2.95,
-      "TEX": 3.11,
-      "MTN": 3.17,
-      "SWE": 3.27,
-      "NWE": 3.33
+      "NOR": 3.53,
+      "SOU": 3.44,
+      "MID": 3.14,
+      "SPL": 3.11,
+      "TEX": 3.34,
+      "MTN": 3.36,
+      "SWE": 3.4,
+      "NWE": 3.46
     },
     "SPL": {
-      "NOR": 3.27,
-      "SOU": 3.0,
-      "MID": 2.89,
-      "SPL": 2.78,
-      "TEX": 2.83,
-      "MTN": 2.95,
-      "SWE": 3.05,
-      "NWE": 3.17
+      "NOR": 3.63,
+      "SOU": 3.35,
+      "MID": 3.05,
+      "SPL": 3.01,
+      "TEX": 3.13,
+      "MTN": 3.21,
+      "SWE": 3.26,
+      "NWE": 3.37
     },
     "TEX": {
-      "NOR": 3.33,
-      "SOU": 2.89,
-      "MID": 2.95,
-      "SPL": 2.78,
-      "TEX": 2.67,
-      "MTN": 2.95,
-      "SWE": 2.89,
-      "NWE": 3.17
+      "NOR": 3.76,
+      "SOU": 3.29,
+      "MID": 3.16,
+      "SPL": 3.07,
+      "TEX": 3.01,
+      "MTN": 3.27,
+      "SWE": 3.14,
+      "NWE": 3.44
     },
     "MTN": {
-      "NOR": 3.38,
-      "SOU": 3.17,
-      "MID": 3.0,
-      "SPL": 2.89,
-      "TEX": 2.95,
-      "MTN": 2.67,
-      "SWE": 2.78,
-      "NWE": 2.78
+      "NOR": 3.77,
+      "SOU": 3.56,
+      "MID": 3.18,
+      "SPL": 3.15,
+      "TEX": 3.27,
+      "MTN": 2.93,
+      "SWE": 2.98,
+      "NWE": 2.98
     },
     "SWE": {
-      "NOR": 3.43,
-      "SOU": 3.27,
-      "MID": 3.11,
-      "SPL": 3.0,
-      "TEX": 2.89,
-      "MTN": 2.78,
-      "SWE": 2.62,
-      "NWE": 2.83
+      "NOR": 3.75,
+      "SOU": 3.6,
+      "MID": 3.23,
+      "SPL": 3.2,
+      "TEX": 3.14,
+      "MTN": 2.98,
+      "SWE": 2.75,
+      "NWE": 2.98
     },
     "NWE": {
-      "NOR": 3.55,
-      "SOU": 3.38,
-      "MID": 3.21,
-      "SPL": 3.17,
-      "TEX": 3.17,
-      "MTN": 2.83,
-      "SWE": 2.89,
-      "NWE": 2.73
+      "NOR": 3.87,
+      "SOU": 3.72,
+      "MID": 3.35,
+      "SPL": 3.37,
+      "TEX": 3.44,
+      "MTN": 3.04,
+      "SWE": 3.04,
+      "NWE": 2.87
     }
   },
   "equipmentProfiles": {
     "flatbed": {
       "label": "Flatbed",
-      "multiplier": 1.0,
+      "multiplier": 1,
       "confidenceBoost": 0
     },
     "stepdeck": {
@@ -153,48 +189,33 @@
   "display": {
     "showConfidence": true,
     "showLastUpdated": true,
-    "customerPdfHidesMarketBasis": true,
     "showMarketDirection": true,
-    "showDieselAdjustment": true
+    "showDieselAdjustment": true,
+    "customerPdfHidesMarketBasis": true
   },
   "methodology": {
-    "note": "The updater now uses multiple public sources and a weighted consensus: numeric public freight-rate anchors, market-pressure text signals, and EIA diesel adjustment. It updates every 72 hours when scheduled by GitHub Actions. Tycon Systems remains handled separately by Customer Name in the calculator pricing engine.",
-    "generalCalibration": "Raised from the earlier bargain matrix by about 16% for non-Tycon customers.",
-    "tyconCalibration": "Tycon still receives a separate customer-profile multiplier so its aggressive win mode stays effectively where it was.",
-    "updateIntervalHours": 72
+    "baseNationalAverage": 2.7,
+    "competitiveMarketMultiplier": 0.875,
+    "updateIntervalHours": 72,
+    "note": "The updater now uses multiple public sources and a weighted consensus: numeric public freight-rate anchors, market-pressure text signals, and EIA diesel adjustment. It updates every 72 hours when scheduled by GitHub Actions. Tycon Systems remains handled separately by Customer Name in the calculator's pricing engine."
   },
   "sources": [
-    {
-      "source": "DAT Trendlines Flatbed National Rates",
-      "id": "dat-flatbed-national",
-      "url": "https://www.dat.com/trendlines/flatbed/national-rates",
-      "type": "freight-rate",
-      "weight": 3.5,
-      "foundAt": "2026-06-05T18:45:00.000Z",
-      "rates": {}
-    },
-    {
-      "source": "DAT Trendlines",
-      "id": "dat-trendlines",
-      "url": "https://www.dat.com/trendlines",
-      "type": "freight-rate",
-      "weight": 2.0,
-      "foundAt": "2026-06-05T18:45:00.000Z",
-      "rates": {}
-    },
     {
       "source": "Scale Funding Current Freight Rates",
       "id": "scale-current-freight-rates",
       "url": "https://getscalefunding.com/resources/current-freight-rates/",
       "type": "freight-rate",
-      "weight": 3.0,
-      "foundAt": "2026-06-05T18:45:00.000Z",
+      "weight": 3,
+      "foundAt": "2026-06-08T21:17:09.358Z",
       "rates": {
         "national": 3.6,
-        "midwest": null,
+        "midwest": 2.86,
         "west": 3.03,
-        "southeast": 3.81
-      }
+        "southeast": 3.81,
+        "dryvan": null,
+        "reefer": null
+      },
+      "reusedFromPreviousSnapshot": false
     },
     {
       "source": "FTR / Truckstop Spot Market Insights",
@@ -202,9 +223,10 @@
       "url": "https://spot.ftrintel.com/current",
       "type": "market-pressure",
       "weight": 2.5,
-      "foundAt": "2026-06-05T18:45:00.000Z",
-      "pressure": 0.018,
-      "direction": "Slightly rising"
+      "foundAt": "2026-06-08T21:17:09.609Z",
+      "pressure": 0.078,
+      "direction": "Rising",
+      "reusedFromPreviousSnapshot": false
     },
     {
       "source": "EIA Weekly Diesel Fuel Update",
@@ -212,80 +234,50 @@
       "url": "https://www.eia.gov/petroleum/gasdiesel/",
       "type": "diesel",
       "weight": 2.5,
-      "foundAt": "2026-06-05T18:45:00.000Z",
+      "foundAt": "2026-06-08T21:17:09.912Z",
       "diesel": {
-        "nationalAverage": null,
-        "benchmark": 3.8,
-        "adjustmentMultiplier": 1.0,
-        "adjustmentPercent": 0.0,
-        "regionFactors": {
-          "NOR": 1,
-          "SOU": 1,
-          "MID": 1,
-          "SPL": 1,
-          "TEX": 1,
-          "MTN": 1,
-          "SWE": 1,
-          "NWE": 1
-        },
-        "source": "EIA Weekly Diesel Fuel Update"
-      }
+        "national": null,
+        "eastCoast": null,
+        "midwest": null,
+        "gulfCoast": null,
+        "rockyMountain": null,
+        "westCoast": 5.186
+      },
+      "reusedFromPreviousSnapshot": false
     },
     {
       "source": "C.H. Robinson Freight Market Update",
       "id": "ch-robinson-market-update",
       "url": "https://www.chrobinson.com/en-us/resources/insights-and-advisories/north-america-freight-insights/",
       "type": "market-pressure",
-      "weight": 1.0,
-      "foundAt": "2026-06-05T18:45:00.000Z",
-      "pressure": 0.01,
-      "direction": "Slightly rising"
+      "weight": 1,
+      "foundAt": "2026-06-08T21:17:10.310Z",
+      "pressure": 0,
+      "direction": "Stable",
+      "reusedFromPreviousSnapshot": false
     },
     {
       "source": "ACT Research Freight Trucking Rates",
       "id": "act-freight-rates",
       "url": "https://www.actresearch.net/resources/data-tracking/freight-trucking-rates",
       "type": "market-pressure",
-      "weight": 1.0,
-      "foundAt": "2026-06-05T18:45:00.000Z",
-      "pressure": 0.006,
-      "direction": "Stable / firm"
+      "weight": 1,
+      "foundAt": "2026-06-08T21:17:10.674Z",
+      "pressure": 0.037,
+      "direction": "Rising",
+      "reusedFromPreviousSnapshot": false
     }
   ],
-  "failures": [],
-  "updateCadence": "every-72-hours-when-public-sources-are-available",
-  "modelNationalAverage": 3.6,
-  "marketConsensus": {
-    "sourceCount": 7,
-    "numericSourceCount": 3,
-    "trendSourceCount": 3,
-    "dieselSourceCount": 1,
-    "rawMarketNationalAverage": 3.6,
-    "modelNationalAverage": 3.6,
-    "marketPressure": 0.012,
-    "marketPressurePercent": 1.2,
-    "marketDirection": "Slightly rising",
-    "diesel": {
-      "nationalAverage": null,
-      "benchmark": 3.8,
-      "adjustmentMultiplier": 1.0,
-      "adjustmentPercent": 0.0,
-      "regionFactors": {
-        "NOR": 1,
-        "SOU": 1,
-        "MID": 1,
-        "SPL": 1,
-        "TEX": 1,
-        "MTN": 1,
-        "SWE": 1,
-        "NWE": 1
-      },
-      "source": "EIA Weekly Diesel Fuel Update"
+  "failures": [
+    {
+      "source": "DAT Trendlines Flatbed National Rates",
+      "url": "https://www.dat.com/trendlines/flatbed/national-rates",
+      "error": "No parseable freight, diesel, or trend signal found"
     },
-    "weights": {
-      "numericRates": "DAT/Scale numeric anchors dominate when parseable; extreme outliers are filtered before averaging.",
-      "marketPressure": "FTR/Truckstop, C.H. Robinson, and ACT public text are used as small directional modifiers, not raw rate sources.",
-      "diesel": "EIA weekly diesel is used as a mild fuel-cost pressure adjustment, capped to avoid overreacting."
+    {
+      "source": "DAT Trendlines",
+      "url": "https://www.dat.com/trendlines",
+      "error": "No parseable freight, diesel, or trend signal found"
     }
-  }
+  ]
 }

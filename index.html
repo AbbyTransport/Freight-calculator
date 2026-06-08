@@ -1649,7 +1649,7 @@ button {
               <label for="costPerMile">Cost Per Mile ($)</label>
               <input type="number" id="costPerMile" name="costPerMile"
                      step="0.01" min="0" max="100"
-                     value="3.15"
+                     value="3.32"
                      aria-describedby="costPerMileError" />
               <span class="error-message" id="costPerMileError" aria-live="polite"></span>
               <small id="laneRateHint" class="lane-hint" aria-live="polite"></small>
@@ -1866,7 +1866,7 @@ const FreightCalculator = {
   API_KEY:              '5b3ce3597851110001cf6248b4d09a96abdf3939cbb99a2f87f1b6ee1a51234ab4f2892c31ec4051',
   METERS_PER_MILE:      1609.34,
   BASE_FACTOR_TYCON:    3800 / (40 * 2389),
-  DEFAULT_COST_PER_MILE: 3.15, // realistic general-market discount basis; 3-day multi-source updater patches this value
+  DEFAULT_COST_PER_MILE: 3.32, // auto-updated every 3 days; see data/lane-rates.json
   MINIMUM_CHARGE:        600,    // ← raised from $500
 
 
@@ -2027,14 +2027,14 @@ const FreightCalculator = {
    * ─────────────────────────────────────────────────────────── */
   REGION_RATES: {
     // NOR SOU MID SPL TEX MTN SWE NWE
-    NOR: { NOR:2.99, SOU:3.17, MID:3.21, SPL:3.33, TEX:3.38, MTN:3.43, SWE:3.49, NWE:3.55 },
-    SOU: { NOR:3.11, SOU:2.95, MID:3.05, SPL:3.11, TEX:3.00, MTN:3.27, SWE:3.33, NWE:3.43 },
-    MID: { NOR:3.27, SOU:3.17, MID:3.05, SPL:2.95, TEX:3.11, MTN:3.17, SWE:3.27, NWE:3.33 },
-    SPL: { NOR:3.27, SOU:3.00, MID:2.89, SPL:2.78, TEX:2.83, MTN:2.95, SWE:3.05, NWE:3.17 },
-    TEX: { NOR:3.33, SOU:2.89, MID:2.95, SPL:2.78, TEX:2.67, MTN:2.95, SWE:2.89, NWE:3.17 },
-    MTN: { NOR:3.38, SOU:3.17, MID:3.00, SPL:2.89, TEX:2.95, MTN:2.67, SWE:2.78, NWE:2.78 },
-    SWE: { NOR:3.43, SOU:3.27, MID:3.11, SPL:3.00, TEX:2.89, MTN:2.78, SWE:2.62, NWE:2.83 },
-    NWE: { NOR:3.55, SOU:3.38, MID:3.21, SPL:3.17, TEX:3.17, MTN:2.83, SWE:2.89, NWE:2.73 },
+    NOR: { NOR:3.41, SOU:3.62, MID:3.47, SPL:3.69, TEX:3.82, MTN:3.83, SWE:3.81, NWE:3.87 },
+    SOU: { NOR:3.56, SOU:3.40, MID:3.32, SPL:3.47, TEX:3.42, MTN:3.68, SWE:3.66, NWE:3.78 },
+    MID: { NOR:3.53, SOU:3.44, MID:3.14, SPL:3.11, TEX:3.34, MTN:3.36, SWE:3.40, NWE:3.46 },
+    SPL: { NOR:3.63, SOU:3.35, MID:3.05, SPL:3.01, TEX:3.13, MTN:3.21, SWE:3.26, NWE:3.37 },
+    TEX: { NOR:3.76, SOU:3.29, MID:3.16, SPL:3.07, TEX:3.01, MTN:3.27, SWE:3.14, NWE:3.44 },
+    MTN: { NOR:3.77, SOU:3.56, MID:3.18, SPL:3.15, TEX:3.27, MTN:2.93, SWE:2.98, NWE:2.98 },
+    SWE: { NOR:3.75, SOU:3.60, MID:3.23, SPL:3.20, TEX:3.14, MTN:2.98, SWE:2.75, NWE:2.98 },
+    NWE: { NOR:3.87, SOU:3.72, MID:3.35, SPL:3.37, TEX:3.44, MTN:3.04, SWE:3.04, NWE:2.87 },
   },
 
   REGION_LABELS: {
@@ -2043,16 +2043,52 @@ const FreightCalculator = {
   },
 
   EQUIPMENT_PROFILES: {
-    flatbed  : { label: 'Flatbed', multiplier: 1.00, confidenceBoost: 0 },
-    stepdeck : { label: 'Step deck', multiplier: 1.05, confidenceBoost: -1 },
-    conestoga: { label: 'Conestoga', multiplier: 1.10, confidenceBoost: -1 },
-    dryvan   : { label: 'Dry van', multiplier: 0.82, confidenceBoost: -1 },
-    reefer   : { label: 'Reefer', multiplier: 0.94, confidenceBoost: -1 },
-    hotshot  : { label: 'Hotshot', multiplier: 0.78, confidenceBoost: -1 },
-    boxtruck : { label: 'Box Truck / Sprinter', multiplier: 0.68, confidenceBoost: -2 },
-    poweronly: { label: 'Power Only', multiplier: 0.80, confidenceBoost: -2 },
-    rgn      : { label: 'RGN / Specialized', multiplier: 1.38, confidenceBoost: -2 },
-  },
+    flatbed: {
+        label: "Flatbed",
+        multiplier: 1,
+        confidenceBoost: 0
+    },
+    stepdeck: {
+        label: "Step deck",
+        multiplier: 1.05,
+        confidenceBoost: -1
+    },
+    conestoga: {
+        label: "Conestoga",
+        multiplier: 1.1,
+        confidenceBoost: -1
+    },
+    dryvan: {
+        label: "Dry van",
+        multiplier: 0.82,
+        confidenceBoost: -1
+    },
+    reefer: {
+        label: "Reefer",
+        multiplier: 0.94,
+        confidenceBoost: -1
+    },
+    hotshot: {
+        label: "Hotshot",
+        multiplier: 0.78,
+        confidenceBoost: -1
+    },
+    boxtruck: {
+        label: "Box Truck / Sprinter",
+        multiplier: 0.68,
+        confidenceBoost: -2
+    },
+    poweronly: {
+        label: "Power Only",
+        multiplier: 0.8,
+        confidenceBoost: -2
+    },
+    rgn: {
+        label: "RGN / Specialized",
+        multiplier: 1.38,
+        confidenceBoost: -2
+    }
+},
 
   laneRateData: null,
   laneRateLoadedAt: null,
