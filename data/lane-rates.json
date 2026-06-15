@@ -1,18 +1,18 @@
 {
   "schemaVersion": 5,
-  "updatedAt": "2026-06-11T21:32:22.744Z",
+  "updatedAt": "2026-06-15T22:06:27.503Z",
   "updateCadence": "every-72-hours-when-public-sources-are-available",
   "model": "3-day-multi-source-public-consensus-plus-realistic-abby-market-discount-matrix",
   "equipment": "flatbed-base-with-equipment-multipliers",
   "rateType": "estimated competitive broker booking target per mile based on public multi-source consensus; not a guaranteed live city-to-city lane average",
-  "defaultCostPerMile": 3.32,
+  "defaultCostPerMile": 3.25,
   "rawMarketNationalAverage": 3.6,
-  "modelNationalAverage": 3.79,
+  "modelNationalAverage": 3.71,
   "competitiveMarketMultiplier": 0.875,
   "regionalAnchors": {
-    "midwest": 2.63,
-    "west": 2.79,
-    "southeast": 3.51
+    "midwest": 2.58,
+    "west": 2.73,
+    "southeast": 3.44
   },
   "marketConsensus": {
     "sourceCount": 5,
@@ -20,9 +20,9 @@
     "trendSourceCount": 3,
     "dieselSourceCount": 1,
     "rawMarketNationalAverage": 3.6,
-    "modelNationalAverage": 3.79,
-    "marketPressure": 0.05155555555555557,
-    "marketPressurePercent": 5.16,
+    "modelNationalAverage": 3.71,
+    "marketPressure": 0.030444444444444448,
+    "marketPressurePercent": 3.04,
     "marketDirection": "Rising",
     "diesel": {
       "nationalAverage": null,
@@ -59,84 +59,84 @@
   },
   "regionRates": {
     "NOR": {
-      "NOR": 3.41,
-      "SOU": 3.62,
-      "MID": 3.47,
-      "SPL": 3.69,
-      "TEX": 3.82,
-      "MTN": 3.83,
-      "SWE": 3.81,
-      "NWE": 3.87
+      "NOR": 3.34,
+      "SOU": 3.55,
+      "MID": 3.4,
+      "SPL": 3.61,
+      "TEX": 3.74,
+      "MTN": 3.75,
+      "SWE": 3.73,
+      "NWE": 3.79
     },
     "SOU": {
-      "NOR": 3.56,
-      "SOU": 3.4,
-      "MID": 3.32,
-      "SPL": 3.47,
-      "TEX": 3.42,
-      "MTN": 3.68,
-      "SWE": 3.66,
-      "NWE": 3.78
+      "NOR": 3.48,
+      "SOU": 3.33,
+      "MID": 3.25,
+      "SPL": 3.4,
+      "TEX": 3.35,
+      "MTN": 3.6,
+      "SWE": 3.58,
+      "NWE": 3.7
     },
     "MID": {
-      "NOR": 3.53,
-      "SOU": 3.44,
-      "MID": 3.14,
-      "SPL": 3.11,
-      "TEX": 3.34,
-      "MTN": 3.36,
-      "SWE": 3.4,
-      "NWE": 3.46
+      "NOR": 3.46,
+      "SOU": 3.37,
+      "MID": 3.08,
+      "SPL": 3.04,
+      "TEX": 3.27,
+      "MTN": 3.29,
+      "SWE": 3.33,
+      "NWE": 3.39
     },
     "SPL": {
-      "NOR": 3.63,
-      "SOU": 3.35,
-      "MID": 3.05,
-      "SPL": 3.01,
-      "TEX": 3.13,
-      "MTN": 3.21,
-      "SWE": 3.26,
-      "NWE": 3.37
+      "NOR": 3.55,
+      "SOU": 3.28,
+      "MID": 2.98,
+      "SPL": 2.95,
+      "TEX": 3.06,
+      "MTN": 3.14,
+      "SWE": 3.19,
+      "NWE": 3.3
     },
     "TEX": {
-      "NOR": 3.76,
-      "SOU": 3.29,
-      "MID": 3.16,
-      "SPL": 3.07,
-      "TEX": 3.01,
-      "MTN": 3.27,
-      "SWE": 3.14,
-      "NWE": 3.44
+      "NOR": 3.68,
+      "SOU": 3.23,
+      "MID": 3.1,
+      "SPL": 3.01,
+      "TEX": 2.95,
+      "MTN": 3.2,
+      "SWE": 3.08,
+      "NWE": 3.37
     },
     "MTN": {
-      "NOR": 3.77,
-      "SOU": 3.56,
-      "MID": 3.18,
-      "SPL": 3.15,
-      "TEX": 3.27,
-      "MTN": 2.93,
-      "SWE": 2.98,
-      "NWE": 2.98
+      "NOR": 3.69,
+      "SOU": 3.48,
+      "MID": 3.12,
+      "SPL": 3.08,
+      "TEX": 3.2,
+      "MTN": 2.87,
+      "SWE": 2.92,
+      "NWE": 2.92
     },
     "SWE": {
-      "NOR": 3.75,
-      "SOU": 3.6,
-      "MID": 3.23,
-      "SPL": 3.2,
-      "TEX": 3.14,
-      "MTN": 2.98,
-      "SWE": 2.75,
-      "NWE": 2.98
+      "NOR": 3.67,
+      "SOU": 3.52,
+      "MID": 3.16,
+      "SPL": 3.13,
+      "TEX": 3.08,
+      "MTN": 2.92,
+      "SWE": 2.69,
+      "NWE": 2.92
     },
     "NWE": {
-      "NOR": 3.87,
-      "SOU": 3.72,
-      "MID": 3.35,
-      "SPL": 3.37,
-      "TEX": 3.44,
-      "MTN": 3.04,
-      "SWE": 3.04,
-      "NWE": 2.87
+      "NOR": 3.79,
+      "SOU": 3.64,
+      "MID": 3.28,
+      "SPL": 3.3,
+      "TEX": 3.37,
+      "MTN": 2.98,
+      "SWE": 2.97,
+      "NWE": 2.81
     }
   },
   "equipmentProfiles": {
@@ -206,7 +206,7 @@
       "url": "https://getscalefunding.com/resources/current-freight-rates/",
       "type": "freight-rate",
       "weight": 3,
-      "foundAt": "2026-06-11T21:32:23.166Z",
+      "foundAt": "2026-06-15T22:06:27.960Z",
       "rates": {
         "national": 3.6,
         "midwest": 2.86,
@@ -223,8 +223,8 @@
       "url": "https://spot.ftrintel.com/current",
       "type": "market-pressure",
       "weight": 2.5,
-      "foundAt": "2026-06-11T21:32:23.631Z",
-      "pressure": 0.078,
+      "foundAt": "2026-06-15T22:06:28.109Z",
+      "pressure": 0.04,
       "direction": "Rising",
       "reusedFromPreviousSnapshot": false
     },
@@ -234,7 +234,7 @@
       "url": "https://www.eia.gov/petroleum/gasdiesel/",
       "type": "diesel",
       "weight": 2.5,
-      "foundAt": "2026-06-11T21:32:23.848Z",
+      "foundAt": "2026-06-15T22:06:28.329Z",
       "diesel": {
         "national": null,
         "eastCoast": null,
@@ -251,7 +251,7 @@
       "url": "https://www.chrobinson.com/en-us/resources/insights-and-advisories/north-america-freight-insights/",
       "type": "market-pressure",
       "weight": 1,
-      "foundAt": "2026-06-11T21:32:24.195Z",
+      "foundAt": "2026-06-15T22:06:28.575Z",
       "pressure": 0,
       "direction": "Stable",
       "reusedFromPreviousSnapshot": false
@@ -262,7 +262,7 @@
       "url": "https://www.actresearch.net/resources/data-tracking/freight-trucking-rates",
       "type": "market-pressure",
       "weight": 1,
-      "foundAt": "2026-06-11T21:32:24.653Z",
+      "foundAt": "2026-06-15T22:06:28.676Z",
       "pressure": 0.037,
       "direction": "Rising",
       "reusedFromPreviousSnapshot": false
