@@ -86,5 +86,22 @@
     "sourceSummary": "Scale Funding Current Freight Rates + FTR / Truckstop Spot Market Insights + EIA Weekly Diesel Fuel Update + C.H. Robinson Freight Market Update + ACT Research Freight Trucking Rates",
     "sourceCount": 5,
     "failures": 2
+  },
+  {
+    "updatedAt": "2026-06-19T19:17:13.412Z",
+    "defaultCostPerMile": 3.25,
+    "rawMarketNationalAverage": 3.6,
+    "modelNationalAverage": 3.71,
+    "marketDirection": "Rising",
+    "marketPressurePercent": 3.04,
+    "dieselAdjustmentPercent": 0,
+    "regionalAnchors": {
+      "midwest": 2.58,
+      "west": 2.73,
+      "southeast": 3.44
+    },
+    "sourceSummary": "Scale Funding Current Freight Rates + FTR / Truckstop Spot Market Insights + EIA Weekly Diesel Fuel Update + C.H. Robinson Freight Market Update + ACT Research Freight Trucking Rates",
+    "sourceCount": 5,
+    "failures": 2
   }
 ]
