@@ -1,6 +1,6 @@
 {
   "schemaVersion": 5,
-  "updatedAt": "2026-08-11T14:30:19.754Z",
+  "updatedAt": "2026-08-15T13:40:04.518Z",
   "updateCadence": "every-72-hours-when-public-sources-are-available",
   "model": "3-day-multi-source-public-consensus-plus-realistic-abby-market-discount-matrix",
   "equipment": "flatbed-base-with-equipment-multipliers",
@@ -206,7 +206,7 @@
       "url": "https://getscalefunding.com/resources/current-freight-rates/",
       "type": "freight-rate",
       "weight": 3,
-      "foundAt": "2026-08-11T14:30:20.859Z",
+      "foundAt": "2026-08-15T13:40:04.976Z",
       "rates": {
         "national": 3.72,
         "midwest": 3.51,
@@ -223,7 +223,7 @@
       "url": "https://spot.ftrintel.com/current",
       "type": "market-pressure",
       "weight": 2.5,
-      "foundAt": "2026-08-11T14:30:21.077Z",
+      "foundAt": "2026-08-15T13:40:05.156Z",
       "pressure": 0.015,
       "direction": "Stable",
       "reusedFromPreviousSnapshot": false
@@ -234,7 +234,7 @@
       "url": "https://www.eia.gov/petroleum/gasdiesel/",
       "type": "diesel",
       "weight": 2.5,
-      "foundAt": "2026-08-11T14:30:21.862Z",
+      "foundAt": "2026-08-15T13:40:05.354Z",
       "diesel": {
         "national": null,
         "eastCoast": null,
@@ -251,7 +251,7 @@
       "url": "https://www.chrobinson.com/en-us/resources/insights-and-advisories/north-america-freight-insights/",
       "type": "market-pressure",
       "weight": 1,
-      "foundAt": "2026-08-11T14:30:22.289Z",
+      "foundAt": "2026-08-15T13:40:05.664Z",
       "pressure": 0,
       "direction": "Stable",
       "reusedFromPreviousSnapshot": false
@@ -262,7 +262,7 @@
       "url": "https://www.actresearch.net/resources/data-tracking/freight-trucking-rates",
       "type": "market-pressure",
       "weight": 1,
-      "foundAt": "2026-08-11T14:30:22.677Z",
+      "foundAt": "2026-08-15T13:40:05.838Z",
       "pressure": 0.052,
       "direction": "Rising",
       "reusedFromPreviousSnapshot": false
