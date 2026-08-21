@@ -1,6 +1,6 @@
 {
   "schemaVersion": 5,
-  "updatedAt": "2026-08-18T13:53:55.313Z",
+  "updatedAt": "2026-08-21T13:55:13.897Z",
   "updateCadence": "every-72-hours-when-public-sources-are-available",
   "model": "3-day-multi-source-public-consensus-plus-realistic-abby-market-discount-matrix",
   "equipment": "flatbed-base-with-equipment-multipliers",
@@ -206,7 +206,7 @@
       "url": "https://getscalefunding.com/resources/current-freight-rates/",
       "type": "freight-rate",
       "weight": 3,
-      "foundAt": "2026-08-18T13:53:55.669Z",
+      "foundAt": "2026-08-21T13:55:14.222Z",
       "rates": {
         "national": 3.72,
         "midwest": 3.51,
@@ -223,7 +223,7 @@
       "url": "https://spot.ftrintel.com/current",
       "type": "market-pressure",
       "weight": 2.5,
-      "foundAt": "2026-08-18T13:53:55.931Z",
+      "foundAt": "2026-08-21T13:55:14.454Z",
       "pressure": -0.045,
       "direction": "Softening",
       "reusedFromPreviousSnapshot": false
@@ -234,14 +234,14 @@
       "url": "https://www.eia.gov/petroleum/gasdiesel/",
       "type": "diesel",
       "weight": 2.5,
-      "foundAt": "2026-08-18T13:53:56.309Z",
+      "foundAt": "2026-08-21T13:55:14.754Z",
       "diesel": {
         "national": null,
         "eastCoast": null,
         "midwest": null,
         "gulfCoast": null,
         "rockyMountain": null,
-        "westCoast": 4.662
+        "westCoast": 4.685
       },
       "reusedFromPreviousSnapshot": false
     },
@@ -251,7 +251,7 @@
       "url": "https://www.chrobinson.com/en-us/resources/insights-and-advisories/north-america-freight-insights/",
       "type": "market-pressure",
       "weight": 1,
-      "foundAt": "2026-08-18T13:53:56.760Z",
+      "foundAt": "2026-08-21T13:55:15.176Z",
       "pressure": 0,
       "direction": "Stable",
       "reusedFromPreviousSnapshot": false
@@ -262,7 +262,7 @@
       "url": "https://www.actresearch.net/resources/data-tracking/freight-trucking-rates",
       "type": "market-pressure",
       "weight": 1,
-      "foundAt": "2026-08-18T13:53:57.139Z",
+      "foundAt": "2026-08-21T13:55:15.600Z",
       "pressure": 0.052,
       "direction": "Rising",
       "reusedFromPreviousSnapshot": false
