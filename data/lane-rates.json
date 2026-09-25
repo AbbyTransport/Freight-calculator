@@ -1,6 +1,6 @@
 {
   "schemaVersion": 5,
-  "updatedAt": "2026-09-21T18:38:17.313Z",
+  "updatedAt": "2026-09-25T17:55:58.684Z",
   "updateCadence": "every-72-hours-when-public-sources-are-available",
   "model": "3-day-multi-source-public-consensus-plus-realistic-abby-market-discount-matrix",
   "equipment": "flatbed-base-with-equipment-multipliers",
@@ -206,7 +206,7 @@
       "url": "https://www.dat.com/trendlines",
       "type": "freight-rate",
       "weight": 2,
-      "foundAt": "2026-09-21T18:38:17.718Z",
+      "foundAt": "2026-09-25T17:55:59.077Z",
       "rates": {
         "national": 3.69,
         "midwest": null,
@@ -223,7 +223,7 @@
       "url": "https://getscalefunding.com/resources/current-freight-rates/",
       "type": "freight-rate",
       "weight": 3,
-      "foundAt": "2026-09-21T18:38:17.989Z",
+      "foundAt": "2026-09-25T17:55:59.236Z",
       "rates": {
         "national": 3.65,
         "midwest": 3.04,
@@ -240,7 +240,7 @@
       "url": "https://spot.ftrintel.com/current",
       "type": "market-pressure",
       "weight": 2.5,
-      "foundAt": "2026-09-21T18:38:18.265Z",
+      "foundAt": "2026-09-25T17:55:59.463Z",
       "pressure": 0.03,
       "direction": "Rising",
       "reusedFromPreviousSnapshot": false
@@ -251,14 +251,14 @@
       "url": "https://www.eia.gov/petroleum/gasdiesel/",
       "type": "diesel",
       "weight": 2.5,
-      "foundAt": "2026-09-21T18:38:18.440Z",
+      "foundAt": "2026-09-25T17:55:59.721Z",
       "diesel": {
         "national": null,
         "eastCoast": null,
         "midwest": null,
         "gulfCoast": null,
         "rockyMountain": null,
-        "westCoast": 4.823
+        "westCoast": 4.975
       },
       "reusedFromPreviousSnapshot": false
     },
@@ -268,7 +268,7 @@
       "url": "https://www.chrobinson.com/en-us/resources/insights-and-advisories/north-america-freight-insights/",
       "type": "market-pressure",
       "weight": 1,
-      "foundAt": "2026-09-21T18:38:18.854Z",
+      "foundAt": "2026-09-25T17:56:00.181Z",
       "pressure": 0,
       "direction": "Stable",
       "reusedFromPreviousSnapshot": false
@@ -279,7 +279,7 @@
       "url": "https://www.actresearch.net/resources/data-tracking/freight-trucking-rates",
       "type": "market-pressure",
       "weight": 1,
-      "foundAt": "2026-09-21T18:38:19.222Z",
+      "foundAt": "2026-09-25T17:56:00.525Z",
       "pressure": 0,
       "direction": "Stable",
       "reusedFromPreviousSnapshot": false
