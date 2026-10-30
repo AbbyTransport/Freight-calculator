@@ -1649,7 +1649,7 @@ button {
               <label for="costPerMile">Cost Per Mile ($)</label>
               <input type="number" id="costPerMile" name="costPerMile"
                      step="0.01" min="0" max="100"
-                     value="3.12"
+                     value="3.16"
                      aria-describedby="costPerMileError" />
               <span class="error-message" id="costPerMileError" aria-live="polite"></span>
               <small id="laneRateHint" class="lane-hint" aria-live="polite"></small>
@@ -1866,7 +1866,7 @@ const FreightCalculator = {
   API_KEY:              '5b3ce3597851110001cf6248b4d09a96abdf3939cbb99a2f87f1b6ee1a51234ab4f2892c31ec4051',
   METERS_PER_MILE:      1609.34,
   BASE_FACTOR_TYCON:    3800 / (40 * 2389),
-  DEFAULT_COST_PER_MILE: 3.12, // auto-updated every 3 days; see data/lane-rates.json
+  DEFAULT_COST_PER_MILE: 3.16, // auto-updated every 3 days; see data/lane-rates.json
   MINIMUM_CHARGE:        600,    // ← raised from $500
 
 
@@ -2027,14 +2027,14 @@ const FreightCalculator = {
    * ─────────────────────────────────────────────────────────── */
   REGION_RATES: {
     // NOR SOU MID SPL TEX MTN SWE NWE
-    NOR: { NOR:3.22, SOU:3.43, MID:3.37, SPL:3.52, TEX:3.61, MTN:3.62, SWE:3.62, NWE:3.67 },
-    SOU: { NOR:3.37, SOU:3.23, MID:3.23, SPL:3.32, TEX:3.23, MTN:3.49, SWE:3.48, NWE:3.60 },
-    MID: { NOR:3.43, SOU:3.35, MID:3.12, SPL:3.04, TEX:3.24, MTN:3.26, SWE:3.31, NWE:3.37 },
-    SPL: { NOR:3.46, SOU:3.21, MID:2.98, SPL:2.90, TEX:2.98, MTN:3.06, SWE:3.12, NWE:3.23 },
-    TEX: { NOR:3.55, SOU:3.12, MID:3.07, SPL:2.93, TEX:2.83, MTN:3.09, SWE:2.98, NWE:3.26 },
-    MTN: { NOR:3.57, SOU:3.37, MID:3.09, SPL:3.01, TEX:3.09, MTN:2.77, SWE:2.83, NWE:2.83 },
-    SWE: { NOR:3.56, SOU:3.43, MID:3.15, SPL:3.07, TEX:2.98, MTN:2.83, SWE:2.62, NWE:2.84 },
-    NWE: { NOR:3.67, SOU:3.54, MID:3.26, SPL:3.23, TEX:3.26, MTN:2.89, SWE:2.90, NWE:2.73 },
+    NOR: { NOR:3.25, SOU:3.47, MID:3.40, SPL:3.56, TEX:3.65, MTN:3.66, SWE:3.66, NWE:3.71 },
+    SOU: { NOR:3.41, SOU:3.26, MID:3.26, SPL:3.36, TEX:3.27, MTN:3.52, SWE:3.52, NWE:3.63 },
+    MID: { NOR:3.46, SOU:3.38, MID:3.15, SPL:3.07, TEX:3.27, MTN:3.29, SWE:3.35, NWE:3.40 },
+    SPL: { NOR:3.50, SOU:3.24, MID:3.02, SPL:2.93, TEX:3.02, MTN:3.10, SWE:3.16, NWE:3.27 },
+    TEX: { NOR:3.59, SOU:3.15, MID:3.10, SPL:2.96, TEX:2.87, MTN:3.12, SWE:3.01, NWE:3.29 },
+    MTN: { NOR:3.61, SOU:3.41, MID:3.12, SPL:3.04, TEX:3.12, MTN:2.80, SWE:2.87, NWE:2.87 },
+    SWE: { NOR:3.60, SOU:3.46, MID:3.18, SPL:3.10, TEX:3.01, MTN:2.87, SWE:2.65, NWE:2.87 },
+    NWE: { NOR:3.71, SOU:3.58, MID:3.29, SPL:3.27, TEX:3.29, MTN:2.92, SWE:2.93, NWE:2.76 },
   },
 
   REGION_LABELS: {
