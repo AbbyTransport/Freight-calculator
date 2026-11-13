@@ -800,5 +800,22 @@
     "sourceSummary": "DAT Trendlines + Scale Funding Current Freight Rates + FTR / Truckstop Spot Market Insights + EIA Weekly Diesel Fuel Update + C.H. Robinson Freight Market Update + ACT Research Freight Trucking Rates",
     "sourceCount": 6,
     "failures": 1
+  },
+  {
+    "updatedAt": "2026-11-13T20:27:35.653Z",
+    "defaultCostPerMile": 3.29,
+    "rawMarketNationalAverage": 3.65,
+    "modelNationalAverage": 3.76,
+    "marketDirection": "Rising",
+    "marketPressurePercent": 3.06,
+    "dieselAdjustmentPercent": 0,
+    "regionalAnchors": {
+      "midwest": 3,
+      "west": 2.86,
+      "southeast": 3.55
+    },
+    "sourceSummary": "DAT Trendlines + Scale Funding Current Freight Rates + FTR / Truckstop Spot Market Insights + EIA Weekly Diesel Fuel Update + C.H. Robinson Freight Market Update + ACT Research Freight Trucking Rates",
+    "sourceCount": 6,
+    "failures": 1
   }
 ]
